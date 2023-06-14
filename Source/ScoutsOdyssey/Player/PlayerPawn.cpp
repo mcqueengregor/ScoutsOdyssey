@@ -42,8 +42,6 @@ void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	MeshComponent->OnComponentBeginOverlap.AddDynamic(this, &APlayerPawn::OnOverlapBegin);
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Emerald, FString("Working!"));
 }
 
 // Called every frame
@@ -74,10 +72,4 @@ void APlayerPawn::MoveForward(float Value)
 	const float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(this);
 	const FVector NewLocation = GetActorLocation() + FVector(HoriMoveSpeed * Value * DeltaTime, 0.0f, 0.0f);
 	SetActorLocation(NewLocation);
-}
-
-void APlayerPawn::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Overlapped with ") + UKismetSystemLibrary::GetDisplayName(OtherActor));;
 }
