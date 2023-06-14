@@ -26,7 +26,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+protected:
 	void MoveRight(float Value);
+	void MoveForward(float Value);
+
+	void PositionCamera();
+
+public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class USceneComponent* SceneComponent;
@@ -41,8 +47,8 @@ public:
 		class USpringArmComponent* SpringArmComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		float HoriMoveSpeed;	// Left/right speed in cm/s
+		float HoriMoveSpeed;	// Left/right speed in Unreal units per second
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		float VertMoveSpeed;	// Front/back speed in cm/s
+		float VertMoveSpeed;	// Front/back speed in Unreal units per second
 };
