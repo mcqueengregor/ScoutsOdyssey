@@ -3,6 +3,9 @@
 
 #include "DialogueComponent.h"
 
+#include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
+
 UDialogueComponent::UDialogueComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -11,14 +14,27 @@ UDialogueComponent::UDialogueComponent()
 
 void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) 
 {
-	UE_LOG(LogTemp, Warning, TEXT("Clicked!"));	
+	UE_LOG(LogTemp, Warning, TEXT("Clicked! From Dialogue Component"));
+	if(MyPlayerController)
+	{
+		MyPlayerController->ShowSpeechBubble();	
+	} else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MyPlayerController from DialogueComponent is null"));
+	}
+	
 }
 
 
 void UDialogueComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	MyPlayerController = Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+	ClickableSetUp();
+}
+
+void UDialogueComponent::ClickableSetUp()
+{
 	UStaticMeshComponent* OwnerMesh = Cast<UStaticMeshComponent>(GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass()));
 	if(OwnerMesh)
 	{
@@ -26,8 +42,9 @@ void UDialogueComponent::BeginPlay()
 	} else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("cast failed!"));	
-	}
+	}	
 }
+
 
 
 void UDialogueComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

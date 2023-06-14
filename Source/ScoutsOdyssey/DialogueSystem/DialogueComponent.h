@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "ScoutsOdyssey/Interfaces/Clickable.h"
+#include "ScoutsOdyssey/Player/MyPlayerController.h"
 #include "DialogueComponent.generated.h"
 
 
@@ -18,7 +19,7 @@ public:
 
 	UFUNCTION()
 	virtual void Click_Implementation(UPrimitiveComponent* TouchedComponent ,FKey ButtonPressed) override;
-
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -26,6 +27,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	void ClickableSetUp();
+private:
+	AMyPlayerController* MyPlayerController;
 };
+
 
 
