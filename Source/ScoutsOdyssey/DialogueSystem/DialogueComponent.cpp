@@ -2,7 +2,8 @@
 
 
 #include "DialogueComponent.h"
-
+#include "ScoutsOdyssey/Player/MyPlayerController.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 

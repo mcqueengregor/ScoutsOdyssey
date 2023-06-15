@@ -7,8 +7,6 @@
 
 void AMyPlayerController::ShowSpeechBubble() const
 {
-	
-	
 	if(SpeechBubble)
 	{
 		SpeechBubble->SetPositionInViewport(GetPlayerScreenCoordinate(SpeechBubbleOffSet));

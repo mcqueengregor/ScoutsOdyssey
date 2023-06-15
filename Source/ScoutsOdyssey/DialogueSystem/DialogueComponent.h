@@ -3,11 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "Components/ActorComponent.h"
 #include "ScoutsOdyssey/Interfaces/Clickable.h"
-#include "ScoutsOdyssey/Player/MyPlayerController.h"
 #include "DialogueComponent.generated.h"
 
+
+class UBehaviorTree;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SCOUTSODYSSEY_API UDialogueComponent : public UActorComponent, public IClickable
@@ -20,16 +22,19 @@ public:
 	UFUNCTION()
 	virtual void Click_Implementation(UPrimitiveComponent* TouchedComponent ,FKey ButtonPressed) override;
 	
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;	
+	
 protected:
 	virtual void BeginPlay() override;
 
-public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+public:
+	UPROPERTY(EditInstanceOnly, Category=Dialogue)
+	TSubclassOf<UBehaviorTree> DialogueTreeAsset;
 
 private:
 	void ClickableSetUp();
-private:
-	AMyPlayerController* MyPlayerController;
+
+	class AMyPlayerController* MyPlayerController;
 };
 
 
