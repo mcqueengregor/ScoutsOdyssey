@@ -57,9 +57,17 @@ void AStageSectionVolume::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherA
 
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		FViewTargetTransitionParams TransitionParams;
-		TransitionParams.BlendFunction = EViewTargetBlendFunction::VTBlend_EaseInOut;
-		TransitionParams.BlendExp = 0.0f;
-		TransitionParams.BlendTime = 1.0f;
+
+		// Use either sweeping transition or instant location change based on whether this is the first
+		// camera angle transition or not:
+		TransitionParams.BlendFunction = Pawn->bHasCameraAngleChangedAlready ?
+				EViewTargetBlendFunction::VTBlend_EaseInOut :
+				EViewTargetBlendFunction::VTBlend_Linear;
+		TransitionParams.BlendTime = Pawn->bHasCameraAngleChangedAlready * Pawn->CameraTransitionDuration;
+		TransitionParams.BlendExp = 2.0f;
+
+		Pawn->bHasCameraAngleChangedAlready = true;
+		
 		PlayerController->SetViewTarget(this, TransitionParams);
 	}
 }

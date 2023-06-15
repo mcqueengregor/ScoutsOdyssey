@@ -30,13 +30,7 @@ protected:
 	void MoveRight(float Value);
 	void MoveForward(float Value);
 
-	void PositionCamera();
-
 public:
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-		class USceneComponent* SceneComponent;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class UStaticMeshComponent* MeshComponent;
 
@@ -46,9 +40,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class USpringArmComponent* SpringArmComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float HoriMoveSpeed;	// Left/right speed in Unreal units per second
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float VertMoveSpeed;	// Front/back speed in Unreal units per second
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float CameraTransitionDuration;	// The amount of time a camera angle transition takes, in seconds
+	
+	bool bHasCameraAngleChangedAlready;	// Whether or not the camera component has changed location already.
+										// Set to 'false' originally which triggers instant location change,
+										// then set to 'true' which uses EaseInOut transitions.
 };

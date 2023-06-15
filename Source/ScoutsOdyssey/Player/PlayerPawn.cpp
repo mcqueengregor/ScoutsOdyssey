@@ -14,18 +14,16 @@ APlayerPawn::APlayerPawn()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
-	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Default scene"));
-	SceneComponent->SetupAttachment(GetRootComponent());
-
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>
 		SphereMesh(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh component"));
 	MeshComponent->SetStaticMesh(SphereMesh.Object);
-	MeshComponent->SetupAttachment(SceneComponent);
+	MeshComponent->SetSimulatePhysics(true);
+	MeshComponent->SetupAttachment(GetRootComponent());
 	
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring arm component"));
-	SpringArmComponent->SetupAttachment(SceneComponent);
+	SpringArmComponent->SetupAttachment(MeshComponent);
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera component"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
@@ -33,23 +31,26 @@ APlayerPawn::APlayerPawn()
 	SpringArmComponent->TargetArmLength = 150.0f;
 	SpringArmComponent->bDoCollisionTest = false;
 
-	HoriMoveSpeed = 100.0f;
-	VertMoveSpeed = 100.0f;
+	HoriMoveSpeed = 200.0f;
+	VertMoveSpeed = 200.0f;
+
+	CameraTransitionDuration = 1.0f;
+	bHasCameraAngleChangedAlready = false;
 }
 
 // Called when the game starts or when spawned
 void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 }
+
 
 // Called to bind functionality to input
 void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
