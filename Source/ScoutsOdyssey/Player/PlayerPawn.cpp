@@ -20,6 +20,7 @@ APlayerPawn::APlayerPawn()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh component"));
 	MeshComponent->SetStaticMesh(SphereMesh.Object);
 	MeshComponent->SetSimulatePhysics(true);
+	MeshComponent->BodyInstance.bLockZRotation = true;
 	MeshComponent->SetupAttachment(GetRootComponent());
 	
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring arm component"));

@@ -21,13 +21,13 @@ AStageSectionVolume::AStageSectionVolume()
 	SceneComponent->SetupAttachment(GetRootComponent());
 	
 	TriggerVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("Stage section trigger volume"));
-	TriggerVolume->InitBoxExtent(FVector(150.0f));	// TODO: Set extent's x- and z- components to
-	TriggerVolume->SetupAttachment(SceneComponent); // appropriate values once these are figured out!!
+	TriggerVolume->InitBoxExtent(FVector(300.0f, 250.0f, 150.0f));	// TODO: Set extent to appropriate
+	TriggerVolume->SetupAttachment(SceneComponent);								// values once these are figured out!!
 	this->bGenerateOverlapEventsDuringLevelStreaming = true;	// Detect BeginOverlap events on game startup.
 	
 	StageSectionCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera angle component"));
-	StageSectionCameraComponent->SetRelativeLocation(FVector(-500.0f, 0.0f, 0.0f));
-	StageSectionCameraComponent->SetupAttachment(SceneComponent);
+	StageSectionCameraComponent->SetRelativeLocation(FVector(-750.0f, 0.0f, 0.0f));
+	StageSectionCameraComponent->SetupAttachment(TriggerVolume);
 }
 
 // Called when the game starts or when spawned
