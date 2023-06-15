@@ -1,9 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerPawn.h"
-
-#include <string>
-
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -20,6 +17,8 @@ APlayerPawn::APlayerPawn()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh component"));
 	MeshComponent->SetStaticMesh(SphereMesh.Object);
 	MeshComponent->SetSimulatePhysics(true);
+	MeshComponent->BodyInstance.bLockXRotation = true;
+	MeshComponent->BodyInstance.bLockYRotation = true;
 	MeshComponent->BodyInstance.bLockZRotation = true;
 	MeshComponent->SetupAttachment(GetRootComponent());
 	
@@ -37,6 +36,7 @@ APlayerPawn::APlayerPawn()
 
 	CameraTransitionDuration = 1.0f;
 	bHasCameraAngleChangedAlready = false;
+	LastEnteredSection = nullptr;
 }
 
 // Called when the game starts or when spawned

@@ -2,6 +2,7 @@
 
 
 #include "StageSectionVolume.h"
+#include "Containers/List.h"		// TLinkedList used by APlayerPawn
 #include "../Player/PlayerPawn.h"	// APlayerPawn class reference
 #include "Camera/CameraComponent.h"
 #include "Chaos/GeometryParticlesfwd.h"
@@ -35,6 +36,7 @@ void AStageSectionVolume::BeginPlay()
 {
 	Super::BeginPlay();
 	OnActorBeginOverlap.AddDynamic(this, &AStageSectionVolume::OnOverlapBegin);
+	OnActorEndOverlap.AddDynamic(this, &AStageSectionVolume::OnOverlapEnd);
 }
 
 // Called every frame
@@ -45,7 +47,7 @@ void AStageSectionVolume::Tick(float DeltaTime)
 }
 
 void AStageSectionVolume::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
-{
+{	
 	// If an actor overlaps with this stage section and that actor is the player character (APlayerPawn),
 	// grab its camera component and sweep it to this stage section's camera angle:
 	APlayerPawn* Pawn = Cast<APlayerPawn>(OtherActor);
@@ -56,19 +58,61 @@ void AStageSectionVolume::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherA
 			FString("Player entered ") + UKismetSystemLibrary::GetDisplayName(this));
 
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		FViewTargetTransitionParams TransitionParams;
-
-		// Use either sweeping transition or instant location change based on whether this is the first
-		// camera angle transition or not:
-		TransitionParams.BlendFunction = Pawn->bHasCameraAngleChangedAlready ?
-				EViewTargetBlendFunction::VTBlend_EaseInOut :
-				EViewTargetBlendFunction::VTBlend_Linear;
-		TransitionParams.BlendTime = Pawn->bHasCameraAngleChangedAlready * Pawn->CameraTransitionDuration;
-		TransitionParams.BlendExp = 2.0f;
+		
+		// Remember this section as the last section that was entered:
+		Pawn->OverlappedStageSections.AddHead(this);
+		Pawn->LastEnteredSection = this;
+		
+		PlayerController->SetViewTarget(this, GetCameraTransitionParams(Pawn));
 
 		Pawn->bHasCameraAngleChangedAlready = true;
-		
-		PlayerController->SetViewTarget(this, TransitionParams);
 	}
+}
+
+void AStageSectionVolume::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
+{
+	APlayerPawn* Pawn = Cast<APlayerPawn>(OtherActor);
+
+	if (Pawn && Pawn->LastEnteredSection)
+	{
+		// Determine which stage section the player should "forget"
+		// about, and update camera angle if necessary:
+		const bool bLeftLastEnteredSection = Pawn->LastEnteredSection == this;
+
+		// (Head represents the last-entered section)
+		auto SectionToForget = bLeftLastEnteredSection ?
+			Pawn->OverlappedStageSections.GetTail() :
+			Pawn->OverlappedStageSections.GetHead();
+
+		FString DebugMsg = bLeftLastEnteredSection ?
+			FString("Removed tail!") :
+			FString("Removed head!");
+
+		// If leaving the previously-entered section, set camera angle back to section the player is returning to:
+		if (bLeftLastEnteredSection)
+		{
+			APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+			PlayerController->SetViewTarget(Pawn->OverlappedStageSections.GetTail()->GetValue(), GetCameraTransitionParams(Pawn));
+			Pawn->LastEnteredSection = Pawn->OverlappedStageSections.GetTail()->GetValue();
+		}
+		
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan, DebugMsg);
+		Pawn->OverlappedStageSections.RemoveNode(SectionToForget);
+	}
+}
+
+FViewTargetTransitionParams AStageSectionVolume::GetCameraTransitionParams(APlayerPawn* const Pawn) const
+{
+	FViewTargetTransitionParams TransitionParams;
+
+	// Use either sweeping transition or instant location change based on whether this is the first
+	// camera angle transition or not:
+	TransitionParams.BlendFunction = Pawn->bHasCameraAngleChangedAlready ?
+			EViewTargetBlendFunction::VTBlend_EaseInOut :
+			EViewTargetBlendFunction::VTBlend_Linear;
+	TransitionParams.BlendTime = Pawn->bHasCameraAngleChangedAlready * Pawn->CameraTransitionDuration;
+	TransitionParams.BlendExp = 2.0f;
+	
+	return TransitionParams;
 }
 

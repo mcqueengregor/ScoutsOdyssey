@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../Level/StageSectionVolume.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "PlayerPawn.generated.h"
@@ -52,4 +53,10 @@ public:
 	bool bHasCameraAngleChangedAlready;	// Whether or not the camera component has changed location already.
 										// Set to 'false' originally which triggers instant location change,
 										// then set to 'true' which uses EaseInOut transitions.
+	
+	class TDoubleLinkedList<AStageSectionVolume*> OverlappedStageSections;	// List of currently-overlapping stage sections,
+																			// used to accurately determine the current
+																			// camera angle to use.
+
+	AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
 };

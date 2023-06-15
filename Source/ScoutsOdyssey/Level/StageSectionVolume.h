@@ -21,6 +21,11 @@ protected:
 
 	UFUNCTION()
 		void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
+
+	UFUNCTION()
+		void OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
+
+	FViewTargetTransitionParams GetCameraTransitionParams(class APlayerPawn* const Pawn) const;
 	
 public:	
 	// Called every frame
