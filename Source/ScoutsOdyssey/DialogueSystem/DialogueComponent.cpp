@@ -7,6 +7,7 @@
 #include "AIController.h"
 #include "Blueprint/UserWidget.h"
 #include "SpeechBubbleUserWidget.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 UDialogueComponent::UDialogueComponent()
@@ -26,11 +27,11 @@ void UDialogueComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	MyPlayerController = Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-	ClickableSetUp();
-	WidgetSetUp();
-
 	// Spawn AI Controller 
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
+	ClickableSetUp();
+	WidgetSetUp();
+	BehaviorTreeSetUp();
 }
 
 void UDialogueComponent::ClickableSetUp()
@@ -62,6 +63,28 @@ void UDialogueComponent::WidgetSetUp()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Speech Bubble Assets not assigned!"));
 	}
+}
+
+void UDialogueComponent::BehaviorTreeSetUp()
+{
+	if(AIController)
+	{
+		AIController->RunBehaviorTree(DialogueTree);
+		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
+		if(Blackboard)
+		{
+			Blackboard->SetValueAsObject("BubbleOne", BubbleOne);
+			Blackboard->SetValueAsObject("BubbleTwo", BubbleTwo);
+			Blackboard->SetValueAsObject("BubbleNarrator", BubbleNarrator);
+		} else
+		{
+			UE_LOG(LogTemp, Error, TEXT("BlackBoardComponent is not assigned in AIController!"));	
+		}	
+	} else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AI Controller was not constructed For Dialogue Tree!"));		
+	}
+
 }
 
 void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const

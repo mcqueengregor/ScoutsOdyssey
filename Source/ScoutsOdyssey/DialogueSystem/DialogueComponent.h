@@ -8,7 +8,6 @@
 #include "ScoutsOdyssey/Interfaces/Clickable.h"
 #include "DialogueComponent.generated.h"
 
-
 UENUM()
 enum EBubble
 {
@@ -43,22 +42,25 @@ public:
 	FVector2D BubbleOneOffSet;
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	FVector2D BubbleTwoOffSet;
-	
+
+	// Behavior Tree
+	UPROPERTY(EditInstanceOnly, Category=Dialogue)
+	UBehaviorTree* DialogueTree;
 	
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	UPROPERTY(EditInstanceOnly, Category=Dialogue)
-	TSubclassOf<UBehaviorTree> DialogueTreeAsset;
-
 private:
+	// SetUp Methods
 	void ClickableSetUp();
-	void End();
-	
 	void WidgetSetUp();
+	void BehaviorTreeSetUp();
+
+	// Widget Utility Methods
 	void SwitchToBubble(EBubble Bubble) const;
 
+	void End();
+	
 	class AMyPlayerController* MyPlayerController;
 	class AAIController* AIController;
 };
