@@ -15,18 +15,11 @@ class SCOUTSODYSSEY_API AMyPlayerController : public APlayerController
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditDefaultsOnly, Category=Widgets)
-	TSubclassOf<UUserWidget> SpeechBubbleAsset;
-	UUserWidget* SpeechBubble;
-	UPROPERTY(EditDefaultsOnly, Category=Widgets)
-	FVector2D SpeechBubbleOffSet;
-public:
-	void ShowSpeechBubble() const;
-	void HideSpeechBubble() const;
+	FVector2D GetPlayerScreenCoordinate(const FVector2D Offset) const;
+	FVector2D GetActorScreenCoordinate(const AActor& Actor, const FVector2D Offset) const;
 	
 protected:
 	virtual void BeginPlay() override;
 
 private:
-	FVector2D GetPlayerScreenCoordinate(FVector2D Offset) const;
 };

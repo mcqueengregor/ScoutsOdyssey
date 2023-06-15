@@ -9,20 +9,41 @@
 #include "DialogueComponent.generated.h"
 
 
-class UBehaviorTree;
+UENUM()
+enum EBubble
+{
+	One,
+	Two,
+	Narrator
+};
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+
+UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SCOUTSODYSSEY_API UDialogueComponent : public UActorComponent, public IClickable
 {
 	GENERATED_BODY()
 
-public:	
+public:
+	// Defaults
 	UDialogueComponent();
-
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
 	UFUNCTION()
 	virtual void Click_Implementation(UPrimitiveComponent* TouchedComponent ,FKey ButtonPressed) override;
+
+	// Widgets
+	UPROPERTY(EditDefaultsOnly, Category=Widgets)
+	TSubclassOf<UUserWidget> SpeechBubble_WidgetAsset;
+	class USpeechBubbleUserWidget* BubbleOne;
+	class USpeechBubbleUserWidget* BubbleTwo;
+	UPROPERTY(EditDefaultsOnly, Category=Widgets)
+	TSubclassOf<UUserWidget> NarratorSpeechBubble_WidgetAsset;
+	class USpeechBubbleUserWidget* BubbleNarrator;
+	UPROPERTY(EditDefaultsOnly, Category=Widgets)
+	FVector2D BubbleOneOffSet;
+	UPROPERTY(EditDefaultsOnly, Category=Widgets)
+	FVector2D BubbleTwoOffSet;
 	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;	
 	
 protected:
 	virtual void BeginPlay() override;
@@ -33,8 +54,13 @@ public:
 
 private:
 	void ClickableSetUp();
+	void End();
+	
+	void WidgetSetUp();
+	void SwitchToBubble(EBubble Bubble) const;
 
 	class AMyPlayerController* MyPlayerController;
+	class AAIController* AIController;
 };
 
 
