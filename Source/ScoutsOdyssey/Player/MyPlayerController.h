@@ -18,10 +18,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> SpeechBubbleAsset;
 	UUserWidget* SpeechBubble;
+	UPROPERTY(EditDefaultsOnly, Category=Widgets)
+	FVector2D SpeechBubbleOffSet;
 public:
 	void ShowSpeechBubble() const;
 	void HideSpeechBubble() const;
 	
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	FVector2D GetPlayerScreenCoordinate(FVector2D Offset) const;
 };
