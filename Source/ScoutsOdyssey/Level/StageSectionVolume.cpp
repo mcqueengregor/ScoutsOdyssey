@@ -66,16 +66,11 @@ void AStageSectionVolume::Tick(float DeltaTime)
 				CurrentCamPos.X,
 				NewYPositionWS,
 				CurrentCamPos.Z));
-
-			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Cyan,
-				FString::Printf(TEXT("Player: %f"), PlayerPawnRef->GetActorLocation().Y));
-			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Cyan,
-				FString::Printf(TEXT("New: %f"), NewYPositionWS));
-			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::White,
-				FString::Printf(TEXT("Lower: %f"), LowerCameraBoundWS));
-			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::White,
-				FString::Printf(TEXT("Upper: %f"), UpperCameraBoundWS));
 		}
+		GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Silver,
+			FString("HEAD: ") + UKismetSystemLibrary::GetDisplayName(PlayerPawnRef->OverlappedStageSections.GetHead()->GetValue()));
+		GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Silver,
+			FString("TAIL: ") + UKismetSystemLibrary::GetDisplayName(PlayerPawnRef->OverlappedStageSections.GetTail()->GetValue()));
 	}
 }
 
@@ -87,9 +82,6 @@ void AStageSectionVolume::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherA
 	
 	if (Pawn)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-			FString("Player entered ") + UKismetSystemLibrary::GetDisplayName(this));
-
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		
 		// Remember this section as the last section that was entered:
@@ -108,31 +100,23 @@ void AStageSectionVolume::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherAct
 
 	if (Pawn && Pawn->LastEnteredSection)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-			FString("Player left ") + UKismetSystemLibrary::GetDisplayName(this));
-		
 		// Determine which stage section the player should "forget"
 		// about, and update camera angle if necessary:
 		const bool bLeftLastEnteredSection = Pawn->LastEnteredSection == this;
-
+		
 		// (Head represents the last-entered section)
+		// TODO: Change 'auto' to explicit data type specifier!
 		auto SectionToForget = bLeftLastEnteredSection ?
-			Pawn->OverlappedStageSections.GetTail() :
-			Pawn->OverlappedStageSections.GetHead();
-
-		FString DebugMsg = bLeftLastEnteredSection ?
-			FString("Removed tail!") :
-			FString("Removed head!");
+			Pawn->OverlappedStageSections.GetHead() :
+			Pawn->OverlappedStageSections.GetTail();
 
 		// If leaving the previously-entered section, set camera angle back to section the player is returning to:
 		if (bLeftLastEnteredSection)
 		{
 			APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-			PlayerController->SetViewTarget(Pawn->OverlappedStageSections.GetTail()->GetValue(), GetCameraTransitionParams(Pawn));
-			Pawn->LastEnteredSection = Pawn->OverlappedStageSections.GetTail()->GetValue();
+			PlayerController->SetViewTarget(Pawn->OverlappedStageSections.GetHead()->GetValue(), GetCameraTransitionParams(Pawn));
+			Pawn->LastEnteredSection = Pawn->OverlappedStageSections.GetHead()->GetValue();
 		}
-		
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan, DebugMsg);
 		Pawn->OverlappedStageSections.RemoveNode(SectionToForget);
 	}
 }

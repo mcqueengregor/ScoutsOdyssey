@@ -51,8 +51,8 @@ public:
 		float CameraTransitionDuration;	// The amount of time a camera angle transition takes, in seconds.
 	
 	bool bHasCameraAngleChangedAlready;	// Whether or not the camera component has changed location already.
-										// Set to 'false' originally which triggers instant location change,
-										// then set to 'true' which uses EaseInOut transitions.
+										// Set to 'false' on first frame of gameplay which triggers instant location
+										// change, then set to 'true' which uses EaseInOut transitions.
 	
 	class TDoubleLinkedList<AStageSectionVolume*> OverlappedStageSections;	// List of currently-overlapping stage
 																			// sections, used to accurately determine
