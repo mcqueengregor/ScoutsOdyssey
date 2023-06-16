@@ -91,7 +91,20 @@ void UDialogueComponent::BehaviorTree_SetUp()
 void UDialogueComponent::Delegate_SetUp()
 {
 	OnDialogueEnd.AddUObject(this, &UDialogueComponent::DialogueEnd_CleanUp);
+
+	// LeftMouseClick Delegates, should always trigger, always on the same UI.
+	BubbleOne->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
+	BubbleTwo->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
+	BubbleNarrator->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
 }
+
+
+void UDialogueComponent::SpeakFinish() const
+{
+	UE_LOG(LogTemp, Warning, TEXT("SpeakFinish Broadcasted!"));
+	OnSpeakFinish.Broadcast();
+}
+
 
 void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 {

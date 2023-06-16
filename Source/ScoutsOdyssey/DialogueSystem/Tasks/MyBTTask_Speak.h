@@ -27,6 +27,7 @@ private:
 	virtual FString GetStaticDescription() const override;
 
 	// Delegate Binding To Finish Task
+	void Delegate_SetUp();
 	void TaskFinish();
 	bool TaskFinished;
 	FDelegateHandle TaskFinish_DelegateHandle;

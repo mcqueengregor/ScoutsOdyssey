@@ -57,6 +57,7 @@ public:
 	FOnSpeakFinish OnSpeakFinish;
 	FOnChoiceFinish OnChoiceFinish;
 	FOnDialogueEnd OnDialogueEnd;
+	void SpeakFinish() const;
 	
 protected:
 	virtual void BeginPlay() override;

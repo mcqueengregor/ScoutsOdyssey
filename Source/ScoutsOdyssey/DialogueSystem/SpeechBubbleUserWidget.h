@@ -7,6 +7,7 @@
 #include "SpeechBubbleUserWidget.generated.h"
 
 
+DECLARE_DELEGATE(FOnLeftMouseClick);
 /**
  * 
  */
@@ -15,4 +16,8 @@ class SCOUTSODYSSEY_API USpeechBubbleUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+	FOnLeftMouseClick OnLeftMouseClick;
+private:
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 };
