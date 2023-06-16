@@ -57,9 +57,9 @@ void AStageSectionVolume::Tick(float DeltaTime)
 		if (CameraType == ECameraType::FOLLOW && PlayerPawnRef->LastEnteredSection == this)
 		{
 			// Find max and min values that camera can move to on the Y-axis, in world-space:
-			const float LowerCameraBoundWS = GetActorLocation().Y - TriggerVolume->GetScaledBoxExtent().Y + FollowCameraBounds;
-			const float UpperCameraBoundWS = GetActorLocation().Y + TriggerVolume->GetScaledBoxExtent().Y - FollowCameraBounds;
-			const float NewYPositionWS = FMath::Clamp(PlayerPawnRef->GetActorLocation().Y, LowerCameraBoundWS, UpperCameraBoundWS);
+			const float LowerCameraBoundWS = GetActorLocation().Y - (TriggerVolume->GetScaledBoxExtent().Y / 2.0f) + FollowCameraBounds;
+			const float UpperCameraBoundWS = GetActorLocation().Y + (TriggerVolume->GetScaledBoxExtent().Y / 2.0f) - FollowCameraBounds;
+			float NewYPositionWS = FMath::Clamp(PlayerPawnRef->GetActorLocation().Y, LowerCameraBoundWS, UpperCameraBoundWS);
 			
 			const FVector CurrentCamPos = StageSectionCameraComponent->GetComponentLocation();
 			StageSectionCameraComponent->SetWorldLocation(FVector(
@@ -69,6 +69,8 @@ void AStageSectionVolume::Tick(float DeltaTime)
 
 			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Cyan,
 				FString::Printf(TEXT("Player: %f"), PlayerPawnRef->GetActorLocation().Y));
+			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Cyan,
+				FString::Printf(TEXT("New: %f"), NewYPositionWS));
 			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::White,
 				FString::Printf(TEXT("Lower: %f"), LowerCameraBoundWS));
 			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::White,
@@ -149,4 +151,3 @@ FViewTargetTransitionParams AStageSectionVolume::GetCameraTransitionParams(APlay
 	
 	return TransitionParams;
 }
-
