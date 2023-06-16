@@ -8,6 +8,10 @@
 #include "ScoutsOdyssey/Interfaces/Clickable.h"
 #include "DialogueComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnSpeakFinish);
+DECLARE_MULTICAST_DELEGATE(FOnChoiceFinish);
+DECLARE_MULTICAST_DELEGATE(FOnDialogueEnd);
+
 UENUM()
 enum EBubble
 {
@@ -46,20 +50,26 @@ public:
 	// Behavior Tree
 	UPROPERTY(EditInstanceOnly, Category=Dialogue)
 	UBehaviorTree* DialogueTree;
+
+	// Delegates
+	FOnSpeakFinish OnSpeakFinish;
+	FOnChoiceFinish OnChoiceFinish;
+	FOnDialogueEnd OnDialogueEnd;
 	
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	// SetUp Methods
-	void ClickableSetUp();
-	void WidgetSetUp();
-	void BehaviorTreeSetUp();
+	void Clickable_SetUp();
+	void Widget_SetUp();
+	void BehaviorTree_SetUp();
+	void Delegate_SetUp();
 
 	// Widget Utility Methods
 	void SwitchToBubble(EBubble Bubble) const;
 
-	void End();
+	void DialogueEnd_CleanUp() const;
 	
 	class AMyPlayerController* MyPlayerController;
 	class AAIController* AIController;

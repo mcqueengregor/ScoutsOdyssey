@@ -29,12 +29,13 @@ void UDialogueComponent::BeginPlay()
 	MyPlayerController = Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	// Spawn AI Controller 
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
-	ClickableSetUp();
-	WidgetSetUp();
-	BehaviorTreeSetUp();
+	Clickable_SetUp();
+	Widget_SetUp();
+	BehaviorTree_SetUp();
+	Delegate_SetUp();
 }
 
-void UDialogueComponent::ClickableSetUp()
+void UDialogueComponent::Clickable_SetUp()
 {
 	UStaticMeshComponent* OwnerMesh = Cast<UStaticMeshComponent>(GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass()));
 	if(OwnerMesh)
@@ -46,7 +47,7 @@ void UDialogueComponent::ClickableSetUp()
 	}	
 }
 
-void UDialogueComponent::WidgetSetUp()
+void UDialogueComponent::Widget_SetUp()
 {
 	if(SpeechBubble_WidgetAsset && NarratorSpeechBubble_WidgetAsset)
 	{
@@ -65,7 +66,7 @@ void UDialogueComponent::WidgetSetUp()
 	}
 }
 
-void UDialogueComponent::BehaviorTreeSetUp()
+void UDialogueComponent::BehaviorTree_SetUp()
 {
 	if(AIController)
 	{
@@ -85,6 +86,11 @@ void UDialogueComponent::BehaviorTreeSetUp()
 		UE_LOG(LogTemp, Error, TEXT("AI Controller was not constructed For Dialogue Tree!"));		
 	}
 
+}
+
+void UDialogueComponent::Delegate_SetUp()
+{
+	OnDialogueEnd.AddUObject(this, &UDialogueComponent::DialogueEnd_CleanUp);
 }
 
 void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
@@ -121,6 +127,27 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 	}
 }
 
+void UDialogueComponent::DialogueEnd_CleanUp() const
+{
+	//Stop BehaviorTree
+	if(AIController)
+		AIController->GetBrainComponent()->StopLogic("Dialogue End Clean Up");
+	else
+		UE_LOG(LogTemp, Error, TEXT("Failed to Clean Up AI Controller! NullPointer!"));	
+	
+	// Destroy all UI
+	if(BubbleOne && BubbleTwo && BubbleNarrator)
+	{
+		BubbleOne->RemoveFromParent();
+		BubbleTwo->RemoveFromParent();
+		BubbleNarrator->RemoveFromParent();	
+	} else
+	{
+		if(!BubbleOne) UE_LOG(LogTemp, Error, TEXT("Bubble One Clean up failed! NullPointer!"));
+		if(!BubbleTwo) UE_LOG(LogTemp, Error, TEXT("Bubble Two Clean up failed! NullPointer!"));
+		if(!BubbleNarrator) UE_LOG(LogTemp, Error, TEXT("Bubble Narrator Clean up failed! NullPointer!"));
+	}
+}
 
 
 void UDialogueComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
