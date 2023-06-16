@@ -6,6 +6,13 @@
 #include "GameFramework/Actor.h"
 #include "StageSectionVolume.generated.h"
 
+UENUM(BlueprintType)
+enum class ECameraType : uint8
+{
+	STATIC = 0 UMETA(DisplayName = "Static camera"),
+	FOLLOW = 1 UMETA(DisplayName = "Follow camera"),
+};
+
 UCLASS()
 class SCOUTSODYSSEY_API AStageSectionVolume : public AActor
 {
@@ -39,4 +46,13 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 		class UCameraComponent* StageSectionCameraComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Attributes")
+		ECameraType CameraType;	// Whether or not this section's camera angle is static or follows the player.
+
+	UPROPERTY(EditAnywhere, Category = "Attributes")
+		float FollowCameraBounds;	// How close the camera can get to the edge of this section in FOLLOW mode
+									// before it remains stationary, in Unreal units.
+
+	APlayerPawn* PlayerPawnRef;	// Pointer reference to the player pawn (used for controlling follow camera location).
 };

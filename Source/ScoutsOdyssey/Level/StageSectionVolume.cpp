@@ -29,6 +29,9 @@ AStageSectionVolume::AStageSectionVolume()
 	StageSectionCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera angle component"));
 	StageSectionCameraComponent->SetRelativeLocation(FVector(-750.0f, 0.0f, 0.0f));
 	StageSectionCameraComponent->SetupAttachment(TriggerVolume);
+
+	CameraType = ECameraType::STATIC;
+	PlayerPawnRef = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -37,13 +40,41 @@ void AStageSectionVolume::BeginPlay()
 	Super::BeginPlay();
 	OnActorBeginOverlap.AddDynamic(this, &AStageSectionVolume::OnOverlapBegin);
 	OnActorEndOverlap.AddDynamic(this, &AStageSectionVolume::OnOverlapEnd);
+
+	// TODO: Find a tidier way of keeping a reference to the player pawn for sections with follow cameras?
+	PlayerPawnRef = Cast<APlayerPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 }
 
 // Called every frame
 void AStageSectionVolume::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	if (PlayerPawnRef)
+	{
+		// If this stage section uses a FOLLOW camera, and the player is currently using this section's camera angle,
+		// set camera position to match player's y-position:
+		if (CameraType == ECameraType::FOLLOW && PlayerPawnRef->LastEnteredSection == this)
+		{
+			// Find max and min values that camera can move to on the Y-axis, in world-space:
+			const float LowerCameraBoundWS = GetActorLocation().Y - TriggerVolume->GetScaledBoxExtent().Y + FollowCameraBounds;
+			const float UpperCameraBoundWS = GetActorLocation().Y + TriggerVolume->GetScaledBoxExtent().Y - FollowCameraBounds;
+			const float NewYPositionWS = FMath::Clamp(PlayerPawnRef->GetActorLocation().Y, LowerCameraBoundWS, UpperCameraBoundWS);
+			
+			const FVector CurrentCamPos = StageSectionCameraComponent->GetComponentLocation();
+			StageSectionCameraComponent->SetWorldLocation(FVector(
+				CurrentCamPos.X,
+				NewYPositionWS,
+				CurrentCamPos.Z));
 
+			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Cyan,
+				FString::Printf(TEXT("Player: %f"), PlayerPawnRef->GetActorLocation().Y));
+			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::White,
+				FString::Printf(TEXT("Lower: %f"), LowerCameraBoundWS));
+			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::White,
+				FString::Printf(TEXT("Upper: %f"), UpperCameraBoundWS));
+		}
+	}
 }
 
 void AStageSectionVolume::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
@@ -75,6 +106,9 @@ void AStageSectionVolume::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherAct
 
 	if (Pawn && Pawn->LastEnteredSection)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
+			FString("Player left ") + UKismetSystemLibrary::GetDisplayName(this));
+		
 		// Determine which stage section the player should "forget"
 		// about, and update camera angle if necessary:
 		const bool bLeftLastEnteredSection = Pawn->LastEnteredSection == this;

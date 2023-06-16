@@ -42,21 +42,21 @@ public:
 		class USpringArmComponent* SpringArmComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float HoriMoveSpeed;	// Left/right speed in Unreal units per second
+		float HoriMoveSpeed;	// Left/right speed in Unreal units per second.
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float VertMoveSpeed;	// Front/back speed in Unreal units per second
+		float VertMoveSpeed;	// Front/back speed in Unreal units per second.
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		float CameraTransitionDuration;	// The amount of time a camera angle transition takes, in seconds
+		float CameraTransitionDuration;	// The amount of time a camera angle transition takes, in seconds.
 	
 	bool bHasCameraAngleChangedAlready;	// Whether or not the camera component has changed location already.
 										// Set to 'false' originally which triggers instant location change,
 										// then set to 'true' which uses EaseInOut transitions.
 	
-	class TDoubleLinkedList<AStageSectionVolume*> OverlappedStageSections;	// List of currently-overlapping stage sections,
-																			// used to accurately determine the current
-																			// camera angle to use.
+	class TDoubleLinkedList<AStageSectionVolume*> OverlappedStageSections;	// List of currently-overlapping stage
+																			// sections, used to accurately determine
+																			// the current camera angle to use.
 
 	AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
 };
