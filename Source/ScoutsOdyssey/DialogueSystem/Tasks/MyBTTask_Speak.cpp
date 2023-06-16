@@ -29,6 +29,9 @@ EBTNodeResult::Type UMyBTTask_Speak::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 		FOnDialogueEnd::FDelegate TaskFinish_Delegate;
 		TaskFinish_Delegate.BindUObject(this, &UMyBTTask_Speak::TaskFinish);
 		TaskFinish_DelegateHandle = DialogueComponent->OnDialogueEnd.Add(TaskFinish_Delegate);
+
+		// Speak
+		DialogueComponent->Speak(Text, BubbleChoice);
 	} else
 	{
 		UE_LOG(LogTemp, Error, TEXT("DialogueComponent is Null: %s"), *GetClass()->GetName());	

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-#include "Ebubble.generated.h"
+#include "DialogueEnums.generated.h"
 
 UENUM(BlueprintType)
 enum class EBubble : uint8
@@ -11,5 +11,11 @@ enum class EBubble : uint8
 	Narrator
 };
 
+UENUM(BlueprintType)
+enum class EBubbleState : uint8
+{
+	Speak,
+	Reply,
+};
 
 

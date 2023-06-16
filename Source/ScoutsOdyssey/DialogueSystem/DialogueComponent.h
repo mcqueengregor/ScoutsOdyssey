@@ -6,7 +6,8 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "Components/ActorComponent.h"
 #include "ScoutsOdyssey/Interfaces/Clickable.h"
-#include "EBubble.h"
+#include "DialogueEnums.h"
+#include "Blueprint/UserWidget.h"
 #include "DialogueComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnSpeakFinish);
@@ -42,11 +43,16 @@ public:
 
 	// Widget Utility Methods
 	void SwitchToBubble(EBubble Bubble) const;
+	void SetTextBlockText(const FText& Text, const UUserWidget& Parent) const;
 	
 	// Behavior Tree
 	UPROPERTY(EditInstanceOnly, Category=Dialogue)
 	UBehaviorTree* DialogueTree;
 
+	// Tasks Setup Methods
+	void Speak(const FText& Text, const EBubble Bubble) const;
+	void Choice(TArray<FText>& Choices);
+	
 	// Delegates
 	FOnSpeakFinish OnSpeakFinish;
 	FOnChoiceFinish OnChoiceFinish;

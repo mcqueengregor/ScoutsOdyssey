@@ -8,6 +8,7 @@
 #include "Blueprint/UserWidget.h"
 #include "SpeechBubbleUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 
 UDialogueComponent::UDialogueComponent()
@@ -19,7 +20,9 @@ UDialogueComponent::UDialogueComponent()
 void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) 
 {
 	UE_LOG(LogTemp, Warning, TEXT("Clicked! From Dialogue Component"));
-	SwitchToBubble(EBubble::Two);
+
+	// Start behavior tree on click.
+	BehaviorTree_SetUp(); 
 }
 
 
@@ -31,7 +34,6 @@ void UDialogueComponent::BeginPlay()
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
 	Clickable_SetUp();
 	Widget_SetUp();
-	BehaviorTree_SetUp();
 	Delegate_SetUp();
 }
 
@@ -123,6 +125,42 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 		if(!BubbleTwo) UE_LOG(LogTemp, Error, TEXT("Failed to Switch Bubble, Bubble Two wasn't created!"));
 		if(!BubbleNarrator) UE_LOG(LogTemp, Error, TEXT("Failed to Switch Bubble, Bubble Narrator wasn't created!"));
 	}
+}
+
+void UDialogueComponent::SetTextBlockText(const FText& Text, const UUserWidget& Parent) const
+{
+	UTextBlock* TextWidget = Cast<UTextBlock>(Parent.GetWidgetFromName(TEXT("TextBlock_Speak")));
+	if(TextWidget)
+		TextWidget->SetText(Text);
+	else
+		UE_LOG(LogTemp, Error, TEXT("Speak failed, Bubble One TextWidget not found!"))	
+}
+
+
+void UDialogueComponent::Speak(const FText& Text, const EBubble Bubble) const
+{
+	if(BubbleOne && BubbleTwo && BubbleNarrator)
+	{
+		switch (Bubble)
+		{
+		case EBubble::One:
+			SetTextBlockText(Text, *BubbleOne);	
+			break;
+		case EBubble::Two:
+			SetTextBlockText(Text, *BubbleTwo);		
+			break;
+		case EBubble::Narrator:
+			SetTextBlockText(Text, *BubbleNarrator);	
+			break;
+		default:
+			UE_LOG(LogTemp, Error, TEXT("Speak method took in undefined EBubble value!"));	
+		}	
+	} else
+	{
+		if(!BubbleOne) UE_LOG(LogTemp, Error, TEXT("Failed to Speak, Bubble One wasn't created!"));
+		if(!BubbleTwo) UE_LOG(LogTemp, Error, TEXT("Failed to Speak, Bubble Two wasn't created!"));
+		if(!BubbleNarrator) UE_LOG(LogTemp, Error, TEXT("Failed to Speak, Bubble Narrator wasn't created!"));
+	}	
 }
 
 void UDialogueComponent::DialogueEnd_CleanUp() const

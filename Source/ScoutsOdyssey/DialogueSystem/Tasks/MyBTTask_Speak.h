@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
-#include "../EBubble.h"
+#include "..\DialogueEnums.h"
 #include "MyBTTask_Speak.generated.h"
 
 /**
