@@ -6,19 +6,12 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "Components/ActorComponent.h"
 #include "ScoutsOdyssey/Interfaces/Clickable.h"
+#include "EBubble.h"
 #include "DialogueComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnSpeakFinish);
 DECLARE_MULTICAST_DELEGATE(FOnChoiceFinish);
 DECLARE_MULTICAST_DELEGATE(FOnDialogueEnd);
-
-UENUM()
-enum EBubble
-{
-	One,
-	Two,
-	Narrator
-};
 
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -47,6 +40,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	FVector2D BubbleTwoOffSet;
 
+	// Widget Utility Methods
+	void SwitchToBubble(EBubble Bubble) const;
+	
 	// Behavior Tree
 	UPROPERTY(EditInstanceOnly, Category=Dialogue)
 	UBehaviorTree* DialogueTree;
@@ -65,9 +61,6 @@ private:
 	void Widget_SetUp();
 	void BehaviorTree_SetUp();
 	void Delegate_SetUp();
-
-	// Widget Utility Methods
-	void SwitchToBubble(EBubble Bubble) const;
 
 	void DialogueEnd_CleanUp() const;
 	

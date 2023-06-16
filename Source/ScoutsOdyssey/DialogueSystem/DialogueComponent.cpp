@@ -74,9 +74,7 @@ void UDialogueComponent::BehaviorTree_SetUp()
 		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
 		if(Blackboard)
 		{
-			Blackboard->SetValueAsObject("BubbleOne", BubbleOne);
-			Blackboard->SetValueAsObject("BubbleTwo", BubbleTwo);
-			Blackboard->SetValueAsObject("BubbleNarrator", BubbleNarrator);
+			Blackboard->SetValueAsObject("DialogueComponent", this);
 		} else
 		{
 			UE_LOG(LogTemp, Error, TEXT("BlackBoardComponent is not assigned in AIController!"));	
@@ -99,19 +97,19 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 	{
 		switch (Bubble)
 		{
-		case One:
+		case EBubble::One:
 			BubbleOne->SetPositionInViewport(MyPlayerController->GetPlayerScreenCoordinate(BubbleOneOffSet));
 			BubbleOne->SetVisibility(ESlateVisibility::Visible);
 			BubbleTwo->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
 			break;
-		case Two:
+		case EBubble::Two:
 			BubbleTwo->SetPositionInViewport(MyPlayerController->GetActorScreenCoordinate(*GetOwner(), BubbleTwoOffSet));	
 			BubbleOne->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleTwo->SetVisibility(ESlateVisibility::Visible);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
 			break;
-		case Narrator:
+		case EBubble::Narrator:
 			BubbleOne->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleTwo->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Visible);

@@ -8,7 +8,9 @@ public class ScoutsOdyssey : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "AIModule" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG"});
+		PublicDependencyModuleNames.AddRange(new string[] { "AIModule", "LevelSequence", "MovieScene" });
+		PublicDependencyModuleNames.AddRange(new string[] { "GameplayAbilities", "GameplayTags", "GamePlayTasks" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
