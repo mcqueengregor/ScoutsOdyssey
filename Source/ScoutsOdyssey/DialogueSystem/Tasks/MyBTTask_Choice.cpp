@@ -39,6 +39,7 @@ EBTNodeResult::Type UMyBTTask_Choice::ExecuteTask(UBehaviorTreeComponent& OwnerC
 		Delegate_SetUp();
 
 		// Display Choice
+		DialogueComponent->Choice(Choices);
 	}
 	else
 	{
@@ -57,7 +58,7 @@ void UMyBTTask_Choice::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 	}
 }
 
-// For calling ChoiceTaskFinish when FOnChoiceFinish is called in DialogueComponent. For ending the task. 
+// For ending the task. When OnChoiceFinish is called.
 void UMyBTTask_Choice::Delegate_SetUp()
 {
 	FOnChoiceFinish::FDelegate ChoiceTaskFinish_Delegate;

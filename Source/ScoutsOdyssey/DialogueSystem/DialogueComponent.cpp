@@ -5,9 +5,11 @@
 #include "ScoutsOdyssey/Player/MyPlayerController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
+#include "DialogueChoiceObject.h"
 #include "Blueprint/UserWidget.h"
 #include "SpeechBubbleUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/ListView.h"
 #include "Components/Overlay.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
@@ -213,9 +215,13 @@ void UDialogueComponent::Choice(TArray<FText>& Choices)
 {
 	if(BubbleOne)
 	{
+		UListView* ListView = Cast<UListView>(BubbleOne->GetWidgetFromName(TEXT("ListView_Choice")));
+		
 		for(int i = 0; i < Choices.Num(); i++)
 		{
-			
+			UDialogueChoiceObject* DialogueChoiceObject = NewObject<UDialogueChoiceObject>(this, UDialogueChoiceObject::StaticClass());
+			DialogueChoiceObject->SetValues(i, Choices[i]);
+			ListView->AddItem(DialogueChoiceObject);
 		}
 	} else
 	{

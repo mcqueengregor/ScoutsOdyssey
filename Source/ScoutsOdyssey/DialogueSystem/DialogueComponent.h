@@ -45,7 +45,6 @@ public:
 	void SwitchToBubble(EBubble Bubble) const;
 	void SwitchBubbleOneState(EBubbleState BubbleState) const;
 	void SetTextBlockText(const FText& Text, const UUserWidget& Parent) const;
-	void ConstructListView(const FText& Text);
 	
 	// Behavior Tree
 	UPROPERTY(EditInstanceOnly, Category=Dialogue)
