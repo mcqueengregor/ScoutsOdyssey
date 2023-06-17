@@ -23,7 +23,7 @@ UMyBTTask_Choice::UMyBTTask_Choice()
 
 EBTNodeResult::Type UMyBTTask_Choice::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	TaskFinished = false;
+	ChoiceTaskFinished = false;
 
 	// Get blackboard values
 	const UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
@@ -32,9 +32,10 @@ EBTNodeResult::Type UMyBTTask_Choice::ExecuteTask(UBehaviorTreeComponent& OwnerC
 
 	if (DialogueComponent)
 	{
+		DialogueComponent->SwitchBubbleOneState(EBubbleState::Choice);
 		DialogueComponent->SwitchToBubble(EBubble::One);
-
-		// Assign task finish delegate
+		
+		// Assign choice task finish delegate
 		Delegate_SetUp();
 
 		// Display Choice
@@ -49,10 +50,34 @@ EBTNodeResult::Type UMyBTTask_Choice::ExecuteTask(UBehaviorTreeComponent& OwnerC
 
 void UMyBTTask_Choice::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	if (TaskFinished)
+	if (ChoiceTaskFinished)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("BTTask Finished: %s"), *GetClass()->GetName());
 		OwnerComp.RequestExecution(EBTNodeResult::Succeeded);
+	}
+}
+
+// For calling ChoiceTaskFinish when FOnChoiceFinish is called in DialogueComponent. For ending the task. 
+void UMyBTTask_Choice::Delegate_SetUp()
+{
+	FOnChoiceFinish::FDelegate ChoiceTaskFinish_Delegate;
+	ChoiceTaskFinish_Delegate.BindUObject(this, &UMyBTTask_Choice::ChoiceTaskFinish);
+	ChoiceTaskFinish_DelegateHandle = DialogueComponent->OnChoiceFinish.Add(ChoiceTaskFinish_Delegate);
+	UE_LOG(LogTemp, Warning, TEXT("TaskFinish Delegate Setup Successfully On OnChoiceFinish!"));
+}
+
+void UMyBTTask_Choice::ChoiceTaskFinish()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Choice Task Finished Called!"));
+	if (DialogueComponent)
+	{
+		// Remove Task Finish Delegate
+		DialogueComponent->OnChoiceFinish.Remove(ChoiceTaskFinish_DelegateHandle);
+		ChoiceTaskFinished = true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Choice Task Can't finish, DialogueComponent is Null: %s"), *GetClass()->GetName());
 	}
 }
 
@@ -70,29 +95,6 @@ FString UMyBTTask_Choice::GetStaticDescription() const
 	return FString::Printf(TEXT("%s"), *ChoicesString);
 }
 
-
-void UMyBTTask_Choice::Delegate_SetUp()
-{
-	FOnDialogueEnd::FDelegate TaskFinish_Delegate;
-	TaskFinish_Delegate.BindUObject(this, &UMyBTTask_Choice::TaskFinish);
-	TaskFinish_DelegateHandle = DialogueComponent->OnChoiceFinish.Add(TaskFinish_Delegate);
-	UE_LOG(LogTemp, Warning, TEXT("TaskFinish Delegate Setup Successfully On OnChoiceFinish!"));
-}
-
-void UMyBTTask_Choice::TaskFinish()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Task Finished Called!"));
-	if (DialogueComponent)
-	{
-		// Remove Task Finish Delegate
-		DialogueComponent->OnSpeakFinish.Remove(TaskFinish_DelegateHandle);
-		TaskFinished = true;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Task cannot finish as Dialogue Component is Null"));
-	}
-}
 
 
 void UMyBTTask_Choice::InitializeFromAsset(UBehaviorTree& Asset)

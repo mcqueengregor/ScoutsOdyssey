@@ -8,6 +8,7 @@
 #include "Blueprint/UserWidget.h"
 #include "SpeechBubbleUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/Overlay.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -129,13 +130,46 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 			BubbleNarrator->SetVisibility(ESlateVisibility::Visible);
 			break;
 		default:
-			UE_LOG(LogTemp, Error, TEXT("Switch to bubble took in undefined value!"));	
+			UE_LOG(LogTemp, Error, TEXT("Switch to bubble took in undefined Bubble type!"));	
 		}	
 	} else
 	{
 		if(!BubbleOne) UE_LOG(LogTemp, Error, TEXT("Failed to Switch Bubble, Bubble One wasn't created!"));
 		if(!BubbleTwo) UE_LOG(LogTemp, Error, TEXT("Failed to Switch Bubble, Bubble Two wasn't created!"));
 		if(!BubbleNarrator) UE_LOG(LogTemp, Error, TEXT("Failed to Switch Bubble, Bubble Narrator wasn't created!"));
+	}
+}
+
+void UDialogueComponent::SwitchBubbleOneState(const EBubbleState BubbleState) const
+{
+	if(BubbleOne)
+	{
+		UOverlay* SpeakOverlay = Cast<UOverlay>(BubbleOne->GetWidgetFromName(TEXT("Overlay_Speak")));	
+		UOverlay* ChoiceOverlay = Cast<UOverlay>(BubbleOne->GetWidgetFromName(TEXT("Overlay_Choice")));		
+
+		if(SpeakOverlay && ChoiceOverlay)
+		{
+			switch (BubbleState)
+			{
+			case EBubbleState::Speak:
+				SpeakOverlay->SetVisibility(ESlateVisibility::Visible);
+				ChoiceOverlay->SetVisibility(ESlateVisibility::Collapsed);
+				break;
+			case EBubbleState::Choice:
+				SpeakOverlay->SetVisibility(ESlateVisibility::Collapsed);
+				ChoiceOverlay->SetVisibility(ESlateVisibility::Visible);
+				break;
+			default:
+				UE_LOG(LogTemp, Error, TEXT("Switch bubble state took in undefined Bubble state!"));		
+			}
+		} else {
+			if(!SpeakOverlay) UE_LOG(LogTemp, Error, TEXT("SpeakOverlay is Null: %s"), TEXT(__FUNCTION__));
+			if(!ChoiceOverlay) UE_LOG(LogTemp, Error, TEXT("ChoiceOverlay is Null: %s"), TEXT(__FUNCTION__));
+		}
+	} else
+		
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to Switch Bubble State, Bubble One wasn't created!"));	
 	}
 }
 
@@ -173,6 +207,20 @@ void UDialogueComponent::Speak(const FText& Text, const EBubble Bubble) const
 		if(!BubbleTwo) UE_LOG(LogTemp, Error, TEXT("Failed to Speak, Bubble Two wasn't created!"));
 		if(!BubbleNarrator) UE_LOG(LogTemp, Error, TEXT("Failed to Speak, Bubble Narrator wasn't created!"));
 	}	
+}
+
+void UDialogueComponent::Choice(TArray<FText>& Choices)
+{
+	if(BubbleOne)
+	{
+		for(int i = 0; i < Choices.Num(); i++)
+		{
+			
+		}
+	} else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to Choice, Bubble One wasn't created!"));	
+	} 
 }
 
 void UDialogueComponent::DialogueEnd_CleanUp() const

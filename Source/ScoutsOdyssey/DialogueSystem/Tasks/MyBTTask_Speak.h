@@ -28,9 +28,9 @@ private:
 
 	// Delegate Binding To Finish Task
 	void Delegate_SetUp();
-	void TaskFinish();
-	bool TaskFinished;
-	FDelegateHandle TaskFinish_DelegateHandle;
+	void SpeakTaskFinish();
+	bool SpeakTaskFinished;
+	FDelegateHandle SpeakTaskFinish_DelegateHandle;
 
 	// Behavior Tree variables
 	class UDialogueComponent* DialogueComponent;

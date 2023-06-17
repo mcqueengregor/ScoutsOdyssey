@@ -21,7 +21,7 @@ UMyBTTask_Speak::UMyBTTask_Speak()
 
 EBTNodeResult::Type UMyBTTask_Speak::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	TaskFinished = false;
+	SpeakTaskFinished = false;
 	
 	// Get blackboard values
 	const UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
@@ -31,6 +31,7 @@ EBTNodeResult::Type UMyBTTask_Speak::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	if (DialogueComponent)
 	{
 		DialogueComponent->SwitchToBubble(BubbleChoice);
+		DialogueComponent->SwitchBubbleOneState(EBubbleState::Speak);
 
 		// Assign task finish delegate
 		Delegate_SetUp();
@@ -48,7 +49,7 @@ EBTNodeResult::Type UMyBTTask_Speak::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 
 void UMyBTTask_Speak::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	if (TaskFinished)
+	if (SpeakTaskFinished)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("BTTask Finished: %s"), *GetClass()->GetName());
 		OwnerComp.RequestExecution(EBTNodeResult::Succeeded);
@@ -64,20 +65,20 @@ FString UMyBTTask_Speak::GetStaticDescription() const
 
 void UMyBTTask_Speak::Delegate_SetUp()
 {
-	FOnDialogueEnd::FDelegate TaskFinish_Delegate;
-	TaskFinish_Delegate.BindUObject(this, &UMyBTTask_Speak::TaskFinish);
-	TaskFinish_DelegateHandle = DialogueComponent->OnSpeakFinish.Add(TaskFinish_Delegate);
+	FOnSpeakFinish::FDelegate SpeakTaskFinish_Delegate;
+	SpeakTaskFinish_Delegate.BindUObject(this, &UMyBTTask_Speak::SpeakTaskFinish);
+	SpeakTaskFinish_DelegateHandle = DialogueComponent->OnSpeakFinish.Add(SpeakTaskFinish_Delegate);
 	UE_LOG(LogTemp, Warning, TEXT("TaskFinish Delegate Setup Successfully On OnSpeakFinish!"));
 }
 
-void UMyBTTask_Speak::TaskFinish()
+void UMyBTTask_Speak::SpeakTaskFinish()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Task Finished Called!"));
+	UE_LOG(LogTemp, Warning, TEXT("Speak Task Finished Called!"));
 	if (DialogueComponent)
 	{
 		// Remove Task Finish Delegate
-		DialogueComponent->OnSpeakFinish.Remove(TaskFinish_DelegateHandle);
-		TaskFinished = true;
+		DialogueComponent->OnSpeakFinish.Remove(SpeakTaskFinish_DelegateHandle);
+		SpeakTaskFinished = true;
 	}
 	else
 	{

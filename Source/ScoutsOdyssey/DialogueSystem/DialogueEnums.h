@@ -15,7 +15,8 @@ UENUM(BlueprintType)
 enum class EBubbleState : uint8
 {
 	Speak,
-	Reply,
+	Choice,
 };
+
 
 
