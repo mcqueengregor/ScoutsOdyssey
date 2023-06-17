@@ -21,8 +21,9 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 {
 	UE_LOG(LogTemp, Warning, TEXT("Clicked! From Dialogue Component"));
 
-	// Start behavior tree on click.
-	BehaviorTree_SetUp(); 
+	Widget_SetUp();
+	Delegate_SetUp();
+	BehaviorTree_SetUp();
 }
 
 
@@ -33,8 +34,6 @@ void UDialogueComponent::BeginPlay()
 	// Spawn AI Controller 
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
 	Clickable_SetUp();
-	Widget_SetUp();
-	Delegate_SetUp();
 }
 
 void UDialogueComponent::Clickable_SetUp()
@@ -178,11 +177,11 @@ void UDialogueComponent::Speak(const FText& Text, const EBubble Bubble) const
 
 void UDialogueComponent::DialogueEnd_CleanUp() const
 {
-	//Stop BehaviorTree
-	if(AIController)
-		AIController->GetBrainComponent()->StopLogic("Dialogue End Clean Up");
-	else
-		UE_LOG(LogTemp, Error, TEXT("Failed to Clean Up AI Controller! NullPointer!"));	
+	// Stop BehaviorTree
+	 if(AIController)
+	 	AIController->GetBrainComponent()->StopLogic("Dialogue End Clean Up");
+	 else
+	 	UE_LOG(LogTemp, Error, TEXT("Failed to Clean Up AI Controller! NullPointer!"));	
 	
 	// Destroy all UI
 	if(BubbleOne && BubbleTwo && BubbleNarrator)

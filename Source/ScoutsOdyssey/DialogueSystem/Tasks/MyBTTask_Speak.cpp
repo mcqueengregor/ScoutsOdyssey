@@ -21,8 +21,10 @@ UMyBTTask_Speak::UMyBTTask_Speak()
 
 EBTNodeResult::Type UMyBTTask_Speak::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	TaskFinished = false;
+	
 	// Get blackboard values
-	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
+	const UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	DialogueComponent = Cast<UDialogueComponent>(
 		BlackboardComponent->GetValueAsObject(DialogueComponent_BlackboardKey.SelectedKeyName));
 
