@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="UDialogueComponent">
+    <Position X="7.5" Y="2.25" Width="2.75" />
+    <InheritanceLine Type="IClickable" ManuallyRouted="true" FixedFromPoint="true">
+      <Path>
+        <Point X="8.875" Y="1.312" />
+        <Point X="8.875" Y="2.25" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>gAAAECAQghARAAARGiiQAAAAAAAEKAAAhAQAAAAoAAA=</HashCode>
+      <FileName>C:\Users\HaochengYang\Documents\GitHub\ScoutsOdyssey\Source\ScoutsOdyssey\DialogueSystem\DialogueComponent.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="BubbleOne" />
+      <Field Name="BubbleTwo" />
+      <Field Name="BubbleNarrator" />
+      <Field Name="MyPlayerController" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="AMyPlayerController">
+    <Position X="13.5" Y="2.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAA=</HashCode>
+      <FileName>C:\Users\HaochengYang\Documents\GitHub\ScoutsOdyssey\Source\ScoutsOdyssey\Player\MyPlayerController.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UMyBTTask_Choice">
+    <Position X="5.75" Y="10.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIBiYAAAAAABAEAAAAAAAEAAAAAAIAiAAAAQAA=</HashCode>
+      <FileName>C:\Users\HaochengYang\Documents\GitHub\ScoutsOdyssey\Source\ScoutsOdyssey\DialogueSystem\Tasks\MyBTTask_Choice.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="DialogueComponent" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="UMyBTTask_Speak">
+    <Position X="9.25" Y="10.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABiAQAQAAAAAEAAAAQAAEAAAAAAAAiCAQAAAg=</HashCode>
+      <FileName>C:\Users\HaochengYang\Documents\GitHub\ScoutsOdyssey\Source\ScoutsOdyssey\DialogueSystem\Tasks\MyBTTask_Speak.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="DialogueComponent" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="UMyBTTask_Exit">
+    <Position X="12.5" Y="10.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAEAAAAAAAEAAAAAAAACCAAAAAA=</HashCode>
+      <FileName>C:\Users\HaochengYang\Documents\GitHub\ScoutsOdyssey\Source\ScoutsOdyssey\DialogueSystem\Tasks\MyBTTask_Exit.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="USpeechBubbleUserWidget">
+    <Position X="13.5" Y="4.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAA=</HashCode>
+      <FileName>C:\Users\HaochengYang\Documents\GitHub\ScoutsOdyssey\Source\ScoutsOdyssey\DialogueSystem\SpeechBubbleUserWidget.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IClickable" Collapsed="true">
+    <Position X="8.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>C:\Users\HaochengYang\Documents\GitHub\ScoutsOdyssey\Source\ScoutsOdyssey\Interfaces\Clickable.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
