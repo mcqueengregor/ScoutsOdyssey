@@ -6,6 +6,8 @@
 #include "UObject/NoExportTypes.h"
 #include "DialogueChoiceObject.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCLicked, int, ReplyIndex);
+
 /**
  * 
  */
@@ -23,5 +25,6 @@ public:
 	int ReplyIndex;
 	UPROPERTY(BlueprintReadWrite)
 	FText Reply;
-	
+	UPROPERTY(BlueprintCallable)	
+	FOnCLicked OnClicked;
 };

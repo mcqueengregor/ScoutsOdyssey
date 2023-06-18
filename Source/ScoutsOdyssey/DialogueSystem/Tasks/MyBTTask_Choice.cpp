@@ -26,7 +26,7 @@ EBTNodeResult::Type UMyBTTask_Choice::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	ChoiceTaskFinished = false;
 
 	// Get blackboard values
-	const UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
+	BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	DialogueComponent = Cast<UDialogueComponent>(
 		BlackboardComponent->GetValueAsObject(DialogueComponent_BlackboardKey.SelectedKeyName));
 
@@ -67,13 +67,16 @@ void UMyBTTask_Choice::Delegate_SetUp()
 	UE_LOG(LogTemp, Warning, TEXT("TaskFinish Delegate Setup Successfully On OnChoiceFinish!"));
 }
 
-void UMyBTTask_Choice::ChoiceTaskFinish()
+void UMyBTTask_Choice::ChoiceTaskFinish(const int ReplyIndex)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Choice Task Finished Called!"));
 	if (DialogueComponent)
 	{
 		// Remove Task Finish Delegate
 		DialogueComponent->OnChoiceFinish.Remove(ChoiceTaskFinish_DelegateHandle);
+
+		// Set BlackBoard ReplyIndex Value
+		BlackboardComponent->SetValueAsInt(ReplyIndex_BlackboardKey_Out.SelectedKeyName, ReplyIndex);
 		ChoiceTaskFinished = true;
 	}
 	else

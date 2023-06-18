@@ -53,10 +53,10 @@ void UDialogueComponent::Clickable_SetUp()
 
 void UDialogueComponent::Widget_SetUp()
 {
-	if(SpeechBubble_WidgetAsset && NarratorSpeechBubble_WidgetAsset)
+	if(PlayerSpeechBubble_WidgetAsset && NPCSpeechBubble_WidgetAsset && NarratorSpeechBubble_WidgetAsset)
 	{
-		BubbleOne = Cast<USpeechBubbleUserWidget>(CreateWidget<UUserWidget>(GetWorld(), SpeechBubble_WidgetAsset));
-		BubbleTwo = Cast<USpeechBubbleUserWidget>(CreateWidget<UUserWidget>(GetWorld(), SpeechBubble_WidgetAsset));
+		BubbleOne = Cast<USpeechBubbleUserWidget>(CreateWidget<UUserWidget>(GetWorld(), PlayerSpeechBubble_WidgetAsset));
+		BubbleTwo = Cast<USpeechBubbleUserWidget>(CreateWidget<UUserWidget>(GetWorld(), NPCSpeechBubble_WidgetAsset));
 		BubbleNarrator = Cast<USpeechBubbleUserWidget>(CreateWidget<UUserWidget>(GetWorld(), NarratorSpeechBubble_WidgetAsset)); 
 		BubbleOne->AddToViewport();
 		BubbleTwo->AddToViewport();
@@ -105,6 +105,12 @@ void UDialogueComponent::SpeakFinish() const
 {
 	UE_LOG(LogTemp, Warning, TEXT("SpeakFinish Broadcasted!"));
 	OnSpeakFinish.Broadcast();
+}
+
+void UDialogueComponent::ChoiceFinish(const int ReplyIndex)
+{
+	UE_LOG(LogTemp, Warning, TEXT("ChoiceFinish Broadcasted!"));
+	OnChoiceFinish.Broadcast(ReplyIndex);	
 }
 
 
@@ -222,6 +228,9 @@ void UDialogueComponent::Choice(TArray<FText>& Choices)
 			UDialogueChoiceObject* DialogueChoiceObject = NewObject<UDialogueChoiceObject>(this, UDialogueChoiceObject::StaticClass());
 			DialogueChoiceObject->SetValues(i, Choices[i]);
 			ListView->AddItem(DialogueChoiceObject);
+
+			// Bind OnClick. ButtonClick => DialogueChoiceOBJ_OnClick => OnChoiceFinished => Choice_TaskFinish
+			DialogueChoiceObject->OnClicked.AddDynamic(this, &UDialogueComponent::ChoiceFinish);
 		}
 	} else
 	{

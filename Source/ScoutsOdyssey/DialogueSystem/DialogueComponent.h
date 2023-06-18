@@ -11,7 +11,7 @@
 #include "DialogueComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnSpeakFinish);
-DECLARE_MULTICAST_DELEGATE(FOnChoiceFinish);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnChoiceFinish, int);
 DECLARE_MULTICAST_DELEGATE(FOnDialogueEnd);
 
 
@@ -30,8 +30,10 @@ public:
 
 	// Widgets
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
-	TSubclassOf<UUserWidget> SpeechBubble_WidgetAsset;
+	TSubclassOf<UUserWidget> PlayerSpeechBubble_WidgetAsset;
 	class USpeechBubbleUserWidget* BubbleOne;
+	UPROPERTY(EditDefaultsOnly, Category=Widgets)
+	TSubclassOf<UUserWidget> NPCSpeechBubble_WidgetAsset;
 	class USpeechBubbleUserWidget* BubbleTwo;
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NarratorSpeechBubble_WidgetAsset;
@@ -59,6 +61,8 @@ public:
 	FOnChoiceFinish OnChoiceFinish;
 	FOnDialogueEnd OnDialogueEnd;
 	void SpeakFinish() const;
+	UFUNCTION()
+	void ChoiceFinish(const int ReplyIndex);
 	
 protected:
 	virtual void BeginPlay() override;

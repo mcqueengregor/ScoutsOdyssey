@@ -28,12 +28,13 @@ private:
 
 	// Delegate Binding To Finish Task
 	void Delegate_SetUp();
-	void ChoiceTaskFinish();
+	void ChoiceTaskFinish(const int ReplyIndex);
 	bool ChoiceTaskFinished;
 	FDelegateHandle ChoiceTaskFinish_DelegateHandle;
 
 	// Behavior Tree variables
 	class UDialogueComponent* DialogueComponent;
+	class UBlackboardComponent* BlackboardComponent;
 	
 	// Behavior Tree editable
 	UPROPERTY(EditAnywhere, Category=Choice)
