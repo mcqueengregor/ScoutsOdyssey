@@ -67,10 +67,6 @@ void AStageSectionVolume::Tick(float DeltaTime)
 				NewYPositionWS,
 				CurrentCamPos.Z));
 		}
-		GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Silver,
-			FString("HEAD: ") + UKismetSystemLibrary::GetDisplayName(PlayerPawnRef->OverlappedStageSections.GetHead()->GetValue()));
-		GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Silver,
-			FString("TAIL: ") + UKismetSystemLibrary::GetDisplayName(PlayerPawnRef->OverlappedStageSections.GetTail()->GetValue()));
 	}
 }
 
