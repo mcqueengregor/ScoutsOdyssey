@@ -1,0 +1,58 @@
+@startuml
+skinparam linetype ortho
+
+!define Blueprint(name, color) class name << (M,) >>
+
+
+class UDialogueComponent << UActorComponent >>{
+    + FOnSpeakFinish
+    + FOnChoiceFinish
+    + FOnDialogueEnd
+    + Choice()
+    + Speak()
+    + ChoiceFinish()
+    + SpeakFinish()
+}
+
+class USpeechBubbleUserWidget << UUserWidget >>{
+    + FOnLeftMouseClick
+    + NativeOnMouseButtonDown()
+}
+
+class UDialogueChoiceObject << UObject >>{
+    + FOnClicked
+}
+
+class WBP_ChoiceEntry << (B, lightblue) Widget Blueprint >>{
+    + Button OnClicked()
+    + Button OnHovered()
+    + Button OnUnHovered()
+}
+
+class UMyBTTask_Choice << UBTTaskNode >>{
+    + UDialogueComponent
+    + ChoiceTaskFinish()
+}
+
+class UMyBTTask_Speak << UBTTaskNode >>{
+    + UDialogueComponent
+    + SpeakTaskFinish()
+}
+
+class UMyBTTask_Exit << UBTTaskNode >>{
+    + ExecuteTask()
+}
+
+UMyBTTask_Choice ..> UDialogueComponent : Choice()
+UMyBTTask_Speak ..> UDialogueComponent : Speak()
+
+UMyBTTask_Speak ---> UDialogueComponent : FOnSpeakFinish += SpeakTaskFinish() 
+USpeechBubbleUserWidget <--- UDialogueComponent : FOnLeftMouseClick += SpeakFinish()
+
+UMyBTTask_Choice ---> UDialogueComponent : FOnChoiceFinish += ChoiceTaskFinish() 
+UDialogueChoiceObject ---> WBP_ChoiceEntry : Button OnCLicked() += FOnClicked
+UDialogueComponent ---> UDialogueChoiceObject : FOnClicked += FOnChoiceFinish
+
+UMyBTTask_Exit ---> UDialogueComponent : FOnDialogueEnd += ExecuteTask()
+
+@enduml
