@@ -33,6 +33,9 @@ protected:
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+		class UBoxComponent* BoxColliderComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class UStaticMeshComponent* MeshComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -40,7 +43,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class USpringArmComponent* SpringArmComponent;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float HoriMoveSpeed;	// Left/right speed in Unreal units per second.
 
@@ -49,6 +52,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float CameraTransitionDuration;	// The amount of time a camera angle transition takes, in seconds.
+
+	UMaterialInstanceDynamic* DynamicMaterial;
 	
 	bool bHasCameraAngleChangedAlready;	// Whether or not the camera component has changed location already.
 										// Set to 'false' on first frame of gameplay which triggers instant location
