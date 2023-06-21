@@ -14,6 +14,17 @@ enum class FPlayerAnimation : uint8
 	WALK = 1 UMETA(DisplayName = "Walk animation"),
 };
 
+USTRUCT()
+struct FSpriteAnimDetails
+{
+	GENERATED_BODY()
+
+	UMaterialInstanceDynamic* AnimationMaterial;
+	int32 NumRows;
+	int32 NumColumns;
+	int32 DesiredFramerate;
+};
+
 UCLASS()
 class SCOUTSODYSSEY_API APlayerPawn : public APawn
 {
@@ -34,10 +45,21 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable)
+		void ChangeAnimation(FPlayerAnimation NewAnimation);
+	
 protected:
 	void MoveRight(float Value);
 	void MoveForward(float Value);
+	void CreateDynamicAnimationMaterials();
 
+	UPROPERTY(EditAnywhere)
+	TMap<FPlayerAnimation, UMaterial*> AnimationMaterialList;	// List of materials for each animation, exposed in the
+																// editor to be populated by a designer. Used to
+																// populate dynamic versions of those materials in
+																// 'SpriteAnimations'.
+	FSpriteAnimDetails* CurrentAnimation;
+	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class UBoxComponent* BoxColliderComponent;
@@ -72,5 +94,6 @@ public:
 
 	AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
 
-	FPlayerAnimation CurrentAnimation;
+private:
+	TMap<FPlayerAnimation, FSpriteAnimDetails> SpriteAnimations;	// Collection of sprite animations w/ metadata.
 };

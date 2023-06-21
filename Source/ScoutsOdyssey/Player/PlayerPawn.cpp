@@ -83,6 +83,27 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerPawn::MoveForward);
 }
 
+void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
+{
+	// Change animation material instance, if one exists:
+	if (!SpriteAnimations.Contains(NewAnimation))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red,
+			FString("ERROR: No material registered for ") + UEnum::GetValueAsString(NewAnimation)));
+		
+		// Default to IDLE animation if no material exists for the requested animation state:
+		CurrentAnimation = SpriteAnimations.Find(FPlayerAnimation::IDLE);
+		MeshComponent->SetMaterial(0, CurrentAnimation->AnimationMaterial);
+		return;
+	}
+
+	CurrentAnimation = SpriteAnimations.Find(NewAnimation);
+	MeshComponent->SetMaterial(0, CurrentAnimation->AnimationMaterial);
+
+	// TODO: If there's additional logic for playing back certain animations (e.g. only playing an animation once
+	// before reverting to the previous one), put it here!
+}
+
 void APlayerPawn::MoveRight(float Value)
 {
 	const float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(this);
@@ -95,4 +116,22 @@ void APlayerPawn::MoveForward(float Value)
 	const float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(this);
 	const FVector NewLocation = GetActorLocation() + FVector(HoriMoveSpeed * Value * DeltaTime, 0.0f, 0.0f);
 	SetActorLocation(NewLocation);
+}
+
+void APlayerPawn::CreateDynamicAnimationMaterials()
+{
+	for (const auto& AnimMaterial : AnimationMaterialList)
+	{
+		UMaterialInterface* MaterialInterface = AnimMaterial.Value;
+		UMaterialInstanceDynamic* NewDynamicMat = UMaterialInstanceDynamic::Create(MaterialInterface, this);
+		
+		// Log sprite animation details used in local animation timeline calculations:
+		FSpriteAnimDetails NewSpriteAnimDetails;
+		NewSpriteAnimDetails.AnimationMaterial = NewDynamicMat;
+		NewSpriteAnimDetails.DesiredFramerate = NewDynamicMat->K2_GetScalarParameterValue("DesiredFramerate");
+		NewSpriteAnimDetails.NumColumns = NewDynamicMat->K2_GetScalarParameterValue("NumSpritesheetColumns");
+		NewSpriteAnimDetails.NumRows =	NewDynamicMat->K2_GetScalarParameterValue("NumSpritesheetRows");
+		
+		SpriteAnimations.Add(AnimMaterial.Key, NewSpriteAnimDetails);
+	}
 }
