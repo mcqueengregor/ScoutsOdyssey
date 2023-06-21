@@ -22,7 +22,8 @@ struct FSpriteAnimDetails
 	UMaterialInstanceDynamic* AnimationMaterial;
 	int32 NumRows;
 	int32 NumColumns;
-	int32 DesiredFramerate;
+	int32 NumEmptyFrames;
+	int32 PlaybackFramerate;
 };
 
 UCLASS()
@@ -49,15 +50,19 @@ public:
 		void ChangeAnimation(FPlayerAnimation NewAnimation);
 	
 protected:
+	// Action/axis methods:
 	void MoveRight(float Value);
 	void MoveForward(float Value);
+
+	// Animation methods:
 	void CreateDynamicAnimationMaterials();
+	void CalculateLocalAnimTime();
 
 	UPROPERTY(EditAnywhere)
-	TMap<FPlayerAnimation, UMaterial*> AnimationMaterialList;	// List of materials for each animation, exposed in the
-																// editor to be populated by a designer. Used to
-																// populate dynamic versions of those materials in
-																// 'SpriteAnimations'.
+	TMap<FPlayerAnimation, UMaterialInstance*> AnimationMaterialList;	// List of materials for each animation,
+																		// exposed in the editor to be populated by a
+																		// designer. Used to populate dynamic versions
+																		// of those materials in 'SpriteAnimations'.
 	FSpriteAnimDetails* CurrentAnimation;
 	
 public:

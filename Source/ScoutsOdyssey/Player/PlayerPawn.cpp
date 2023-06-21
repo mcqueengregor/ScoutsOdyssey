@@ -1,9 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerPawn.h"
+
+#include <string>
+
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Interfaces/IPluginManager.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -25,7 +29,7 @@ APlayerPawn::APlayerPawn()
 	BoxColliderComponent->SetupAttachment(GetRootComponent());
 
 	static ConstructorHelpers::FObjectFinder<UMaterial>
-		Material(TEXT("Material'/Game/Art/MeshMaterials/M_ScoutBase.M_ScoutBase'"));
+		Material(TEXT("Material'/Game/Art/MeshMaterials/CharacterMaterials/M_ScoutAnimBase.M_ScoutAnimBase'"));
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh component"));
 	MeshComponent->SetStaticMesh(PlaneMesh.Object);
@@ -60,6 +64,8 @@ void APlayerPawn::BeginPlay()
 	UMaterialInterface* mat = MeshComponent->GetMaterial(0);
 	DynamicMaterial = UMaterialInstanceDynamic::Create(mat, this);
 	MeshComponent->SetMaterial(0, DynamicMaterial);
+
+	CreateDynamicAnimationMaterials();
 }
 
 // Called every frame
@@ -67,13 +73,10 @@ void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	const float CurrentTimeSecs = UGameplayStatics::GetTimeSeconds(GetWorld()) * 5.0f;
+	CalculateLocalAnimTime();
 	
-	// Pulse material emission over time:
-	DynamicMaterial->SetScalarParameterValue("EmissiveStrength",
-		(FMath::Sin(CurrentTimeSecs) * 0.5f + 0.5f) * 10.0f);
 }
-
+		
 // Called to bind functionality to input
 void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -89,7 +92,7 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 	if (!SpriteAnimations.Contains(NewAnimation))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red,
-			FString("ERROR: No material registered for ") + UEnum::GetValueAsString(NewAnimation)));
+			FString("ERROR: No material registered for ") + UEnum::GetValueAsString(NewAnimation));
 		
 		// Default to IDLE animation if no material exists for the requested animation state:
 		CurrentAnimation = SpriteAnimations.Find(FPlayerAnimation::IDLE);
@@ -128,10 +131,37 @@ void APlayerPawn::CreateDynamicAnimationMaterials()
 		// Log sprite animation details used in local animation timeline calculations:
 		FSpriteAnimDetails NewSpriteAnimDetails;
 		NewSpriteAnimDetails.AnimationMaterial = NewDynamicMat;
-		NewSpriteAnimDetails.DesiredFramerate = NewDynamicMat->K2_GetScalarParameterValue("DesiredFramerate");
+		NewSpriteAnimDetails.PlaybackFramerate = NewDynamicMat->K2_GetScalarParameterValue("PlaybackFramerate");
 		NewSpriteAnimDetails.NumColumns = NewDynamicMat->K2_GetScalarParameterValue("NumSpritesheetColumns");
-		NewSpriteAnimDetails.NumRows =	NewDynamicMat->K2_GetScalarParameterValue("NumSpritesheetRows");
+		NewSpriteAnimDetails.NumRows = NewDynamicMat->K2_GetScalarParameterValue("NumSpritesheetRows");
+		NewSpriteAnimDetails.NumEmptyFrames = NewDynamicMat->K2_GetScalarParameterValue("NumEmptyFrames"); 
+		
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,FString::Printf(TEXT("%i, %i, %i"),
+				NewSpriteAnimDetails.PlaybackFramerate, NewSpriteAnimDetails.NumColumns, NewSpriteAnimDetails.NumColumns));
 		
 		SpriteAnimations.Add(AnimMaterial.Key, NewSpriteAnimDetails);
 	}
+
+	CurrentAnimation = SpriteAnimations.Find(FPlayerAnimation::IDLE);
+	MeshComponent->SetMaterial(0, CurrentAnimation->AnimationMaterial);
+	
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
+		FString::Printf(TEXT("Created %i dynamic material instances!"), SpriteAnimations.Num()));
 }
+
+void APlayerPawn::CalculateLocalAnimTime()
+{
+	const float CurrentGameTime = UGameplayStatics::GetTimeSeconds(GetWorld());
+	const int32 NumSpriteCells = CurrentAnimation->NumColumns * CurrentAnimation->NumRows;
+	const int32 NumSprites = NumSpriteCells - CurrentAnimation->NumEmptyFrames;
+
+	// Calculate normalised local animation time, adjust for empty frames in spritesheet:
+	float LocalTimeNorm = (CurrentAnimation->PlaybackFramerate / static_cast<float>(NumSpriteCells)) * CurrentGameTime;
+	float AdjustedLocalTimeNorm = FGenericPlatformMath::Fmod(LocalTimeNorm, NumSprites / static_cast<float>(NumSpriteCells));
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Emerald, FString::Printf(TEXT("%f"), AdjustedLocalTimeNorm));
+	
+	if (CurrentAnimation)
+		CurrentAnimation->AnimationMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", AdjustedLocalTimeNorm);
+}
+
