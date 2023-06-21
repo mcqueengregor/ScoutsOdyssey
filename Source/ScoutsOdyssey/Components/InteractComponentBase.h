@@ -26,5 +26,5 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// TODO: Replace data type of ItemType with whatever class the items become!
-	virtual void OnInteractWithItem(int32 ItemType, APlayerPawn* PlayerRef) { };
+	virtual void OnInteractWithItem(int32 ItemType, APlayerPawn* PlayerRef) PURE_VIRTUAL(UInteractComponentBase::OnInteractWithItem,);
 };

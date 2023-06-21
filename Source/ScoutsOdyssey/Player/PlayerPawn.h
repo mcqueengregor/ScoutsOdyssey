@@ -7,6 +7,13 @@
 #include "GameFramework/Pawn.h"
 #include "PlayerPawn.generated.h"
 
+UENUM(BlueprintType)
+enum class FPlayerAnimation : uint8
+{
+	IDLE = 0 UMETA(DisplayName = "Idle animation"),
+	WALK = 1 UMETA(DisplayName = "Walk animation"),
+};
+
 UCLASS()
 class SCOUTSODYSSEY_API APlayerPawn : public APawn
 {
@@ -64,4 +71,6 @@ public:
 																			// the current camera angle to use.
 
 	AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
+
+	FPlayerAnimation CurrentAnimation;
 };
