@@ -101,4 +101,8 @@ public:
 
 private:
 	TMap<FPlayerAnimation, FSpriteAnimDetails> SpriteAnimations;	// Collection of sprite animations w/ metadata.
+
+	FVector MovementDirection;	// Direction the player will move on the current frame, in Unreal units.
+	FVector OriginalMeshScale;	// The scale of 'MeshComponont' when BeginPlay is triggered.
+	float CurrentGameTime;	// The amount of time that has passed since the game started, in seconds.
 };

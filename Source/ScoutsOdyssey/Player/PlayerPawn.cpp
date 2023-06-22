@@ -66,15 +66,33 @@ void APlayerPawn::BeginPlay()
 	MeshComponent->SetMaterial(0, DynamicMaterial);
 
 	CreateDynamicAnimationMaterials();
+
+	CurrentGameTime = 0.0f;
+	OriginalMeshScale = MeshComponent->GetComponentScale();
 }
 
 // Called every frame
 void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	CurrentGameTime += DeltaTime;
+	
 	CalculateLocalAnimTime();
 	
+	// Update animation based on this frame's movement vector:
+	if (MovementDirection.IsNearlyZero())
+		ChangeAnimation(FPlayerAnimation::IDLE);
+	else
+	{
+		FVector NewLocation = GetActorLocation() + MovementDirection * DeltaTime;
+		SetActorLocation(NewLocation);
+		ChangeAnimation(FPlayerAnimation::WALK);
+
+		// Flip sprite mesh based on horizontal movement direction:
+		FVector NewScale = OriginalMeshScale;
+		NewScale.Y *= MovementDirection.Y < 0 ? -1.0f : 1.0f;
+		MeshComponent->SetWorldScale3D(NewScale);
+	}
 }
 		
 // Called to bind functionality to input
@@ -109,16 +127,12 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 
 void APlayerPawn::MoveRight(float Value)
 {
-	const float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(this);
-	const FVector NewLocation = GetActorLocation() + FVector(0.0f, HoriMoveSpeed * Value * DeltaTime, 0.0f);
-	SetActorLocation(NewLocation);
+	MovementDirection.Y = FMath::Clamp(Value, -1.0f, 1.0f) * HoriMoveSpeed;
 }
 
 void APlayerPawn::MoveForward(float Value)
 {
-	const float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(this);
-	const FVector NewLocation = GetActorLocation() + FVector(HoriMoveSpeed * Value * DeltaTime, 0.0f, 0.0f);
-	SetActorLocation(NewLocation);
+	MovementDirection.X = FMath::Clamp(Value, -1.0f, 1.0f) * VertMoveSpeed;
 }
 
 void APlayerPawn::CreateDynamicAnimationMaterials()
@@ -151,7 +165,6 @@ void APlayerPawn::CreateDynamicAnimationMaterials()
 
 void APlayerPawn::CalculateLocalAnimTime()
 {
-	const float CurrentGameTime = UGameplayStatics::GetTimeSeconds(GetWorld());
 	const int32 NumSpriteCells = CurrentAnimation->NumColumns * CurrentAnimation->NumRows;
 	const int32 NumSprites = NumSpriteCells - CurrentAnimation->NumEmptyFrames;
 
@@ -164,4 +177,3 @@ void APlayerPawn::CalculateLocalAnimTime()
 	if (CurrentAnimation)
 		CurrentAnimation->AnimationMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", AdjustedLocalTimeNorm);
 }
-
