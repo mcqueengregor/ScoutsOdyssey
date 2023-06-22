@@ -24,6 +24,7 @@ struct FSpriteAnimDetails
 	int32 NumColumns;
 	int32 NumEmptyFrames;
 	int32 PlaybackFramerate;
+	FPlayerAnimation AnimationType;
 };
 
 UCLASS()

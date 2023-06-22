@@ -79,6 +79,8 @@ void APlayerPawn::Tick(float DeltaTime)
 	
 	CalculateLocalAnimTime();
 	
+	UE_LOG(LogTemp, Warning, TEXT("Moving player..."));
+	
 	// Update animation based on this frame's movement vector:
 	if (MovementDirection.IsNearlyZero())
 		ChangeAnimation(FPlayerAnimation::IDLE);
@@ -87,12 +89,16 @@ void APlayerPawn::Tick(float DeltaTime)
 		FVector NewLocation = GetActorLocation() + MovementDirection * DeltaTime;
 		SetActorLocation(NewLocation);
 		ChangeAnimation(FPlayerAnimation::WALK);
-
+		
 		// Flip sprite mesh based on horizontal movement direction:
 		FVector NewScale = OriginalMeshScale;
-		NewScale.Y *= MovementDirection.Y < 0 ? -1.0f : 1.0f;
+		NewScale.X *= MovementDirection.Y < 0 ? -OriginalMeshScale.X : OriginalMeshScale.X;
 		MeshComponent->SetWorldScale3D(NewScale);
 	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Move direction: %s"), *MovementDirection.ToString());
+	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::White,
+		MeshComponent->GetComponentScale().ToCompactString());
 }
 		
 // Called to bind functionality to input
@@ -118,9 +124,13 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 		return;
 	}
 
-	CurrentAnimation = SpriteAnimations.Find(NewAnimation);
-	MeshComponent->SetMaterial(0, CurrentAnimation->AnimationMaterial);
-
+	// If the animation set to play on this frame is different from the currently-used one, update material:
+	if (NewAnimation != CurrentAnimation->AnimationType)
+	{
+		CurrentAnimation = SpriteAnimations.Find(NewAnimation);
+		MeshComponent->SetMaterial(0, CurrentAnimation->AnimationMaterial);
+	}
+	
 	// TODO: If there's additional logic for playing back certain animations (e.g. only playing an animation once
 	// before reverting to the previous one), put it here!
 }
@@ -149,6 +159,7 @@ void APlayerPawn::CreateDynamicAnimationMaterials()
 		NewSpriteAnimDetails.NumColumns = NewDynamicMat->K2_GetScalarParameterValue("NumSpritesheetColumns");
 		NewSpriteAnimDetails.NumRows = NewDynamicMat->K2_GetScalarParameterValue("NumSpritesheetRows");
 		NewSpriteAnimDetails.NumEmptyFrames = NewDynamicMat->K2_GetScalarParameterValue("NumEmptyFrames"); 
+		NewSpriteAnimDetails.AnimationType = AnimMaterial.Key;
 		
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,FString::Printf(TEXT("%i, %i, %i"),
 				NewSpriteAnimDetails.PlaybackFramerate, NewSpriteAnimDetails.NumColumns, NewSpriteAnimDetails.NumColumns));
@@ -170,9 +181,7 @@ void APlayerPawn::CalculateLocalAnimTime()
 
 	// Calculate normalised local animation time, adjust for empty frames in spritesheet:
 	float LocalTimeNorm = (CurrentAnimation->PlaybackFramerate / static_cast<float>(NumSpriteCells)) * CurrentGameTime;
-	float AdjustedLocalTimeNorm = FGenericPlatformMath::Fmod(LocalTimeNorm, NumSprites / static_cast<float>(NumSpriteCells));
-
-	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Emerald, FString::Printf(TEXT("%f"), AdjustedLocalTimeNorm));
+	float AdjustedLocalTimeNorm = FGenericPlatformMath::Fmod(LocalTimeNorm, FMath::Max(NumSprites / static_cast<float>(NumSpriteCells), 1e-5f));
 	
 	if (CurrentAnimation)
 		CurrentAnimation->AnimationMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", AdjustedLocalTimeNorm);
