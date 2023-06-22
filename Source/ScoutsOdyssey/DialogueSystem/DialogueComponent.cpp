@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
 #include "DialogueChoiceObject.h"
+#include "DialogueMeshActor.h"
 #include "Blueprint/UserWidget.h"
 #include "SpeechBubbleUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -26,29 +27,12 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 
 	Widget_SetUp();
 	Delegate_SetUp();
-	BehaviorTree_SetUp();
 }
-
 
 void UDialogueComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	MyPlayerController = Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-	// Spawn AI Controller 
-	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
-	Clickable_SetUp();
-}
-
-void UDialogueComponent::Clickable_SetUp()
-{
-	UStaticMeshComponent* OwnerMesh = Cast<UStaticMeshComponent>(GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-	if(OwnerMesh)
-	{
-		OwnerMesh->OnClicked.AddDynamic(this, &UDialogueComponent::Click_Implementation);	
-	} else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("cast failed!"));	
-	}	
+	
 }
 
 void UDialogueComponent::Widget_SetUp()
@@ -68,26 +52,6 @@ void UDialogueComponent::Widget_SetUp()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Speech Bubble Assets not assigned!"));
 	}
-}
-
-void UDialogueComponent::BehaviorTree_SetUp()
-{
-	if(AIController)
-	{
-		AIController->RunBehaviorTree(DialogueTree);
-		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
-		if(Blackboard)
-		{
-			Blackboard->SetValueAsObject("DialogueComponent", this);
-		} else
-		{
-			UE_LOG(LogTemp, Error, TEXT("BlackBoardComponent is not assigned in AIController!"));	
-		}	
-	} else
-	{
-		UE_LOG(LogTemp, Error, TEXT("AI Controller was not constructed For Dialogue Tree!"));		
-	}
-
 }
 
 void UDialogueComponent::Delegate_SetUp()
@@ -113,21 +77,22 @@ void UDialogueComponent::ChoiceFinish(const int ReplyIndex)
 	OnChoiceFinish.Broadcast(ReplyIndex);	
 }
 
-
 void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 {
+	ADialogueMeshActor* Owner = Cast<ADialogueMeshActor>(GetOwner());
+	
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
 		switch (Bubble)
 		{
 		case EBubble::One:
-			BubbleOne->SetPositionInViewport(MyPlayerController->GetPlayerScreenCoordinate(BubbleOneOffSet));
+			BubbleOne->SetPositionInViewport(Owner->MyPlayerController->GetPlayerScreenCoordinate(BubbleOneOffSet));
 			BubbleOne->SetVisibility(ESlateVisibility::Visible);
 			BubbleTwo->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
 			break;
 		case EBubble::Two:
-			BubbleTwo->SetPositionInViewport(MyPlayerController->GetActorScreenCoordinate(*GetOwner(), BubbleTwoOffSet));	
+			BubbleTwo->SetPositionInViewport(Owner->MyPlayerController->GetActorScreenCoordinate(*GetOwner(), BubbleTwoOffSet));	
 			BubbleOne->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleTwo->SetVisibility(ESlateVisibility::Visible);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
@@ -240,9 +205,11 @@ void UDialogueComponent::Choice(TArray<FText>& Choices)
 
 void UDialogueComponent::DialogueEnd_CleanUp() const
 {
+	ADialogueMeshActor* Owner = Cast<ADialogueMeshActor>(GetOwner());
+	
 	// Stop BehaviorTree
-	 if(AIController)
-	 	AIController->GetBrainComponent()->StopLogic("Dialogue End Clean Up");
+	 if(Owner->AIController)
+	 	Owner->AIController->GetBrainComponent()->StopLogic("Dialogue End Clean Up");
 	 else
 	 	UE_LOG(LogTemp, Error, TEXT("Failed to Clean Up AI Controller! NullPointer!"));	
 	

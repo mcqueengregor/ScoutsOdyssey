@@ -26,18 +26,21 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UFUNCTION()
-	virtual void Click_Implementation(UPrimitiveComponent* TouchedComponent ,FKey ButtonPressed) override;
+	virtual void Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) override;
 
 	// Widgets
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> PlayerSpeechBubble_WidgetAsset;
 	class USpeechBubbleUserWidget* BubbleOne;
+	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NPCSpeechBubble_WidgetAsset;
 	class USpeechBubbleUserWidget* BubbleTwo;
+	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NarratorSpeechBubble_WidgetAsset;
 	class USpeechBubbleUserWidget* BubbleNarrator;
+	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	FVector2D BubbleOneOffSet;
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
@@ -60,6 +63,7 @@ public:
 	FOnSpeakFinish OnSpeakFinish;
 	FOnChoiceFinish OnChoiceFinish;
 	FOnDialogueEnd OnDialogueEnd;
+	
 	void SpeakFinish() const;
 	UFUNCTION()
 	void ChoiceFinish(const int ReplyIndex);
@@ -69,15 +73,10 @@ protected:
 
 private:
 	// SetUp Methods
-	void Clickable_SetUp();
 	void Widget_SetUp();
-	void BehaviorTree_SetUp();
 	void Delegate_SetUp();
 
 	void DialogueEnd_CleanUp() const;
-	
-	class AMyPlayerController* MyPlayerController;
-	class AAIController* AIController;
 };
 
 
