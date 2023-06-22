@@ -27,6 +27,7 @@ public:
 	class AMyPlayerController* MyPlayerController;
 	class AAIController* AIController;
 
-	void BehaviorTree_SetUp();
+	UFUNCTION()
+	void BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
 	void Clickable_SetUp();
 };

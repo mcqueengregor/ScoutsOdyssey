@@ -25,7 +25,7 @@ void ADialogueMeshActor::BeginPlay()
 	Clickable_SetUp();
 }
 
-void ADialogueMeshActor::BehaviorTree_SetUp()
+void ADialogueMeshActor::BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
 {
 	if(AIController)
 	{		
@@ -58,7 +58,10 @@ void ADialogueMeshActor::Clickable_SetUp()
 		Cast<UStaticMeshComponent>(GetComponentByClass(UStaticMeshComponent::StaticClass()));
 	
 	if (DialogueComponent && MyStaticMeshComponent)
+	{
 		MyStaticMeshComponent->OnClicked.AddDynamic(DialogueComponent, &UDialogueComponent::Click_Implementation);
+		MyStaticMeshComponent->OnClicked.AddDynamic(this, &ADialogueMeshActor::BehaviorTree_Start);
+	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Dialogue mesh actor OnClicked delegate wasn't set up (DialogueComponent was nullptr)"));
