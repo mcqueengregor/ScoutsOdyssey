@@ -39,6 +39,7 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NarratorSpeechBubble_WidgetAsset;
+	class USpeechBubbleUserWidget* BubbleNarrator;
 	UPROPERTY(EditAnywhere, Category=Widgets)
 	FVector2D BubbleOneOffSet;
 	UPROPERTY(EditAnywhere, Category=Widgets)

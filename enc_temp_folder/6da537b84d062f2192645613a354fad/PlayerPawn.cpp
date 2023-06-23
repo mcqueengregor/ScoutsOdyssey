@@ -199,7 +199,7 @@ void APlayerPawn::TempCreateDynamicMaterial()
 	UberSpriteAnimDetails.WalkNumColumns = NewMat->K2_GetScalarParameterValue("WalkNumSpritesheetColumns");
 	UberSpriteAnimDetails.IdleNumEmptyFrames = 1;
 	UberSpriteAnimDetails.WalkNumEmptyFrames = 0;
-	UberSpriteAnimDetails.PlaybackFramerate = 10;
+	UberSpriteAnimDetails.PlaybackFramerate = 3;
 
 	TempCurrentAnimation = FPlayerAnimation::IDLE;
 	const int32 EnumAsInt = static_cast<int32>(TempCurrentAnimation);

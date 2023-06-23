@@ -30,7 +30,8 @@ void UTreeInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UTreeInteractComponent::OnInteractWithItem(int32 ItemType, APlayerPawn* PlayerRef)
 {
-
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
+		FString("TreeInteractComponent::OnInteractWithItem working!"));
 }
 
 void UTreeInteractComponent::DoTask()

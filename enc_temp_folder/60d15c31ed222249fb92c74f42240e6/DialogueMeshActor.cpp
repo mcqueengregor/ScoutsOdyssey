@@ -32,6 +32,8 @@ void ADialogueMeshActor::BeginPlay()
 		GetStaticMeshComponent()->GetMaterial(0), this);
 	
 	GetStaticMeshComponent()->SetMaterial(0, DynamicAnimMaterial);
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green,
+		UKismetSystemLibrary::GetDisplayName(DynamicAnimMaterial));
 }
 
 void ADialogueMeshActor::Tick(float DeltaSeconds)
@@ -41,6 +43,9 @@ void ADialogueMeshActor::Tick(float DeltaSeconds)
 	// TODO: Extend this to choose animation transition duration!
 	LocalAnimTime += bAnimFlipFlop ? DeltaSeconds : -DeltaSeconds;
 	LocalAnimTime = FMath::Clamp(LocalAnimTime, 0.0f, 1.0f);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Blue,
+FString::Printf(TEXT("%f"), LocalAnimTime));
 	
 	if (DynamicAnimMaterial)
 		DynamicAnimMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", LocalAnimTime);
