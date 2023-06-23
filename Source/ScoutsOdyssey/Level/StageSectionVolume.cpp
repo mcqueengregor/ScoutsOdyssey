@@ -110,8 +110,8 @@ void AStageSectionVolume::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherAct
 		if (bLeftLastEnteredSection)
 		{
 			APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-			PlayerController->SetViewTarget(Pawn->OverlappedStageSections.GetHead()->GetValue(), GetCameraTransitionParams(Pawn));
-			Pawn->LastEnteredSection = Pawn->OverlappedStageSections.GetHead()->GetValue();
+			PlayerController->SetViewTarget(Pawn->OverlappedStageSections.GetTail()->GetValue(), GetCameraTransitionParams(Pawn));
+			Pawn->LastEnteredSection = Pawn->OverlappedStageSections.GetTail()->GetValue();
 		}
 		Pawn->OverlappedStageSections.RemoveNode(SectionToForget);
 	}
