@@ -96,8 +96,6 @@ void APlayerPawn::Tick(float DeltaTime)
 	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("Move direction: %s"), *MovementDirection.ToString());
-	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::White,
-		MeshComponent->GetComponentScale().ToCompactString());
 }
 		
 // Called to bind functionality to input
@@ -243,9 +241,6 @@ void APlayerPawn::TempCalculateLocalAnimTime()
 	float LocalTimeNorm = (UberSpriteAnimDetails.PlaybackFramerate / static_cast<float>(NumSpriteCells)) * CurrentGameTime;
 	float AdjustedLocalTimeNorm = FGenericPlatformMath::Fmod(LocalTimeNorm,
 		FMath::Max(NumSprites / static_cast<float>(NumSpriteCells), 1e-5f));
-
-	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green,
-		FString::Printf(TEXT("%f"), AdjustedLocalTimeNorm));
 	
 	UberSpriteAnimDetails.AnimationMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", AdjustedLocalTimeNorm);
 }

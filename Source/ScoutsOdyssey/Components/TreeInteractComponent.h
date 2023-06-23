@@ -25,6 +25,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void OnInteractWithItem(int32 ItemType, APlayerPawn* PlayerRef) override;
 
-	UPROPERTY(EditAnywhere)
-	float TestValue;
+	UFUNCTION(BlueprintCallable)
+	virtual void DoTask() override;
 };

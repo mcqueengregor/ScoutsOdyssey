@@ -14,6 +14,7 @@
 #include "Components/Overlay.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/Components/InteractComponentBase.h"
 
 void ADialogueMeshActor::BeginPlay()
 {
@@ -23,6 +24,31 @@ void ADialogueMeshActor::BeginPlay()
 	// Spawn AI Controller 
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
 	Clickable_SetUp();
+
+	LocalAnimTime = 0.0f;
+	bAnimFlipFlop = true;
+	
+	DynamicAnimMaterial = UMaterialInstanceDynamic::Create(
+		GetStaticMeshComponent()->GetMaterial(0), this);
+	
+	GetStaticMeshComponent()->SetMaterial(0, DynamicAnimMaterial);
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green,
+		UKismetSystemLibrary::GetDisplayName(DynamicAnimMaterial));
+}
+
+void ADialogueMeshActor::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// TODO: Extend this to choose animation transition duration!
+	LocalAnimTime += bAnimFlipFlop ? DeltaSeconds : -DeltaSeconds;
+	LocalAnimTime = FMath::Clamp(LocalAnimTime, 0.0f, 1.0f);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Blue,
+FString::Printf(TEXT("%f"), LocalAnimTime));
+	
+	if (DynamicAnimMaterial)
+		DynamicAnimMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", LocalAnimTime);
 }
 
 void ADialogueMeshActor::BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
@@ -38,11 +64,21 @@ void ADialogueMeshActor::BehaviorTree_Start(UPrimitiveComponent* TouchedComponen
 			if (DialogueComponent)
 			{
 				Blackboard->SetValueAsObject("DialogueComponent", DialogueComponent);
+				UE_LOG(LogTemp, Warning, TEXT("Registered dialogue component reference in blackboard!"));
+			}
+
+			UInteractComponentBase* InteractComponent =
+				Cast<UInteractComponentBase>(GetComponentByClass(UInteractComponentBase::StaticClass()));
+
+			if (InteractComponent)
+			{
+				Blackboard->SetValueAsObject("InteractComponent", InteractComponent);
+				UE_LOG(LogTemp, Warning, TEXT("Registered interaction component reference in blackboard!"));
 			}
 		} else
 		{
 			UE_LOG(LogTemp, Error, TEXT("BlackBoardComponent is not assigned in AIController!"));	
-		}	
+		}
 	} else
 	{
 		UE_LOG(LogTemp, Error, TEXT("AI Controller was not constructed For Dialogue Tree!"));		
@@ -66,4 +102,9 @@ void ADialogueMeshActor::Clickable_SetUp()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Dialogue mesh actor OnClicked delegate wasn't set up (DialogueComponent was nullptr)"));
 	}
+}
+
+void ADialogueMeshActor::ToggleAnimation()
+{
+	bAnimFlipFlop = !bAnimFlipFlop;
 }

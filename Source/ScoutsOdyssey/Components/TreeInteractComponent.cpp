@@ -3,27 +3,48 @@
 
 #include "TreeInteractComponent.h"
 
+#include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
+
 UTreeInteractComponent::UTreeInteractComponent()
 {
-	TestValue = 50.0f;
+	
 }
 
 void UTreeInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-		FString("Working!"));
+	
 }
 
 void UTreeInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
+	if (OwnerActor)
+	{
+		OwnerActor->Tick(DeltaTime);
+	}
 }
 
 void UTreeInteractComponent::OnInteractWithItem(int32 ItemType, APlayerPawn* PlayerRef)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-		FString("OnInteractWithItem working!"));
+		FString("TreeInteractComponent::OnInteractWithItem working!"));
+}
+
+void UTreeInteractComponent::DoTask()
+{
+	ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
+	
+	if (OwnerActor)
+	{
+		OwnerActor->ToggleAnimation();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning,
+			TEXT("TreeInteractComponent couldn't get reference to owning DialogueMeshActor!"));
+	}
 }
