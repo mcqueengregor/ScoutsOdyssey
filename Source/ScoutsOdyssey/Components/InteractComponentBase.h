@@ -28,5 +28,6 @@ public:
 	// TODO: Replace data type of ItemType with whatever class the items become!
 	virtual void OnInteractWithItem(int32 ItemType, APlayerPawn* PlayerRef) PURE_VIRTUAL(UInteractComponentBase::OnInteractWithItem,);
 
+	UFUNCTION(BlueprintCallable)
 	virtual void DoTask() PURE_VIRTUAL(UInteractComponentBase::DoTask,);
 };
