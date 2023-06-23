@@ -27,6 +27,21 @@ struct FSpriteAnimDetails
 	FPlayerAnimation AnimationType;
 };
 
+USTRUCT()
+struct FUberSpriteAnimDetails
+{
+	GENERATED_BODY()
+
+	UMaterialInstanceDynamic* AnimationMaterial;
+	int32 IdleNumRows;
+	int32 IdleNumColumns;
+	int32 IdleNumEmptyFrames;
+	int32 WalkNumRows;
+	int32 WalkNumColumns;
+	int32 WalkNumEmptyFrames;
+	int32 PlaybackFramerate;
+};
+
 UCLASS()
 class SCOUTSODYSSEY_API APlayerPawn : public APawn
 {
@@ -87,8 +102,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float CameraTransitionDuration;	// The amount of time a camera angle transition takes, in seconds.
-
-	UMaterialInstanceDynamic* DynamicMaterial;
 	
 	bool bHasCameraAngleChangedAlready;	// Whether or not the camera component has changed location already.
 										// Set to 'false' on first frame of gameplay which triggers instant location
@@ -104,6 +117,15 @@ private:
 	TMap<FPlayerAnimation, FSpriteAnimDetails> SpriteAnimations;	// Collection of sprite animations w/ metadata.
 
 	FVector MovementDirection;	// Direction the player will move on the current frame, in Unreal units.
-	FVector OriginalMeshScale;	// The scale of 'MeshComponont' when BeginPlay is triggered.
+	FVector OriginalMeshScale;	// The scale of 'MeshComponent' when BeginPlay is triggered.
 	float CurrentGameTime;	// The amount of time that has passed since the game started, in seconds.
+
+	// TEMPORARY MATERIAL FIX DATA:
+	void TempCreateDynamicMaterial();
+	void TempChangeAnimation(FPlayerAnimation NewAnimation);
+	void TempCalculateLocalAnimTime();
+	UPROPERTY(EditAnywhere)
+		class UMaterial* UberAnimMaterial;
+	FUberSpriteAnimDetails UberSpriteAnimDetails;
+	FPlayerAnimation TempCurrentAnimation;
 };

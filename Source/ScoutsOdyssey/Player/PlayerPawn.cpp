@@ -60,12 +60,8 @@ void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Setup dynamic material instance:
-	UMaterialInterface* mat = MeshComponent->GetMaterial(0);
-	DynamicMaterial = UMaterialInstanceDynamic::Create(mat, this);
-	MeshComponent->SetMaterial(0, DynamicMaterial);
-
-	CreateDynamicAnimationMaterials();
+	// Setup dynamic material instances:
+	TempCreateDynamicMaterial();
 
 	CurrentGameTime = 0.0f;
 	OriginalMeshScale = MeshComponent->GetComponentScale();
@@ -77,23 +73,26 @@ void APlayerPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	CurrentGameTime += DeltaTime;
 	
-	CalculateLocalAnimTime();
+	TempCalculateLocalAnimTime();
 	
 	UE_LOG(LogTemp, Warning, TEXT("Moving player..."));
 	
 	// Update animation based on this frame's movement vector:
 	if (MovementDirection.IsNearlyZero())
-		ChangeAnimation(FPlayerAnimation::IDLE);
+		TempChangeAnimation(FPlayerAnimation::IDLE);
 	else
 	{
 		FVector NewLocation = GetActorLocation() + MovementDirection * DeltaTime;
 		SetActorLocation(NewLocation);
-		ChangeAnimation(FPlayerAnimation::WALK);
+		TempChangeAnimation(FPlayerAnimation::WALK);
 		
 		// Flip sprite mesh based on horizontal movement direction:
 		FVector NewScale = OriginalMeshScale;
 		NewScale.X *= MovementDirection.Y < 0 ? -OriginalMeshScale.X : OriginalMeshScale.X;
-		MeshComponent->SetWorldScale3D(NewScale);
+		MeshComponent->SetRelativeScale3D(FVector(
+			MovementDirection.Y < 0 ? -OriginalMeshScale.X : OriginalMeshScale.X,
+			OriginalMeshScale.Y,
+			OriginalMeshScale.Z));
 	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("Move direction: %s"), *MovementDirection.ToString());
@@ -185,4 +184,68 @@ void APlayerPawn::CalculateLocalAnimTime()
 	
 	if (CurrentAnimation)
 		CurrentAnimation->AnimationMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", AdjustedLocalTimeNorm);
+}
+
+// TEMPORARY FUNCTIONS: ------------------------------------------------------------------------------------------------
+void APlayerPawn::TempCreateDynamicMaterial()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Using temp anim init!"));
+	
+	if (UberAnimMaterial)
+		UberSpriteAnimDetails.AnimationMaterial = UMaterialInstanceDynamic::Create(UberAnimMaterial, this);
+
+	UMaterialInstanceDynamic* NewMat = UberSpriteAnimDetails.AnimationMaterial;
+	UberSpriteAnimDetails.IdleNumRows = 2;
+	UberSpriteAnimDetails.IdleNumColumns = 2;
+	UberSpriteAnimDetails.WalkNumRows = NewMat->K2_GetScalarParameterValue("WalkNumSpritesheetRows");
+	UberSpriteAnimDetails.WalkNumColumns = NewMat->K2_GetScalarParameterValue("WalkNumSpritesheetColumns");
+	UberSpriteAnimDetails.IdleNumEmptyFrames = 1;
+	UberSpriteAnimDetails.WalkNumEmptyFrames = 0;
+	UberSpriteAnimDetails.PlaybackFramerate = 3;
+
+	TempCurrentAnimation = FPlayerAnimation::IDLE;
+	const int32 EnumAsInt = static_cast<int32>(TempCurrentAnimation);
+	const float IntAsFloat = static_cast<float>(EnumAsInt);
+
+	MeshComponent->SetMaterial(0, UberSpriteAnimDetails.AnimationMaterial);
+	NewMat->SetScalarParameterValue("CurrentAnimIndex", IntAsFloat);
+}
+
+void APlayerPawn::TempChangeAnimation(FPlayerAnimation NewAnimation)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Using temp anim change!"));
+
+	const int32 EnumAsInt = static_cast<int32>(NewAnimation);
+	const float IntAsFloat = NewAnimation == FPlayerAnimation::IDLE ? 0.0f : 1.0f;
+	
+	UberSpriteAnimDetails.AnimationMaterial->SetScalarParameterValue("CurrentAnimIndex", IntAsFloat);
+	TempCurrentAnimation = NewAnimation;
+}
+
+void APlayerPawn::TempCalculateLocalAnimTime()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Using temp calculate local anim time!"));
+	
+	const int32 AnimNumRows = TempCurrentAnimation == FPlayerAnimation::IDLE ?
+		UberSpriteAnimDetails.IdleNumRows :
+		UberSpriteAnimDetails.WalkNumRows;
+	const int32 AnimNumColumns = TempCurrentAnimation == FPlayerAnimation::IDLE ?
+		UberSpriteAnimDetails.IdleNumColumns :
+		UberSpriteAnimDetails.WalkNumColumns;
+	const int32 AnimNumEmpty = TempCurrentAnimation == FPlayerAnimation::IDLE ?
+		UberSpriteAnimDetails.IdleNumEmptyFrames :
+		UberSpriteAnimDetails.WalkNumEmptyFrames;
+	
+	const int32 NumSpriteCells = AnimNumColumns * AnimNumRows;
+	const int32 NumSprites = NumSpriteCells - AnimNumEmpty;
+
+	// Calculate normalised local animation time, adjust for empty frames in spritesheet:
+	float LocalTimeNorm = (UberSpriteAnimDetails.PlaybackFramerate / static_cast<float>(NumSpriteCells)) * CurrentGameTime;
+	float AdjustedLocalTimeNorm = FGenericPlatformMath::Fmod(LocalTimeNorm,
+		FMath::Max(NumSprites / static_cast<float>(NumSpriteCells), 1e-5f));
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green,
+		FString::Printf(TEXT("%f"), AdjustedLocalTimeNorm));
+	
+	UberSpriteAnimDetails.AnimationMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", AdjustedLocalTimeNorm);
 }
