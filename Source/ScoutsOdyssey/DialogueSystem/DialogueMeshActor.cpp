@@ -24,9 +24,16 @@ void ADialogueMeshActor::BeginPlay()
 	// Spawn AI Controller 
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
 	Clickable_SetUp();
-
-	LocalAnimTime = 0.0f;
-	bAnimFlipFlop = true;
+	
+	if(PlayOnStart)
+	{
+		LocalAnimTime = 0.0f;
+		bAnimFlipFlop = true;	
+	} else
+	{
+		LocalAnimTime = 0.0f;
+		bAnimFlipFlop = false;
+	}
 	
 	DynamicAnimMaterial = UMaterialInstanceDynamic::Create(
 		GetStaticMeshComponent()->GetMaterial(0), this);
@@ -40,7 +47,7 @@ void ADialogueMeshActor::Tick(float DeltaSeconds)
 
 	// TODO: Extend this to choose animation transition duration!
 	LocalAnimTime += bAnimFlipFlop ? DeltaSeconds : -DeltaSeconds;
-	LocalAnimTime = FMath::Clamp(LocalAnimTime, 0.0f, 1.0f);
+	LocalAnimTime = FMath::Clamp(LocalAnimTime, 0.0f, 1.0f);	
 	
 	if (DynamicAnimMaterial)
 		DynamicAnimMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", LocalAnimTime);

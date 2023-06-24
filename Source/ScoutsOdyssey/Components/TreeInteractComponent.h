@@ -26,4 +26,5 @@ public:
 	virtual void OnInteractWithItem(int32 ItemType, APlayerPawn* PlayerRef) override;
 
 	virtual void DoTask() override;
+
 };

@@ -36,6 +36,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void ToggleAnimation();
 
+	UPROPERTY(EditAnywhere, Category=Interact)
+	bool PlayOnStart; 
+	
 private:
 	bool bAnimFlipFlop;	// When 'true' animation local time will increase from 0 to 1 (i.e. animation will play from
 						// start to end, then stop), when 'false' animation local time will go from 1 to 0 (i.e.
