@@ -8,7 +8,7 @@
 #include "InteractComponentBase.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Abstract )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Abstract)
 class SCOUTSODYSSEY_API UInteractComponentBase : public UActorComponent
 {
 	GENERATED_BODY()

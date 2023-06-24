@@ -75,7 +75,7 @@ void APlayerPawn::Tick(float DeltaTime)
 	
 	TempCalculateLocalAnimTime();
 	
-	UE_LOG(LogTemp, Warning, TEXT("Moving player..."));
+	// UE_LOG(LogTemp, Warning, TEXT("Moving player..."));
 	
 	// Update animation based on this frame's movement vector:
 	if (MovementDirection.IsNearlyZero())
@@ -95,7 +95,7 @@ void APlayerPawn::Tick(float DeltaTime)
 			OriginalMeshScale.Z));
 	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("Move direction: %s"), *MovementDirection.ToString());
+	// UE_LOG(LogTemp, Warning, TEXT("Move direction: %s"), *MovementDirection.ToString());
 }
 		
 // Called to bind functionality to input
@@ -211,7 +211,7 @@ void APlayerPawn::TempCreateDynamicMaterial()
 
 void APlayerPawn::TempChangeAnimation(FPlayerAnimation NewAnimation)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Using temp anim change!"));
+	// UE_LOG(LogTemp, Warning, TEXT("Using temp anim change!"));
 
 	const int32 EnumAsInt = static_cast<int32>(NewAnimation);
 	const float IntAsFloat = NewAnimation == FPlayerAnimation::IDLE ? 0.0f : 1.0f;
@@ -222,7 +222,7 @@ void APlayerPawn::TempChangeAnimation(FPlayerAnimation NewAnimation)
 
 void APlayerPawn::TempCalculateLocalAnimTime()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Using temp calculate local anim time!"));
+	// UE_LOG(LogTemp, Warning, TEXT("Using temp calculate local anim time!"));
 	
 	const int32 AnimNumRows = TempCurrentAnimation == FPlayerAnimation::IDLE ?
 		UberSpriteAnimDetails.IdleNumRows :

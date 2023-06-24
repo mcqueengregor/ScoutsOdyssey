@@ -67,7 +67,7 @@ void ADialogueMeshActor::BehaviorTree_Start(UPrimitiveComponent* TouchedComponen
 
 			if (InteractComponent)
 			{
-				Blackboard->SetValueAsObject("InteractComponent", InteractComponent);
+				Blackboard->SetValueAsObject("InteractionComponent", InteractComponent);
 				UE_LOG(LogTemp, Warning, TEXT("Registered interaction component reference in blackboard!"));
 			}
 		} else

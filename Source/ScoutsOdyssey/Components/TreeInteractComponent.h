@@ -25,6 +25,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void OnInteractWithItem(int32 ItemType, APlayerPawn* PlayerRef) override;
 
-	// UFUNCTION(BlueprintCallable)
 	virtual void DoTask() override;
 };
