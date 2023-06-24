@@ -80,9 +80,13 @@ void UDialogueComponent::ChoiceFinish(const int ReplyIndex)
 void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 {
 	ADialogueMeshActor* Owner = Cast<ADialogueMeshActor>(GetOwner());
-	
+		
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
+		const FVector2D ViewPortSize = AMyPlayerController::GetViewportSize();
+		const FVector2D BubbleOneOffSet = ViewPortSize * BubbleOneOffSet_PercentageViewPort;
+		const FVector2D BubbleTwoOffSet = ViewPortSize * BubbleTwoOffSet_PercentageViewPort;
+		
 		switch (Bubble)
 		{
 		case EBubble::One:

@@ -41,18 +41,15 @@ public:
 	TSubclassOf<UUserWidget> NarratorSpeechBubble_WidgetAsset;
 	class USpeechBubbleUserWidget* BubbleNarrator;
 	UPROPERTY(EditAnywhere, Category=Widgets)
-	FVector2D BubbleOneOffSet;
+	FVector2D BubbleOneOffSet_PercentageViewPort;
 	UPROPERTY(EditAnywhere, Category=Widgets)
-	FVector2D BubbleTwoOffSet;
-
+	FVector2D BubbleTwoOffSet_PercentageViewPort;
+	
+	
 	// Widget Utility Methods
 	void SwitchToBubble(EBubble Bubble) const;
 	void SwitchBubbleOneState(EBubbleState BubbleState) const;
 	void SetTextBlockText(const FText& Text, const UUserWidget& Parent) const;
-	
-	// Behavior Tree
-	UPROPERTY(EditInstanceOnly, Category=Dialogue)
-	UBehaviorTree* DialogueTree;
 
 	// Tasks Setup Methods
 	void Speak(const FText& Text, const EBubble Bubble) const;

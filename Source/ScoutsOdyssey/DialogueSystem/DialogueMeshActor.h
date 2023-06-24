@@ -37,7 +37,9 @@ public:
 	void ToggleAnimation();
 
 	UPROPERTY(EditAnywhere, Category=Interact)
-	bool PlayOnStart; 
+	bool PlayOnStart;
+	UPROPERTY(EditAnywhere, Category=Interact)
+	float AnimationSpeed = 1;
 	
 private:
 	bool bAnimFlipFlop;	// When 'true' animation local time will increase from 0 to 1 (i.e. animation will play from

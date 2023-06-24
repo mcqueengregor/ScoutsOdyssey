@@ -7,7 +7,6 @@
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Interfaces/IPluginManager.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values

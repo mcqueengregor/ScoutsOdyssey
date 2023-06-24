@@ -17,6 +17,7 @@ class SCOUTSODYSSEY_API AMyPlayerController : public APlayerController
 public:
 	FVector2D GetPlayerScreenCoordinate(const FVector2D Offset) const;
 	FVector2D GetActorScreenCoordinate(const AActor& Actor, const FVector2D Offset) const;
+	static FVector2D GetViewportSize();
 	
 protected:
 	virtual void BeginPlay() override;

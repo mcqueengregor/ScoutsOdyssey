@@ -46,7 +46,7 @@ void ADialogueMeshActor::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	// TODO: Extend this to choose animation transition duration!
-	LocalAnimTime += bAnimFlipFlop ? DeltaSeconds : -DeltaSeconds;
+	LocalAnimTime += bAnimFlipFlop ? DeltaSeconds * AnimationSpeed : -DeltaSeconds * AnimationSpeed;
 	LocalAnimTime = FMath::Clamp(LocalAnimTime, 0.0f, 1.0f);	
 	
 	if (DynamicAnimMaterial)
