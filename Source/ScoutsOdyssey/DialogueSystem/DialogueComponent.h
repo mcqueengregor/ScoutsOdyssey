@@ -51,7 +51,7 @@ public:
 	void SetTextBlockText(const FText& Text, const UUserWidget& Parent) const;
 
 	// Tasks Setup Methods
-	void Speak(const FText& Text, const EBubble Bubble) const;
+	void Speak(const FString& String, const EBubble Bubble) const;
 	void Choice(TArray<FText>& Choices);
 	
 	// Delegates
@@ -75,8 +75,11 @@ private:
 	void DialogueEnd_CleanUp() const;
 
 	// Typewriter Effect
-	FText CurText;
-	void TypeNextLetter(class UTextBlock* TextBlock);
+	FString CurSpeakString;
+	int CurChar_Index;
+	FTimerHandle SpeakTimerHandle;
+	FTimerDelegate SpeakTimerDelegate;
+	void TypeNextLetter(UUserWidget& ParentWidget,  FString& String);
 };
 
 

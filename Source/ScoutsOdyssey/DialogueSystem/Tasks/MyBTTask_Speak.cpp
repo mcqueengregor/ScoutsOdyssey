@@ -37,7 +37,7 @@ EBTNodeResult::Type UMyBTTask_Speak::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 		Delegate_SetUp();
 
 		// Speak
-		DialogueComponent->Speak(Text, BubbleChoice);
+		DialogueComponent->Speak(String, BubbleChoice);
 	}
 	else
 	{
@@ -59,7 +59,7 @@ void UMyBTTask_Speak::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 
 FString UMyBTTask_Speak::GetStaticDescription() const
 {
-	return FString::Printf(TEXT("%s: %s"), *UEnum::GetValueAsString(BubbleChoice), *Text.ToString());
+	return FString::Printf(TEXT("%s: %s"), *UEnum::GetValueAsString(BubbleChoice), *String);
 }
 
 

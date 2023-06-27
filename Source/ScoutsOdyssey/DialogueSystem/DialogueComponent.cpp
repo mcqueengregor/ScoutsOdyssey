@@ -15,6 +15,7 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
+#include "Engine/World.h"
 
 UDialogueComponent::UDialogueComponent()
 {
@@ -161,20 +162,22 @@ void UDialogueComponent::SetTextBlockText(const FText& Text, const UUserWidget& 
 }
 
 
-void UDialogueComponent::Speak(const FText& Text, const EBubble Bubble) const
+void UDialogueComponent::Speak(const FString& String, const EBubble Bubble) const
 {
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
 		switch (Bubble)
 		{
 		case EBubble::One:
-			SetTextBlockText(Text, *BubbleOne);	
+			// SpeakTimerDelegate.BindUObject(this, &UDialogueComponent::TypeNextLetter, *BubbleOne, String);
+			// GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, SpeakTimerDelegate, ) 
+			//SetTextBlockText(Text, *BubbleOne);	
 			break;
 		case EBubble::Two:
-			SetTextBlockText(Text, *BubbleTwo);		
+			//SetTextBlockText(Text, *BubbleTwo);		
 			break;
 		case EBubble::Narrator:
-			SetTextBlockText(Text, *BubbleNarrator);	
+			//SetTextBlockText(Text, *BubbleNarrator);	
 			break;
 		default:
 			UE_LOG(LogTemp, Error, TEXT("Speak method took in undefined EBubble value!"));	
@@ -234,14 +237,23 @@ void UDialogueComponent::DialogueEnd_CleanUp() const
 	}
 }
 
-void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock)
+void UDialogueComponent::TypeNextLetter(UUserWidget& ParentWidget, FString& String)
 {
+	UTextBlock* TextBlock = Cast<UTextBlock>(ParentWidget.GetWidgetFromName(TEXT("TextBlock_Speak")));	
 	if(TextBlock)
 	{
-		
+		if(CurChar_Index >= String.Len())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
+		} else
+		{
+			CurSpeakString += String[CurChar_Index];
+			CurChar_Index++;
+			TextBlock->SetText(FText::FromString(CurSpeakString));	
+		}
 	} else
 	{
-		
+		LOG_ERROR("Can't type next letter. TextBlock is null!");
 	}
 }
 
