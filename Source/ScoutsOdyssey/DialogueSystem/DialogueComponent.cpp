@@ -14,6 +14,7 @@
 #include "Components/Overlay.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
 
 UDialogueComponent::UDialogueComponent()
 {
@@ -32,7 +33,7 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 void UDialogueComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 void UDialogueComponent::Widget_SetUp()
@@ -186,6 +187,8 @@ void UDialogueComponent::Speak(const FText& Text, const EBubble Bubble) const
 	}	
 }
 
+
+
 void UDialogueComponent::Choice(TArray<FText>& Choices)
 {
 	if(BubbleOne)
@@ -228,6 +231,17 @@ void UDialogueComponent::DialogueEnd_CleanUp() const
 		if(!BubbleOne) UE_LOG(LogTemp, Error, TEXT("Bubble One Clean up failed! NullPointer!"));
 		if(!BubbleTwo) UE_LOG(LogTemp, Error, TEXT("Bubble Two Clean up failed! NullPointer!"));
 		if(!BubbleNarrator) UE_LOG(LogTemp, Error, TEXT("Bubble Narrator Clean up failed! NullPointer!"));
+	}
+}
+
+void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock)
+{
+	if(TextBlock)
+	{
+		
+	} else
+	{
+		
 	}
 }
 

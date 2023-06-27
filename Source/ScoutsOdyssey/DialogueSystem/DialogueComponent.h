@@ -45,7 +45,6 @@ public:
 	UPROPERTY(EditAnywhere, Category=Widgets)
 	FVector2D BubbleTwoOffSet_PercentageViewPort;
 	
-	
 	// Widget Utility Methods
 	void SwitchToBubble(EBubble Bubble) const;
 	void SwitchBubbleOneState(EBubbleState BubbleState) const;
@@ -72,7 +71,12 @@ private:
 	void Widget_SetUp();
 	void Delegate_SetUp();
 
+	// Clean up
 	void DialogueEnd_CleanUp() const;
+
+	// Typewriter Effect
+	FText CurText;
+	void TypeNextLetter(class UTextBlock* TextBlock);
 };
 
 
