@@ -51,7 +51,7 @@ public:
 	void SetTextBlockText(const FText& Text, const UUserWidget& Parent) const;
 
 	// Tasks Setup Methods
-	void Speak(const FString& String, const EBubble Bubble) const;
+	void Speak(const FString& String, const EBubble Bubble);
 	void Choice(TArray<FText>& Choices);
 	
 	// Delegates
@@ -78,8 +78,8 @@ private:
 	FString CurSpeakString;
 	int CurChar_Index;
 	FTimerHandle SpeakTimerHandle;
-	FTimerDelegate SpeakTimerDelegate;
-	void TypeNextLetter(UUserWidget& ParentWidget,  FString& String);
+	//FTimerDelegate SpeakTimerDelegate;
+	void TypeNextLetter(const UUserWidget& ParentWidget,  const FString& String);
 };
 
 

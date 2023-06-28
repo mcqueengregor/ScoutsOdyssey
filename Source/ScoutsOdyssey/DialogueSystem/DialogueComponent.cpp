@@ -161,16 +161,18 @@ void UDialogueComponent::SetTextBlockText(const FText& Text, const UUserWidget& 
 		UE_LOG(LogTemp, Error, TEXT("Speak failed, Bubble One TextWidget not found!"))	
 }
 
-
-void UDialogueComponent::Speak(const FString& String, const EBubble Bubble) const
+// Was const, now no longer const given TypeNextLetter isn't const
+void UDialogueComponent::Speak(const FString& String, const EBubble Bubble)
 {
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
 		switch (Bubble)
 		{
 		case EBubble::One:
-			// SpeakTimerDelegate.BindUObject(this, &UDialogueComponent::TypeNextLetter, *BubbleOne, String);
-			// GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, SpeakTimerDelegate, ) 
+			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([this, String]()
+			{
+				TypeNextLetter(*BubbleOne, String);
+			}), 0.1f, true); 
 			//SetTextBlockText(Text, *BubbleOne);	
 			break;
 		case EBubble::Two:
@@ -237,7 +239,7 @@ void UDialogueComponent::DialogueEnd_CleanUp() const
 	}
 }
 
-void UDialogueComponent::TypeNextLetter(UUserWidget& ParentWidget, FString& String)
+void UDialogueComponent::TypeNextLetter(const UUserWidget& ParentWidget, const FString& String)
 {
 	UTextBlock* TextBlock = Cast<UTextBlock>(ParentWidget.GetWidgetFromName(TEXT("TextBlock_Speak")));	
 	if(TextBlock)
