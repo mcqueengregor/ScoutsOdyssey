@@ -78,8 +78,9 @@ private:
 	FString CurSpeakString;
 	int CurChar_Index;
 	FTimerHandle SpeakTimerHandle;
-	//FTimerDelegate SpeakTimerDelegate;
-	void TypeNextLetter(const UUserWidget& ParentWidget,  const FString& String);
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
+	float LetterTypeRate = 0.1f;
+	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String);
 };
 
 

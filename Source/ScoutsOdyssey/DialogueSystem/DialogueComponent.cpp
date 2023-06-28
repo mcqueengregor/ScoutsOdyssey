@@ -166,20 +166,25 @@ void UDialogueComponent::Speak(const FString& String, const EBubble Bubble)
 {
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
+		auto SetTimerLambda = [=](const UUserWidget& UserWidget)
+		{
+			UTextBlock* TextBlock = Cast<UTextBlock>(UserWidget.GetWidgetFromName(TEXT("TextBlock_Speak")));
+			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([=]()
+			{
+				TypeNextLetter(TextBlock, String);
+			}), LetterTypeRate, true); 
+		};
+		
 		switch (Bubble)
 		{
 		case EBubble::One:
-			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([this, String]()
-			{
-				TypeNextLetter(*BubbleOne, String);
-			}), 0.1f, true); 
-			//SetTextBlockText(Text, *BubbleOne);	
+			SetTimerLambda(*BubbleOne);
 			break;
 		case EBubble::Two:
-			//SetTextBlockText(Text, *BubbleTwo);		
+			SetTimerLambda(*BubbleTwo);
 			break;
 		case EBubble::Narrator:
-			//SetTextBlockText(Text, *BubbleNarrator);	
+			SetTimerLambda(*BubbleNarrator);
 			break;
 		default:
 			UE_LOG(LogTemp, Error, TEXT("Speak method took in undefined EBubble value!"));	
@@ -239,9 +244,8 @@ void UDialogueComponent::DialogueEnd_CleanUp() const
 	}
 }
 
-void UDialogueComponent::TypeNextLetter(const UUserWidget& ParentWidget, const FString& String)
+void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& String)
 {
-	UTextBlock* TextBlock = Cast<UTextBlock>(ParentWidget.GetWidgetFromName(TEXT("TextBlock_Speak")));	
 	if(TextBlock)
 	{
 		if(CurChar_Index >= String.Len())
