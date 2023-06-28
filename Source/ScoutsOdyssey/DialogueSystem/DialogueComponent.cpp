@@ -67,9 +67,12 @@ void UDialogueComponent::Delegate_SetUp()
 }
 
 
-void UDialogueComponent::SpeakFinish() const
+void UDialogueComponent::SpeakFinish() 
 {
 	UE_LOG(LogTemp, Warning, TEXT("SpeakFinish Broadcasted!"));
+	GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
+	CurSpeakString = "";
+	CurChar_Index = 0;
 	OnSpeakFinish.Broadcast();
 }
 
@@ -165,9 +168,9 @@ void UDialogueComponent::SetTextBlockText(const FText& Text, const UUserWidget& 
 void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType)
 {
 	// Clean up last-speak setups. Timers and so-on. 
-	GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
-	CurSpeakString = "";
-	CurChar_Index = 0;
+	// GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
+	// CurSpeakString = "";
+	// CurChar_Index = 0;
 	
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
@@ -261,8 +264,12 @@ void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& St
 			// Set Text
 			CurSpeakString += String[CurChar_Index];
 			CurChar_Index++;
-			TextBlock->SetText(FText::FromString(CurSpeakString));
-
+			
+			if(TextBlock)
+				TextBlock->SetText(FText::FromString(CurSpeakString));
+			else
+				LOG_ERROR("Can't Set Text. TextBlock is null!");
+			
 			// Play Sound
 			PlayRandomVoice(VoiceType);
 		}

@@ -61,7 +61,7 @@ public:
 	FOnChoiceFinish OnChoiceFinish;
 	FOnDialogueEnd OnDialogueEnd;
 	
-	void SpeakFinish() const;
+	void SpeakFinish();
 	UFUNCTION()
 	void ChoiceFinish(const int ReplyIndex);
 	
