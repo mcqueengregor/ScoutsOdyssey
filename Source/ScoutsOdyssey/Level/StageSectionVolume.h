@@ -38,21 +38,22 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		class USceneComponent* SceneComponent;
 	
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		class UBoxComponent* TriggerVolume;
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		class UCameraComponent* StageSectionCameraComponent;
 
-	UPROPERTY(EditAnywhere, Category = "Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attributes")
 		ECameraType CameraType;	// Whether or not this section's camera angle is static or follows the player.
 
-	UPROPERTY(EditAnywhere, Category = "Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attributes")
 		float FollowCameraBounds;	// How close the camera can get to the edge of this section in FOLLOW mode
 									// before it remains stationary, in Unreal units.
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Misc.")
 	APlayerPawn* PlayerPawnRef;	// Pointer reference to the player pawn (used for controlling follow camera location).
 };
