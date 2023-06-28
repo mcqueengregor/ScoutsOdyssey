@@ -164,8 +164,11 @@ void UDialogueComponent::SetTextBlockText(const FText& Text, const UUserWidget& 
 // Was const, now no longer const given TypeNextLetter isn't const
 void UDialogueComponent::Speak(const FString& String, const EBubble Bubble)
 {
+	// Clean up last-speak setups. Timers and so-on. 
+	GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
 	CurSpeakString = "";
 	CurChar_Index = 0;
+	
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
 		auto SetTimerLambda = [=](const UUserWidget& UserWidget)

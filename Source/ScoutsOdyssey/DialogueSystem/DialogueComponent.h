@@ -78,7 +78,7 @@ private:
 	FString CurSpeakString;
 	int CurChar_Index;
 	FTimerHandle SpeakTimerHandle;
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true), Category=TypeWriterEffect)
 	float LetterTypeRate = 0.1f;
 	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String);
 };
