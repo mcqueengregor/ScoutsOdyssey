@@ -5,6 +5,7 @@
 #include "../Level/StageSectionVolume.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "../Animation/SpriteAnimationDataAsset.h"
 #include "PlayerPawn.generated.h"
 
 UENUM(BlueprintType)
@@ -14,32 +15,14 @@ enum class FPlayerAnimation : uint8
 	WALK = 1 UMETA(DisplayName = "Walk animation"),
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSpriteAnimDetails
 {
 	GENERATED_BODY()
 
-	UMaterialInstanceDynamic* AnimationMaterial;
-	int32 NumRows;
-	int32 NumColumns;
-	int32 NumEmptyFrames;
-	int32 PlaybackFramerate;
+	UPROPERTY(EditAnywhere)
+	USpriteAnimationDataAsset* SpriteAnimDA;
 	FPlayerAnimation AnimationType;
-};
-
-USTRUCT()
-struct FUberSpriteAnimDetails
-{
-	GENERATED_BODY()
-
-	UMaterialInstanceDynamic* AnimationMaterial;
-	int32 IdleNumRows;
-	int32 IdleNumColumns;
-	int32 IdleNumEmptyFrames;
-	int32 WalkNumRows;
-	int32 WalkNumColumns;
-	int32 WalkNumEmptyFrames;
-	int32 PlaybackFramerate;
 };
 
 UCLASS()
@@ -71,14 +54,16 @@ protected:
 	void MoveForward(float Value);
 
 	// Animation methods:
-	void CreateDynamicAnimationMaterials();
+	void CreateDynamicAnimationMaterial();
+	void UpdateDynamicMaterialParameters();
 	void CalculateLocalAnimTime();
 
 	UPROPERTY(EditAnywhere)
-	TMap<FPlayerAnimation, UMaterialInstance*> AnimationMaterialList;	// List of materials for each animation,
-																		// exposed in the editor to be populated by a
-																		// designer. Used to populate dynamic versions
-																		// of those materials in 'SpriteAnimations'.
+	TMap<FPlayerAnimation, FSpriteAnimDetails> AnimationsList;	// List of details for each animation, exposed in the
+																// editor to be populated by a designer. Used to update
+																// a dynamic material instance when playing and/or
+																// switching animations.
+	UMaterialInstanceDynamic* DynamicMaterial;
 	FSpriteAnimDetails* CurrentAnimation;
 	
 public:
@@ -114,18 +99,7 @@ public:
 	AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
 
 private:
-	TMap<FPlayerAnimation, FSpriteAnimDetails> SpriteAnimations;	// Collection of sprite animations w/ metadata.
-
 	FVector MovementDirection;	// Direction the player will move on the current frame, in Unreal units.
 	FVector OriginalMeshScale;	// The scale of 'MeshComponent' when BeginPlay is triggered.
 	float CurrentGameTime;	// The amount of time that has passed since the game started, in seconds.
-
-	// TEMPORARY MATERIAL FIX DATA:
-	void TempCreateDynamicMaterial();
-	void TempChangeAnimation(FPlayerAnimation NewAnimation);
-	void TempCalculateLocalAnimTime();
-	UPROPERTY(EditAnywhere)
-		class UMaterial* UberAnimMaterial;
-	FUberSpriteAnimDetails UberSpriteAnimDetails;
-	FPlayerAnimation TempCurrentAnimation;
 };
