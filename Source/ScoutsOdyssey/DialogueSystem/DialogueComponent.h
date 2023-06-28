@@ -8,11 +8,13 @@
 #include "ScoutsOdyssey/Interfaces/Clickable.h"
 #include "DialogueEnums.h"
 #include "Blueprint/UserWidget.h"
+#include "Sound/SoundCue.h"
 #include "DialogueComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnSpeakFinish);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnChoiceFinish, int);
 DECLARE_MULTICAST_DELEGATE(FOnDialogueEnd);
+
 
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -51,7 +53,7 @@ public:
 	void SetTextBlockText(const FText& Text, const UUserWidget& Parent) const;
 
 	// Tasks Setup Methods
-	void Speak(const FString& String, const EBubble Bubble);
+	void Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType);
 	void Choice(TArray<FText>& Choices);
 	
 	// Delegates
@@ -80,7 +82,12 @@ private:
 	FTimerHandle SpeakTimerHandle;
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true), Category=TypeWriterEffect)
 	float LetterTypeRate = 0.1f;
-	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String);
+	UPROPERTY(EditDefaultsOnly, Category=TypeWriterEffect)
+	TArray<USoundCue*> LowVoices;
+	UPROPERTY(EditDefaultsOnly, Category=TypeWriterEffect)
+	TArray<USoundCue*> HighVoices;
+	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String, const EVoiceType VoiceType);
+	void PlayRandomVoice(EVoiceType VoiceType) const;
 };
 
 

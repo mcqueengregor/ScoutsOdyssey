@@ -37,7 +37,7 @@ EBTNodeResult::Type UMyBTTask_Speak::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 		Delegate_SetUp();
 
 		// Speak
-		DialogueComponent->Speak(String, BubbleChoice);
+		DialogueComponent->Speak(String, BubbleChoice, VoiceType);
 	}
 	else
 	{

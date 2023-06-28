@@ -162,7 +162,7 @@ void UDialogueComponent::SetTextBlockText(const FText& Text, const UUserWidget& 
 }
 
 // Was const, now no longer const given TypeNextLetter isn't const
-void UDialogueComponent::Speak(const FString& String, const EBubble Bubble)
+void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType)
 {
 	// Clean up last-speak setups. Timers and so-on. 
 	GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
@@ -176,7 +176,7 @@ void UDialogueComponent::Speak(const FString& String, const EBubble Bubble)
 			UTextBlock* TextBlock = Cast<UTextBlock>(UserWidget.GetWidgetFromName(TEXT("TextBlock_Speak")));
 			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([=]()
 			{
-				TypeNextLetter(TextBlock, String);
+				TypeNextLetter(TextBlock, String, VoiceType);
 			}), LetterTypeRate, true); 
 		};
 		
@@ -249,7 +249,7 @@ void UDialogueComponent::DialogueEnd_CleanUp() const
 	}
 }
 
-void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& String)
+void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& String, const EVoiceType VoiceType)
 {
 	if(TextBlock)
 	{
@@ -258,13 +258,40 @@ void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& St
 			GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
 		} else
 		{
+			// Set Text
 			CurSpeakString += String[CurChar_Index];
 			CurChar_Index++;
-			TextBlock->SetText(FText::FromString(CurSpeakString));	
+			TextBlock->SetText(FText::FromString(CurSpeakString));
+
+			// Play Sound
+			PlayRandomVoice(VoiceType);
 		}
 	} else
 	{
 		LOG_ERROR("Can't type next letter. TextBlock is null!");
+	}
+}
+
+void UDialogueComponent::PlayRandomVoice(EVoiceType VoiceType) const
+{
+	auto PlayRandomVoiceInArray = [=](TArray<USoundCue*> Voices)
+	{
+		if(Voices.Num() > 0)
+			UGameplayStatics::PlaySound2D(this, Voices[FMath::RandRange(0, Voices.Num()-1)]);
+		else
+			LOG_ERROR("No voice inside the voices array!")
+	};
+	
+	switch (VoiceType)
+	{
+		case EVoiceType::High:
+			PlayRandomVoiceInArray(HighVoices);
+			break;
+		case EVoiceType::Low:
+			PlayRandomVoiceInArray(LowVoices);
+			break;
+		default:
+			LOG_ERROR("Non-existent VoiceType.");
 	}
 }
 
