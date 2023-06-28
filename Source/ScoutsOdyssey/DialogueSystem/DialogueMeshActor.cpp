@@ -10,11 +10,18 @@
 #include "Blueprint/UserWidget.h"
 #include "SpeechBubbleUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/ListView.h"
 #include "Components/Overlay.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "ScoutsOdyssey/Components/InteractComponentBase.h"
+
+ADialogueMeshActor::ADialogueMeshActor()
+{
+	PropCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("PropCollider"));
+	PropCollider->SetupAttachment(RootComponent);
+}
 
 void ADialogueMeshActor::BeginPlay()
 {

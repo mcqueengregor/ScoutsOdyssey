@@ -16,6 +16,8 @@ class SCOUTSODYSSEY_API ADialogueMeshActor : public AStaticMeshActor, public ICl
 {
 	GENERATED_BODY()
 
+	ADialogueMeshActor();
+	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -51,4 +53,6 @@ private:
 
 protected:	
 	class UMaterialInstanceDynamic* DynamicAnimMaterial;
+	UPROPERTY(EditDefaultsOnly)
+	class UBoxComponent* PropCollider;
 };
