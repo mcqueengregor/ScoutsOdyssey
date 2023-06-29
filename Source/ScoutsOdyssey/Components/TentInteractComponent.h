@@ -34,4 +34,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FTentState CurrentState;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TMap<FTentState, UTexture2D*> TentStateTextures;
+
+private:
+	UMaterialInstanceDynamic* DynamicMaterial;	// Dynamic material instance applied to owner mesh, used to change the
+												// tent texture to match the tent's state.
 };

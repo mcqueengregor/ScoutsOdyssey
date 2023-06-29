@@ -35,7 +35,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void ToggleAnimation();
-
+	
 	UPROPERTY(EditAnywhere, Category=Interact)
 	bool PlayOnStart;
 	UPROPERTY(EditAnywhere, Category=Interact)

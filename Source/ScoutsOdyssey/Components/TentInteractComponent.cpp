@@ -12,6 +12,7 @@ UTentInteractComponent::UTentInteractComponent()
 void UTentInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
 	
 }
 
