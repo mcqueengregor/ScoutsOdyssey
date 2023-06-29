@@ -25,7 +25,7 @@ UDialogueComponent::UDialogueComponent()
 
 void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) 
 {
-	UE_LOG(LogTemp, Warning, TEXT("Clicked! From Dialogue Component"));
+	//UE_LOG(LogTemp, Warning, TEXT("Clicked! From Dialogue Component"));
 
 	// Enable input on click.
 	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
@@ -82,7 +82,6 @@ void UDialogueComponent::Delegate_SetUp()
 
 void UDialogueComponent::SpeakFinish() 
 {
-	UE_LOG(LogTemp, Warning, TEXT("SpeakFinish Broadcasted!"));
 	GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
 	CurSpeakString = "";
 	CurChar_Index = 0;
@@ -91,7 +90,6 @@ void UDialogueComponent::SpeakFinish()
 
 void UDialogueComponent::ChoiceFinish(const int ReplyIndex)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ChoiceFinish Broadcasted!"));
 	OnChoiceFinish.Broadcast(ReplyIndex);	
 }
 

@@ -53,7 +53,9 @@ TEXT macros can cause issue due to its L identifier
 #define CUR_FUNC_SIG (FString(__FUNCSIG__))
 
 //Current Class Name + Function Name + Line Number where this is called
-#define CUR_CLASS_FUNC_LINE (CUR_CLASS_FUNC + "(" + CUR_LINE + ")") 
+#define CUR_CLASS_FUNC_LINE (CUR_CLASS_FUNC + "(" + CUR_LINE + ")")
+
+#define CUR_ACTOR_CLASS_FUNC_LINE ("[" + GetName() + "] => " + CUR_CLASS_FUNC_LINE)
 
 
 
@@ -74,7 +76,11 @@ TEXT macros can cause issue due to its L identifier
  
 #define LOG2(Text1, Text2) 	UE_LOG(LogTemp, Warning,TEXT("%s: %s %s"), *CUR_CLASS_FUNC_LINE, *FString(Text1),*FString(Text2))
 
-#define LOG_ERROR(Text) 		   UE_LOG(LogTemp,Error,TEXT("%s: %s"), *CUR_CLASS_FUNC_LINE, *FString(Text))
+#define LOG_ACTOR(Text) 		  UE_LOG(LogTemp, Warning,TEXT("%s: %s"), *CUR_ACTOR_CLASS_FUNC_LINE, *FString(Text))
+
+#define LOG_ERROR(Text) 		 UE_LOG(LogTemp,Error,TEXT("%s: %s"), *CUR_CLASS_FUNC_LINE, *FString(Text))
+
+#define LOG_ACTOR_ERROR(Text) UE_LOG(LogTemp,Error,TEXT("%s: %s"), *CUR_ACTOR_CLASS_FUNC_LINE, *FString(Text)) 
 
 #define LOG_FLOAT(Text, Float) 	UE_LOG(LogTemp, Warning,TEXT("%s: %s %f"), *CUR_CLASS_FUNC_LINE, *FString(Text), Float)
 

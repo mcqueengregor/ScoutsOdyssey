@@ -51,7 +51,6 @@ void UMyBTTask_Speak::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 {
 	if (SpeakTaskFinished)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BTTask Finished: %s"), *GetClass()->GetName());
 		OwnerComp.RequestExecution(EBTNodeResult::Succeeded);
 	}
 }
@@ -68,12 +67,10 @@ void UMyBTTask_Speak::Delegate_SetUp()
 	FOnSpeakFinish::FDelegate SpeakTaskFinish_Delegate;
 	SpeakTaskFinish_Delegate.BindUObject(this, &UMyBTTask_Speak::SpeakTaskFinish);
 	SpeakTaskFinish_DelegateHandle = DialogueComponent->OnSpeakFinish.Add(SpeakTaskFinish_Delegate);
-	UE_LOG(LogTemp, Warning, TEXT("TaskFinish Delegate Setup Successfully On OnSpeakFinish!"));
 }
 
 void UMyBTTask_Speak::SpeakTaskFinish()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Speak Task Finished Called!"));
 	if (DialogueComponent)
 	{
 		// Remove Task Finish Delegate

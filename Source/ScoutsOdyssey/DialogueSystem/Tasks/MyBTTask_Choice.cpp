@@ -53,7 +53,6 @@ void UMyBTTask_Choice::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 {
 	if (ChoiceTaskFinished)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BTTask Finished: %s"), *GetClass()->GetName());
 		OwnerComp.RequestExecution(EBTNodeResult::Succeeded);
 	}
 }
@@ -64,12 +63,10 @@ void UMyBTTask_Choice::Delegate_SetUp()
 	FOnChoiceFinish::FDelegate ChoiceTaskFinish_Delegate;
 	ChoiceTaskFinish_Delegate.BindUObject(this, &UMyBTTask_Choice::ChoiceTaskFinish);
 	ChoiceTaskFinish_DelegateHandle = DialogueComponent->OnChoiceFinish.Add(ChoiceTaskFinish_Delegate);
-	UE_LOG(LogTemp, Warning, TEXT("TaskFinish Delegate Setup Successfully On OnChoiceFinish!"));
 }
 
 void UMyBTTask_Choice::ChoiceTaskFinish(const int ReplyIndex)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Choice Task Finished Called!"));
 	if (DialogueComponent)
 	{
 		// Remove Task Finish Delegate

@@ -146,7 +146,7 @@ void ADialogueMeshActor::ToggleAnimation()
 
 void ADialogueMeshActor::LeftMouseButtonDown()
 {
-	UE_LOG(LogTemp, Error, TEXT("current left mouse button down actor name is %s"), *GetName());
+	LOG_ACTOR("current left mouse button down actor!");
 	if(OnLeftMouseClick.IsBound())
 	{
 		OnLeftMouseClick.Execute();
