@@ -28,7 +28,7 @@ void UTreeInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	}
 }
 
-void UTreeInteractComponent::OnInteractWithItem(int32 ItemType, APlayerPawn* PlayerRef)
+void UTreeInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
 
 }
