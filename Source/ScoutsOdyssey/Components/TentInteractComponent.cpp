@@ -2,10 +2,11 @@
 
 
 #include "TentInteractComponent.h"
+#include "../DialogueSystem/DialogueMeshActor.h"
 
 UTentInteractComponent::UTentInteractComponent()
 {
-	
+	CurrentState = FTentState::START;
 }
 
 void UTentInteractComponent::BeginPlay()
@@ -28,7 +29,8 @@ void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
-	
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
+		FString("Tent interact working!"));
 }
 
 void UTentInteractComponent::DoTask()
