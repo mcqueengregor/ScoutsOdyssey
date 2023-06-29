@@ -36,6 +36,9 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 	
 	Widget_SetUp();
 	Delegate_SetUp();
+
+	// Set as -1 when you first start. So won't call speak finish
+	SpeakClickCount = -1;
 }
 
 void UDialogueComponent::BeginPlay()
@@ -79,13 +82,27 @@ void UDialogueComponent::Delegate_SetUp()
 	
 }
 
-
+// Issue: given input is bound immediately, this is also invoked every time left mouse is clicked, regardless whether you have started speaking or not. 
 void UDialogueComponent::SpeakFinish() 
 {
-	GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
-	CurSpeakString = "";
-	CurChar_Index = 0;
-	OnSpeakFinish.Broadcast();
+	if (SpeakClickCount == -1)
+	{
+		return;
+	} else if(SpeakClickCount == 0)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
+		SetTextBlockText(CurFullString, *CurTextBlock);
+		SpeakClickCount = 1;
+	} else if (SpeakClickCount == 1)
+	{
+		CurSpeakString = "";
+		CurChar_Index = 0;
+		SpeakClickCount = -1;
+		OnSpeakFinish.Broadcast();
+	} else
+	{
+		LOG_ERROR("Click Count not -1, 0 or 1!");
+	}
 }
 
 void UDialogueComponent::ChoiceFinish(const int ReplyIndex)
@@ -166,13 +183,9 @@ void UDialogueComponent::SwitchBubbleOneState(const EBubbleState BubbleState) co
 	}
 }
 
-void UDialogueComponent::SetTextBlockText(const FText& Text, const UUserWidget& Parent) const
+void UDialogueComponent::SetTextBlockText(const FString& String, UTextBlock& TextWidget) const
 {
-	UTextBlock* TextWidget = Cast<UTextBlock>(Parent.GetWidgetFromName(TEXT("TextBlock_Speak")));
-	if(TextWidget)
-		TextWidget->SetText(Text);
-	else
-		UE_LOG(LogTemp, Error, TEXT("Speak failed, Bubble One TextWidget not found!"))	
+	TextWidget.SetText(FText::FromString(String));
 }
 
 // Was const, now no longer const given TypeNextLetter isn't const
@@ -181,12 +194,14 @@ void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, cons
 	
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
+		SpeakClickCount = 0;
+		CurFullString = String;
 		auto SetTimerLambda = [=](const UUserWidget& UserWidget)
 		{
-			UTextBlock* TextBlock = Cast<UTextBlock>(UserWidget.GetWidgetFromName(TEXT("TextBlock_Speak")));
+			CurTextBlock = Cast<UTextBlock>(UserWidget.GetWidgetFromName(TEXT("TextBlock_Speak")));
 			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([=]()
 			{
-				TypeNextLetter(TextBlock, String, VoiceType);
+				TypeNextLetter(CurTextBlock, String, VoiceType);
 			}), LetterTypeRate, true); 
 		};
 		

@@ -50,7 +50,7 @@ public:
 	// Widget Utility Methods
 	void SwitchToBubble(EBubble Bubble) const;
 	void SwitchBubbleOneState(EBubbleState BubbleState) const;
-	void SetTextBlockText(const FText& Text, const UUserWidget& Parent) const;
+	void SetTextBlockText(const FString& String, class UTextBlock& TextWidget) const;
 
 	// Tasks Setup Methods
 	void Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType);
@@ -77,6 +77,8 @@ private:
 	void DialogueEnd_CleanUp() const;
 
 	// Typewriter Effect
+	class UTextBlock* CurTextBlock;
+	FString CurFullString;
 	FString CurSpeakString;
 	int CurChar_Index;
 	FTimerHandle SpeakTimerHandle;
@@ -88,6 +90,9 @@ private:
 	TArray<USoundCue*> HighVoices;
 	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String, const EVoiceType VoiceType);
 	void PlayRandomVoice(EVoiceType VoiceType) const;
+	// Check number of clicks. First click would complete typewriting immediately, while second click would go to next string.
+	// can be -1, 0 and 1. 
+	int SpeakClickCount;
 };
 
 
