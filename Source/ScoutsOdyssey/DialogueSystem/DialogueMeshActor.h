@@ -8,6 +8,9 @@
 #include "ScoutsOdyssey/Interfaces/Clickable.h"
 #include "DialogueMeshActor.generated.h"
 
+
+DECLARE_DELEGATE(FOnLeftMouseClick);
+
 /**
  * 
  */
@@ -20,9 +23,14 @@ class SCOUTSODYSSEY_API ADialogueMeshActor : public AStaticMeshActor, public ICl
 	
 protected:
 	virtual void BeginPlay() override;
-	
+
+	// handling input
+	UInputComponent* CreatePlayerInputComponent();	
+	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent);
+	void StartPlayerInputComponent();
 public:
 	virtual void Tick(float DeltaSeconds) override;
+	
 	
 	// Behavior Tree
 	UPROPERTY(EditInstanceOnly, Category=Dialogue)
@@ -33,6 +41,7 @@ public:
 
 	UFUNCTION()
 	void BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
+	
 	void Clickable_SetUp();
 
 	UFUNCTION(BlueprintCallable, Category = "Interact")
@@ -42,6 +51,11 @@ public:
 	bool PlayOnStart;
 	UPROPERTY(EditAnywhere, Category=Interact)
 	float AnimationSpeed = 1;
+
+
+	UFUNCTION()
+	void LeftMouseButtonDown();
+	FOnLeftMouseClick OnLeftMouseClick;
 	
 private:
 	bool bAnimFlipFlop;	// When 'true' animation local time will increase from 0 to 1 (i.e. animation will play from

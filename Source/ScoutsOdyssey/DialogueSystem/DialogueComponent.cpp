@@ -27,6 +27,13 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 {
 	UE_LOG(LogTemp, Warning, TEXT("Clicked! From Dialogue Component"));
 
+	// Enable input on click.
+	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
+	if(DialogueMeshActor)
+		DialogueMeshActor->EnableInput(DialogueMeshActor->MyPlayerController);
+	else
+		LOG_ERROR("Couldn't enable input.");
+	
 	Widget_SetUp();
 	Delegate_SetUp();
 }
@@ -60,10 +67,16 @@ void UDialogueComponent::Delegate_SetUp()
 {
 	OnDialogueEnd.AddUObject(this, &UDialogueComponent::DialogueEnd_CleanUp);
 
-	// LeftMouseClick Delegates, should always trigger, always on the same UI.
-	BubbleOne->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
-	BubbleTwo->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
-	BubbleNarrator->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
+	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
+	if(DialogueMeshActor)
+	{
+		DialogueMeshActor->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
+	}
+	else 
+	{
+		LOG_ERROR("Couldn't cast to DialogueMeshActor.");	
+	}
+	
 }
 
 
@@ -167,10 +180,6 @@ void UDialogueComponent::SetTextBlockText(const FText& Text, const UUserWidget& 
 // Was const, now no longer const given TypeNextLetter isn't const
 void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType)
 {
-	// Clean up last-speak setups. Timers and so-on. 
-	// GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
-	// CurSpeakString = "";
-	// CurChar_Index = 0;
 	
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
@@ -231,6 +240,15 @@ void UDialogueComponent::Choice(TArray<FText>& Choices)
 void UDialogueComponent::DialogueEnd_CleanUp() const
 {
 	ADialogueMeshActor* Owner = Cast<ADialogueMeshActor>(GetOwner());
+
+	// Disable Input
+	if(Owner)
+	{
+		Owner->DisableInput(Owner->MyPlayerController);
+	} else
+	{
+		LOG_ERROR("Failed to disable Input!");
+	}
 	
 	// Stop BehaviorTree
 	 if(Owner->AIController)

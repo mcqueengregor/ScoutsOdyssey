@@ -4,17 +4,14 @@
 #include "DialogueMeshActor.h"
 #include "DialogueComponent.h"
 #include "ScoutsOdyssey/Player/MyPlayerController.h"
-#include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
 #include "DialogueChoiceObject.h"
 #include "Blueprint/UserWidget.h"
-#include "SpeechBubbleUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/BoxComponent.h"
-#include "Components/ListView.h"
-#include "Components/Overlay.h"
-#include "Components/TextBlock.h"
+#include "GameFramework/InputSettings.h"
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
 #include "ScoutsOdyssey/Components/InteractComponentBase.h"
 
 ADialogueMeshActor::ADialogueMeshActor()
@@ -31,6 +28,9 @@ void ADialogueMeshActor::BeginPlay()
 	// Spawn AI Controller 
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
 	Clickable_SetUp();
+
+	// Start input component. will start on all DialogueMeshActors in scene. 
+	StartPlayerInputComponent();
 	
 	if(PlayOnStart)
 	{
@@ -46,6 +46,32 @@ void ADialogueMeshActor::BeginPlay()
 		GetStaticMeshComponent()->GetMaterial(0), this);
 	
 	GetStaticMeshComponent()->SetMaterial(0, DynamicAnimMaterial);
+}
+
+UInputComponent* ADialogueMeshActor::CreatePlayerInputComponent()
+{
+	static const FName InputComponentName(TEXT("DialogueMeshActor_InputComponent"));
+	return NewObject<UInputComponent>(this, UInputSettings::GetDefaultInputComponentClass(), InputComponentName);
+}
+
+/**
+ * @brief It sets consumeInput to false, after getting a FInputActionBinding& reference. By reference, take note.
+ * @param PlayerInputComponent 
+ */
+void ADialogueMeshActor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	FInputActionBinding& ClickBinding = PlayerInputComponent->BindAction("Click", IE_Pressed, this, &ADialogueMeshActor::LeftMouseButtonDown);
+	ClickBinding.bConsumeInput = false;
+}
+
+void ADialogueMeshActor::StartPlayerInputComponent()
+{
+	InputComponent = CreatePlayerInputComponent();
+	if(InputComponent)
+	{
+		SetupPlayerInputComponent(InputComponent);
+		InputComponent->RegisterComponent();
+	}
 }
 
 void ADialogueMeshActor::Tick(float DeltaSeconds)
@@ -68,11 +94,11 @@ void ADialogueMeshActor::BehaviorTree_Start(UPrimitiveComponent* TouchedComponen
 		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
 		if(Blackboard)
 		{
-			UDialogueComponent* DialogueComponent =
+			UDialogueComponent* DiagueComponent =
 				Cast<UDialogueComponent>(GetComponentByClass(UDialogueComponent::StaticClass()));
-			if (DialogueComponent)
+			if (DiagueComponent)
 			{
-				Blackboard->SetValueAsObject("DialogueComponent", DialogueComponent);
+				Blackboard->SetValueAsObject("DialogueComponent", DiagueComponent);
 				UE_LOG(LogTemp, Warning, TEXT("Registered dialogue component reference in blackboard!"));
 			}
 
@@ -116,4 +142,16 @@ void ADialogueMeshActor::Clickable_SetUp()
 void ADialogueMeshActor::ToggleAnimation()
 {
 	bAnimFlipFlop = !bAnimFlipFlop;
+}
+
+void ADialogueMeshActor::LeftMouseButtonDown()
+{
+	UE_LOG(LogTemp, Error, TEXT("current left mouse button down actor name is %s"), *GetName());
+	if(OnLeftMouseClick.IsBound())
+	{
+		OnLeftMouseClick.Execute();
+	} else
+	{
+		PRINT("delegate not bound? for some reason?");
+	}
 }
