@@ -25,8 +25,6 @@ UDialogueComponent::UDialogueComponent()
 
 void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) 
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Clicked! From Dialogue Component"));
-
 	// Enable input on click.
 	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
 	if(DialogueMeshActor)
@@ -39,6 +37,18 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 
 	// Set as -1 when you first start. So won't call speak finish
 	SpeakClickCount = -1;
+}
+
+void UDialogueComponent::StartDialogue()
+{
+	LOG_ACTOR_ERROR("started! yeah! but why?");
+	Click_Implementation(nullptr,EKeys::A);
+
+	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
+	if(DialogueMeshActor)
+		DialogueMeshActor->BehaviorTree_Start(nullptr, EKeys::A);
+	else
+		LOG_ERROR("Couldn't start behavior tree.");
 }
 
 void UDialogueComponent::BeginPlay()
