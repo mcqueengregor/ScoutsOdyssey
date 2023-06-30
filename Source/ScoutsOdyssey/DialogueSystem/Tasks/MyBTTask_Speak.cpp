@@ -58,7 +58,7 @@ void UMyBTTask_Speak::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 
 FString UMyBTTask_Speak::GetStaticDescription() const
 {
-	return FString::Printf(TEXT("%s: %s"), *UEnum::GetValueAsString(BubbleChoice), *String);
+	return FString::Printf(TEXT("%s: %s"), *UEnum::GetValueAsString(BubbleChoice), *String.Left(20));
 }
 
 
