@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InventoryItemDataAsset.h"
 #include "Components/ActorComponent.h"
+#include "../Player/PlayerPawn.h"
 #include "InventoryComponent.generated.h"
 
 
@@ -22,14 +23,25 @@ protected:
 public:	
 	UFUNCTION(BlueprintCallable)
 	void AddItem(UInventoryItemDataAsset* Item);
+	
 	UFUNCTION(BlueprintCallable)
 	void RemoveSelectedItem();
+	
 	UFUNCTION(BlueprintCallable)
 	void SwitchItem(float Mouse_AxisValue);
+
+	// Return the currently-held item, if the player is holding one:
+	UFUNCTION(BlueprintCallable)
+	inline UInventoryItemDataAsset* GetCurrentItem() { return Items.Num() > 0 ? Items[SelectedItem_Index] : nullptr; }
 	
 private:
 	UPROPERTY(VisibleAnywhere, Category=Inventory)
 	TArray<UInventoryItemDataAsset*> Items;
 	UPROPERTY(VisibleAnywhere, Category=Inventory)
 	int SelectedItem_Index;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	TMap<FGameplayTag, FCurrentItem> TagToEnumMap;
+
+	UInventoryItemDataAsset* EmptyHandDataAsset;
 };

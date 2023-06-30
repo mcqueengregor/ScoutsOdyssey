@@ -8,6 +8,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/Components/InteractComponentBase.h"
+#include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
+#include "ScoutsOdyssey/InventorySystem/InventoryComponent.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -64,6 +67,9 @@ void APlayerPawn::BeginPlay()
 
 	CurrentGameTime = 0.0f;
 	OriginalMeshScale = MeshComponent->GetComponentScale();
+	CurrentHeldItemType = FCurrentItem::EMPTY;
+	CurrentAnimation = AnimationsList.Find(FPlayerAnimation::IDLE);
+	ChangeAnimation(FPlayerAnimation::IDLE);
 }
 
 // Called every frame
@@ -103,12 +109,25 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerPawn::MoveRight);
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerPawn::MoveForward);
+
+	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this,
+		&APlayerPawn::InteractWhileHoldingItem);
+
+	UInventoryComponent* InventoryComponent =
+		Cast<UInventoryComponent>((UInventoryComponent::StaticClass()));
+
+	if (InventoryComponent)
+		PlayerInputComponent->BindAxis("MouseScroll", InventoryComponent, &UInventoryComponent::SwitchItem);
 }
 
 void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 {
+	const int32 EnumAsInt = static_cast<int32>(NewAnimation);
+	const FPlayerAnimation NewAnimWithItem =
+		static_cast<FPlayerAnimation>(EnumAsInt + 2 * static_cast<int32>(CurrentHeldItemType));
+	
 	// Change animation material instance, if one exists:
-	if (!AnimationsList.Contains(NewAnimation))
+	if (!AnimationsList.Contains(NewAnimWithItem))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red,
 			FString("ERROR: No details registered for ") + UEnum::GetValueAsString(NewAnimation));
@@ -120,14 +139,20 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 	}
 
 	// If the animation set to play on this frame is different from the currently-used one, update material:
-	if (NewAnimation != CurrentAnimation->AnimationType)
+	if (NewAnimWithItem != CurrentAnimation->AnimationType)
 	{
-		CurrentAnimation = AnimationsList.Find(NewAnimation);
+		CurrentAnimation = AnimationsList.Find(NewAnimWithItem);
 		UpdateDynamicMaterialParameters();
 	}
 	
 	// TODO: If there's additional logic for playing back certain animations (e.g. only playing an animation once
 	// before reverting to the previous one), put it here!
+}
+
+void APlayerPawn::ChangeItem(FCurrentItem NewItem)
+{
+	CurrentHeldItemType = NewItem;
+	ChangeAnimation(CurrentAnimation->AnimationType);
 }
 
 void APlayerPawn::MoveRight(float Value)
@@ -138,6 +163,28 @@ void APlayerPawn::MoveRight(float Value)
 void APlayerPawn::MoveForward(float Value)
 {
 	MovementDirection.X = FMath::Clamp(Value, -1.0f, 1.0f) * VertMoveSpeed;
+}
+
+void APlayerPawn::InteractWhileHoldingItem()
+{
+	TArray<AActor*> OverlappingSceneProps;
+	GetOverlappingActors(OverlappingSceneProps, ADialogueMeshActor::StaticClass());
+
+	// If standing next to enough scene props, get interaction component and call OnInteractWithItem on it:
+	if (OverlappingSceneProps.Num() >= 1)
+	{
+		UInventoryComponent* InventoryComponent =
+			Cast<UInventoryComponent>(GetComponentByClass(UInventoryComponent::StaticClass()));
+
+		if (InventoryComponent && InventoryComponent->GetCurrentItem())
+		{
+			UInteractComponentBase* ScenePropInteractComp =
+				Cast<UInteractComponentBase>(OverlappingSceneProps[0]->GetComponentByClass(UInteractComponentBase::StaticClass()));
+
+			if (ScenePropInteractComp)
+				ScenePropInteractComp->OnInteractWithItem(InventoryComponent->GetCurrentItem(), this);
+		}
+	}
 }
 
 void APlayerPawn::CreateDynamicAnimationMaterial()

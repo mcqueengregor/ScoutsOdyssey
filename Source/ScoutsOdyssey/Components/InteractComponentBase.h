@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "../Player/PlayerPawn.h"
+#include "ScoutsOdyssey/InventorySystem/InventoryItemDataAsset.h"
 #include "InteractComponentBase.generated.h"
 
 
@@ -24,9 +25,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	// TODO: Replace data type of ItemType with whatever class the items become!
-	virtual void OnInteractWithItem(int32 ItemType, APlayerPawn* PlayerRef) PURE_VIRTUAL(UInteractComponentBase::OnInteractWithItem,);
+	
+	virtual void OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef) PURE_VIRTUAL(UInteractComponentBase::OnInteractWithItem,);
 
 	UFUNCTION(BlueprintCallable)
 	virtual void DoTask() PURE_VIRTUAL(UInteractComponentBase::DoTask,);

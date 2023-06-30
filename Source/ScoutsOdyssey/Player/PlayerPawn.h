@@ -8,11 +8,14 @@
 #include "../Animation/SpriteAnimationDataAsset.h"
 #include "PlayerPawn.generated.h"
 
+// NOTE: Order of animations with items MUST match order of items in FCurrentItem!
 UENUM(BlueprintType)
 enum class FPlayerAnimation : uint8
 {
-	IDLE = 0 UMETA(DisplayName = "Idle animation"),
-	WALK = 1 UMETA(DisplayName = "Walk animation"),
+	IDLE = 0				UMETA(DisplayName = "Idle animation"),
+	WALK = 1				UMETA(DisplayName = "Walk animation"),
+	IDLE_WITH_HAMMER = 2 	UMETA(DisplayName = "Idle with hammer animation"),
+	WALK_WITH_HAMMER = 3 	UMETA(DisplayName = "Walk with hammer animation"),
 };
 
 USTRUCT(BlueprintType)
@@ -23,6 +26,14 @@ struct FSpriteAnimDetails
 	UPROPERTY(EditAnywhere)
 	USpriteAnimationDataAsset* SpriteAnimDA;
 	FPlayerAnimation AnimationType;
+};
+
+UENUM()
+enum class FCurrentItem : uint8
+{
+	EMPTY = 0	UMETA(DisplayName = "Holding no item"),
+	HAMMER = 1	UMETA(DisplayName = "Holding Philbert's hammer"),
+	// TODO: Add more items!
 };
 
 UCLASS()
@@ -47,17 +58,21 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void ChangeAnimation(FPlayerAnimation NewAnimation);
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeItem(FCurrentItem NewItem);
 	
 protected:
 	// Action/axis methods:
 	void MoveRight(float Value);
 	void MoveForward(float Value);
-
+	void InteractWhileHoldingItem();
+	
 	// Animation methods:
 	void CreateDynamicAnimationMaterial();
 	void UpdateDynamicMaterialParameters();
 	void CalculateLocalAnimTime();
-
+	
 	UPROPERTY(EditAnywhere)
 	TMap<FPlayerAnimation, FSpriteAnimDetails> AnimationsList;	// List of details for each animation, exposed in the
 																// editor to be populated by a designer. Used to update
@@ -65,6 +80,7 @@ protected:
 																// switching animations.
 	UMaterialInstanceDynamic* DynamicMaterial;
 	FSpriteAnimDetails* CurrentAnimation;
+	FCurrentItem CurrentHeldItemType;
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
