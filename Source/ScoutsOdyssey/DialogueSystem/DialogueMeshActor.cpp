@@ -24,33 +24,12 @@ void ADialogueMeshActor::BeginPlay()
 	// Spawn AI Controller 
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
 	Clickable_SetUp();
-	
-	if(PlayOnStart)
-	{
-		LocalAnimTime = 0.0f;
-		bAnimFlipFlop = true;	
-	} else
-	{
-		LocalAnimTime = 0.0f;
-		bAnimFlipFlop = false;
-	}
-	
-	DynamicAnimMaterial = UMaterialInstanceDynamic::Create(
-		GetStaticMeshComponent()->GetMaterial(0), this);
-	
-	GetStaticMeshComponent()->SetMaterial(0, DynamicAnimMaterial);
 }
 
 void ADialogueMeshActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	// TODO: Extend this to choose animation transition duration!
-	LocalAnimTime += bAnimFlipFlop ? DeltaSeconds * AnimationSpeed : -DeltaSeconds * AnimationSpeed;
-	LocalAnimTime = FMath::Clamp(LocalAnimTime, 0.0f, 1.0f);	
 	
-	if (DynamicAnimMaterial)
-		DynamicAnimMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", LocalAnimTime);
 }
 
 void ADialogueMeshActor::BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
@@ -104,9 +83,4 @@ void ADialogueMeshActor::Clickable_SetUp()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Dialogue mesh actor OnClicked delegate wasn't set up (DialogueComponent was nullptr)"));
 	}
-}
-
-void ADialogueMeshActor::ToggleAnimation()
-{
-	bAnimFlipFlop = !bAnimFlipFlop;
 }

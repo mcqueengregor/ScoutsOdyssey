@@ -13,19 +13,32 @@ UTreeInteractComponent::UTreeInteractComponent()
 void UTreeInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
+
+	if (OwnerActor)
+	{
+		LocalAnimTime = 0.0f;
+		bAnimFlipFlop = bPlayOnStart;
+		
 	
+		DynamicAnimMaterial = UMaterialInstanceDynamic::Create(
+			GetStaticMeshComponent()->GetMaterial(0), this);
+	
+		OwnerActor->GetStaticMeshComponent()->SetMaterial(0, DynamicAnimMaterial);
+	}
 }
 
 void UTreeInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
-	if (OwnerActor)
-	{
-		OwnerActor->Tick(DeltaTime);
-	}
+	
+	LocalAnimTime += DeltaTime * (1.0f / AnimationDuration) * static_cast<int32>(bAnimFlipFlop);
+	LocalAnimTime = FMath::Clamp(LocalAnimTime, 0.0f, 1.0f);	
+	
+	if (DynamicAnimMaterial)
+		DynamicAnimMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", LocalAnimTime);
 }
 
 void UTreeInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
@@ -35,15 +48,6 @@ void UTreeInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemTyp
 
 void UTreeInteractComponent::DoTask()
 {
-	ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
-	
-	if (OwnerActor)
-	{
-		OwnerActor->ToggleAnimation();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning,
-			TEXT("TreeInteractComponent couldn't get reference to owning DialogueMeshActor!"));
-	}
+	// Toggle animation playback:
+	bAnimFlipFlop = !bAnimFlipFlop;	
 }

@@ -8,6 +8,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/Components/InteractComponentBase.h"
+#include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
+#include "ScoutsOdyssey/InventorySystem/InventoryComponent.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -103,6 +106,9 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerPawn::MoveRight);
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerPawn::MoveForward);
+
+	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this,
+		&APlayerPawn::InteractWhileHoldingItem);
 }
 
 void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
@@ -138,6 +144,28 @@ void APlayerPawn::MoveRight(float Value)
 void APlayerPawn::MoveForward(float Value)
 {
 	MovementDirection.X = FMath::Clamp(Value, -1.0f, 1.0f) * VertMoveSpeed;
+}
+
+void APlayerPawn::InteractWhileHoldingItem()
+{
+	TArray<AActor*> OverlappingSceneProps;
+	GetOverlappingActors(OverlappingSceneProps, ADialogueMeshActor::StaticClass());
+
+	// If standing next to enough scene props, get interaction component and call OnInteractWithItem on it:
+	if (OverlappingSceneProps.Num() >= 1)
+	{
+		UInventoryComponent* InventoryComponent =
+			Cast<UInventoryComponent>(GetComponentByClass(UInventoryComponent::StaticClass()));
+
+		if (InventoryComponent && InventoryComponent->GetCurrentItem())
+		{
+			UInteractComponentBase* ScenePropInteractComp =
+				Cast<UInteractComponentBase>(OverlappingSceneProps[0]->GetComponentByClass(UInteractComponentBase::StaticClass()));
+
+			if (ScenePropInteractComp)
+				ScenePropInteractComp->OnInteractWithItem(InventoryComponent->GetCurrentItem(), this);
+		}
+	}
 }
 
 void APlayerPawn::CreateDynamicAnimationMaterial()

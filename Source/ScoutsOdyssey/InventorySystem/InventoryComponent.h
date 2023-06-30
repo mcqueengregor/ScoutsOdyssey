@@ -22,10 +22,16 @@ protected:
 public:	
 	UFUNCTION(BlueprintCallable)
 	void AddItem(UInventoryItemDataAsset* Item);
+	
 	UFUNCTION(BlueprintCallable)
 	void RemoveSelectedItem();
+	
 	UFUNCTION(BlueprintCallable)
 	void SwitchItem(float Mouse_AxisValue);
+
+	// Return the currently-held item, if the player is holding one:
+	UFUNCTION(BlueprintCallable)
+	inline UInventoryItemDataAsset* GetCurrentItem() { return Items.Num() > 0 ? Items[SelectedItem_Index] : nullptr; }
 	
 private:
 	UPROPERTY(VisibleAnywhere, Category=Inventory)

@@ -3,6 +3,7 @@
 
 #include "TentInteractComponent.h"
 #include "../DialogueSystem/DialogueMeshActor.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 UTentInteractComponent::UTentInteractComponent()
 {
@@ -13,7 +14,17 @@ void UTentInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
 	
+	if (OwnerActor)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
+			UKismetSystemLibrary::GetDisplayName(OwnerActor->GetStaticMeshComponent()->GetMaterial(0)));
+		
+		UMaterialInterface* MatInterface = OwnerActor->GetStaticMeshComponent()->GetMaterial(0);
+		DynamicMaterial = UMaterialInstanceDynamic::Create(MatInterface, this);
+		OwnerActor->GetStaticMeshComponent()->SetMaterial(0, DynamicMaterial);
+	}
 }
 
 void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -30,8 +41,9 @@ void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-		FString("Tent interact working!"));
+	CurrentState = CurrentState == FTentState::START ? FTentState::MIDDLE : FTentState::END;
+	UTexture** CurrentTexture = TentStateTextures.Find(CurrentState);
+	DynamicMaterial->SetTextureParameterValue("SpriteTexture", Cast<UTexture>(*CurrentTexture));
 }
 
 void UTentInteractComponent::DoTask()

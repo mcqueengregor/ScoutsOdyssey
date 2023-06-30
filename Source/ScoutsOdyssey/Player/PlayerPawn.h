@@ -52,7 +52,8 @@ protected:
 	// Action/axis methods:
 	void MoveRight(float Value);
 	void MoveForward(float Value);
-
+	void InteractWhileHoldingItem();
+	
 	// Animation methods:
 	void CreateDynamicAnimationMaterial();
 	void UpdateDynamicMaterialParameters();
