@@ -28,7 +28,6 @@ void UInventoryComponent::BeginPlay()
 		AddItem(EmptyHandDataAsset);
 }
 
-
 void UInventoryComponent::AddItem(UInventoryItemDataAsset* Item)
 {
 	Items.AddUnique(Item);
