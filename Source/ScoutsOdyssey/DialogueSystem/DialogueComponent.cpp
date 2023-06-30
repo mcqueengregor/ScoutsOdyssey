@@ -303,6 +303,10 @@ void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& St
 			GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
 		} else
 		{
+			// Play Sound
+			if(String[CurChar_Index] != TCHAR('.') && String[CurChar_Index] != TCHAR(' '))
+				PlayRandomVoice(VoiceType);
+			
 			// Set Text
 			CurSpeakString += String[CurChar_Index];
 			CurChar_Index++;
@@ -311,9 +315,6 @@ void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& St
 				TextBlock->SetText(FText::FromString(CurSpeakString));
 			else
 				LOG_ERROR("Can't Set Text. TextBlock is null!");
-			
-			// Play Sound
-			PlayRandomVoice(VoiceType);
 		}
 	} else
 	{
