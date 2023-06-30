@@ -39,8 +39,6 @@ void UTentInteractComponent::BeginPlay()
 				static_cast<float>(TentStateTextures.Find(FTentState::START)->TentStateTexture->GetSizeX());
 			Texture.Value.TextureScale.Z = 1.0f;
 
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan,
-				Texture.Value.TextureScale.ToString());
 		}
 	}
 }

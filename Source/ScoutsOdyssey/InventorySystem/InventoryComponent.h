@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InventoryItemDataAsset.h"
 #include "Components/ActorComponent.h"
+#include "../Player/PlayerPawn.h"
 #include "InventoryComponent.generated.h"
 
 
@@ -38,4 +39,9 @@ private:
 	TArray<UInventoryItemDataAsset*> Items;
 	UPROPERTY(VisibleAnywhere, Category=Inventory)
 	int SelectedItem_Index;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	TMap<FGameplayTag, FCurrentItem> TagToEnumMap;
+
+	UInventoryItemDataAsset* EmptyHandDataAsset;
 };
