@@ -41,9 +41,15 @@ void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
-	CurrentState = CurrentState == FTentState::START ? FTentState::MIDDLE : FTentState::END;
-	UTexture** CurrentTexture = TentStateTextures.Find(CurrentState);
-	DynamicMaterial->SetTextureParameterValue("SpriteTexture", Cast<UTexture>(*CurrentTexture));
+	if (ItemType->ItemTag.MatchesTag(ValidItemTag))
+	{
+		CurrentState = CurrentState == FTentState::START ? FTentState::MIDDLE : FTentState::END;
+		UTexture** CurrentTexture = TentStateTextures.Find(CurrentState);
+		DynamicMaterial->SetTextureParameterValue("SpriteTexture", *CurrentTexture);
+	}
+	else
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red,
+			FString("Tags don't match!"));
 }
 
 void UTentInteractComponent::DoTask()

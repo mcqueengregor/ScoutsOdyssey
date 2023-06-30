@@ -23,7 +23,7 @@ void UTreeInteractComponent::BeginPlay()
 		
 	
 		DynamicAnimMaterial = UMaterialInstanceDynamic::Create(
-			GetStaticMeshComponent()->GetMaterial(0), this);
+			OwnerActor->GetStaticMeshComponent()->GetMaterial(0), this);
 	
 		OwnerActor->GetStaticMeshComponent()->SetMaterial(0, DynamicAnimMaterial);
 	}
@@ -43,11 +43,15 @@ void UTreeInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UTreeInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
-
+	
 }
 
 void UTreeInteractComponent::DoTask()
 {
-	// Toggle animation playback:
+	ToggleAnimation();
+}
+
+void UTreeInteractComponent::ToggleAnimation()
+{
 	bAnimFlipFlop = !bAnimFlipFlop;	
 }
