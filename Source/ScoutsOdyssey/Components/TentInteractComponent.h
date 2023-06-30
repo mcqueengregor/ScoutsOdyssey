@@ -14,6 +14,16 @@ enum class FTentState : uint8
 	END = 2		UMETA(DisplayName = "Tent fully put up"),
 };
 
+USTRUCT()
+struct FTentDetails
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere)
+	UTexture2D* TentStateTexture;
+	FVector TextureScale;
+};
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SCOUTSODYSSEY_API UTentInteractComponent : public UInteractComponentBase
 {
@@ -35,8 +45,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FTentState CurrentState;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TMap<FTentState, UTexture*> TentStateTextures;
+	UPROPERTY(EditDefaultsOnly)
+	TMap<FTentState, FTentDetails> TentStateTextures;
 
 private:
 	UMaterialInstanceDynamic* DynamicMaterial;	// Dynamic material instance applied to owner mesh, used to change the
@@ -44,4 +54,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTag ValidItemTag;
+
+	FVector OriginalLocation;
 };

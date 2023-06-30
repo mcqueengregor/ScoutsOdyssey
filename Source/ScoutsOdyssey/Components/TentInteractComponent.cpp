@@ -18,12 +18,30 @@ void UTentInteractComponent::BeginPlay()
 	
 	if (OwnerActor)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-			UKismetSystemLibrary::GetDisplayName(OwnerActor->GetStaticMeshComponent()->GetMaterial(0)));
-		
 		UMaterialInterface* MatInterface = OwnerActor->GetStaticMeshComponent()->GetMaterial(0);
 		DynamicMaterial = UMaterialInstanceDynamic::Create(MatInterface, this);
 		OwnerActor->GetStaticMeshComponent()->SetMaterial(0, DynamicMaterial);
+
+		OriginalLocation = OwnerActor->GetActorLocation();
+	}
+
+	for (auto& Texture : TentStateTextures)
+	{
+		if (Texture.Value.TentStateTexture)
+		{
+			Texture.Value.TextureScale = FVector(
+				Texture.Value.TentStateTexture->GetSizeX(),
+				Texture.Value.TentStateTexture->GetSizeY(),
+				0.0f);
+			Texture.Value.TextureScale.Normalize();
+			Texture.Value.TextureScale /= Texture.Value.TextureScale.X;
+			Texture.Value.TextureScale *= Texture.Value.TentStateTexture->GetSizeX() /
+				static_cast<float>(TentStateTextures.Find(FTentState::START)->TentStateTexture->GetSizeX());
+			Texture.Value.TextureScale.Z = 1.0f;
+
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan,
+				Texture.Value.TextureScale.ToString());
+		}
 	}
 }
 
@@ -44,8 +62,17 @@ void UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemTyp
 	if (ItemType->ItemTag.MatchesTag(ValidItemTag))
 	{
 		CurrentState = CurrentState == FTentState::START ? FTentState::MIDDLE : FTentState::END;
-		UTexture** CurrentTexture = TentStateTextures.Find(CurrentState);
-		DynamicMaterial->SetTextureParameterValue("SpriteTexture", *CurrentTexture);
+		UTexture* CurrentTexture = TentStateTextures.Find(CurrentState)->TentStateTexture;
+		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
+
+		if (ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner()))
+		{
+			OwnerActor->GetStaticMeshComponent()->SetRelativeScale3D(
+				TentStateTextures.Find(CurrentState)->TextureScale);
+
+			// TODO: Make this proportional to differences in resolution between tent sprites:
+			OwnerActor->SetActorLocation(OriginalLocation + FVector(0.0f, 0.0f, 30.0f));
+		}
 	}
 	else
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red,
