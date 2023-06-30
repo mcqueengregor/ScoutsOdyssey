@@ -4,26 +4,61 @@
 #include "DialogueMeshActor.h"
 #include "DialogueComponent.h"
 #include "ScoutsOdyssey/Player/MyPlayerController.h"
-#include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
 #include "DialogueChoiceObject.h"
 #include "Blueprint/UserWidget.h"
-#include "SpeechBubbleUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Components/ListView.h"
-#include "Components/Overlay.h"
-#include "Components/TextBlock.h"
+#include "Components/BoxComponent.h"
+#include "GameFramework/InputSettings.h"
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
 #include "ScoutsOdyssey/Components/InteractComponentBase.h"
+
+ADialogueMeshActor::ADialogueMeshActor()
+{
+	PropCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("PropCollider"));
+	PropCollider->SetupAttachment(RootComponent);
+}
+
+
 
 void ADialogueMeshActor::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	MyPlayerController = Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	// Spawn AI Controller 
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
 	Clickable_SetUp();
+
+	// Start input component. will start on all DialogueMeshActors in scene. 
+	StartPlayerInputComponent();
+}
+
+UInputComponent* ADialogueMeshActor::CreatePlayerInputComponent()
+{
+	static const FName InputComponentName(TEXT("DialogueMeshActor_InputComponent"));
+	return NewObject<UInputComponent>(this, UInputSettings::GetDefaultInputComponentClass(), InputComponentName);
+}
+
+/**
+ * @brief It sets consumeInput to false, after getting a FInputActionBinding& reference. By reference, take note.
+ * @param PlayerInputComponent 
+ */
+void ADialogueMeshActor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	FInputActionBinding& ClickBinding = PlayerInputComponent->BindAction("Click", IE_Pressed, this, &ADialogueMeshActor::LeftMouseButtonDown);
+	ClickBinding.bConsumeInput = false;
+}
+
+void ADialogueMeshActor::StartPlayerInputComponent()
+{
+	InputComponent = CreatePlayerInputComponent();
+	if(InputComponent)
+	{
+		SetupPlayerInputComponent(InputComponent);
+		InputComponent->RegisterComponent();
+	}
 }
 
 void ADialogueMeshActor::Tick(float DeltaSeconds)
@@ -82,5 +117,17 @@ void ADialogueMeshActor::Clickable_SetUp()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Dialogue mesh actor OnClicked delegate wasn't set up (DialogueComponent was nullptr)"));
+	}
+}
+
+void ADialogueMeshActor::LeftMouseButtonDown()
+{
+	LOG_ACTOR("current left mouse button down actor!");
+	if(OnLeftMouseClick.IsBound())
+	{
+		OnLeftMouseClick.Execute();
+	} else
+	{
+		PRINT("delegate not bound? for some reason?");
 	}
 }

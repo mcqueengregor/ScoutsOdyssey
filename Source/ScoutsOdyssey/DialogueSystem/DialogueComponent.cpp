@@ -41,7 +41,6 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 
 void UDialogueComponent::StartDialogue()
 {
-	LOG_ACTOR_ERROR("started! yeah! but why?");
 	Click_Implementation(nullptr,EKeys::A);
 
 	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());

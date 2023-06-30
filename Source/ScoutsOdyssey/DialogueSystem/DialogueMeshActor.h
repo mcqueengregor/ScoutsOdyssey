@@ -8,6 +8,8 @@
 #include "ScoutsOdyssey/Interfaces/Clickable.h"
 #include "DialogueMeshActor.generated.h"
 
+DECLARE_DELEGATE(FOnLeftMouseClick);
+
 /**
  * 
  */
@@ -15,10 +17,16 @@ UCLASS()
 class SCOUTSODYSSEY_API ADialogueMeshActor : public AStaticMeshActor, public IClickable
 {
 	GENERATED_BODY()
+	ADialogueMeshActor();
 
 protected:
 	virtual void BeginPlay() override;
-	
+
+	// handling input
+	UInputComponent* CreatePlayerInputComponent();	
+	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent);
+	void StartPlayerInputComponent();
+
 public:
 	virtual void Tick(float DeltaSeconds) override;
 	
@@ -32,4 +40,12 @@ public:
 	UFUNCTION()
 	void BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
 	void Clickable_SetUp();
+
+	UFUNCTION()
+	void LeftMouseButtonDown();
+	FOnLeftMouseClick OnLeftMouseClick;
+
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	class UBoxComponent* PropCollider;
 };

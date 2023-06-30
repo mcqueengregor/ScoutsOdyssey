@@ -56,4 +56,5 @@ private:
 	FGameplayTag ValidItemTag;
 
 	FVector OriginalLocation;
+	float OriginalScaleMultipler;
 };

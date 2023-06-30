@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
 #include "ScoutsOdyssey/Components/InteractComponentBase.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 #include "ScoutsOdyssey/InventorySystem/InventoryComponent.h"
@@ -170,6 +171,8 @@ void APlayerPawn::InteractWhileHoldingItem()
 	TArray<AActor*> OverlappingSceneProps;
 	GetOverlappingActors(OverlappingSceneProps, ADialogueMeshActor::StaticClass());
 
+	//PRINT_CLASS_LINE_FLOAT("Overlapped actors count: ", OverlappingSceneProps.Num());
+	
 	// If standing next to enough scene props, get interaction component and call OnInteractWithItem on it:
 	if (OverlappingSceneProps.Num() >= 1)
 	{

@@ -23,6 +23,7 @@ void UTentInteractComponent::BeginPlay()
 		OwnerActor->GetStaticMeshComponent()->SetMaterial(0, DynamicMaterial);
 
 		OriginalLocation = OwnerActor->GetActorLocation();
+		OriginalScaleMultipler = OwnerActor->GetActorScale().X;
 	}
 
 	for (auto& Texture : TentStateTextures)
@@ -41,6 +42,7 @@ void UTentInteractComponent::BeginPlay()
 
 		}
 	}
+
 }
 
 void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -66,10 +68,10 @@ void UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemTyp
 		if (ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner()))
 		{
 			OwnerActor->GetStaticMeshComponent()->SetRelativeScale3D(
-				TentStateTextures.Find(CurrentState)->TextureScale);
+				TentStateTextures.Find(CurrentState)->TextureScale * OriginalScaleMultipler);
 
 			// TODO: Make this proportional to differences in resolution between tent sprites:
-			OwnerActor->SetActorLocation(OriginalLocation + FVector(0.0f, 0.0f, 30.0f));
+			OwnerActor->SetActorLocation(OriginalLocation + (FVector(0.0f, 0.0f, 30.0f) *  OriginalScaleMultipler));
 		}
 	}
 	else
