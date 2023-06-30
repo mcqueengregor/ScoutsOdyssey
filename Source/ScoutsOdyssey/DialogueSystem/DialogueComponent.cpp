@@ -289,6 +289,7 @@ void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& St
 	{
 		if(CurChar_Index >= String.Len())
 		{
+			SpeakClickCount = 1;
 			GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
 		} else
 		{
