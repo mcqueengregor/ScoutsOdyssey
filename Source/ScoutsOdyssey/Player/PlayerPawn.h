@@ -79,13 +79,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class USpringArmComponent* SpringArmComponent;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 		float HoriMoveSpeed;	// Left/right speed in Unreal units per second.
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 		float VertMoveSpeed;	// Front/back speed in Unreal units per second.
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 		float CameraTransitionDuration;	// The amount of time a camera angle transition takes, in seconds.
 	
 	bool bHasCameraAngleChangedAlready;	// Whether or not the camera component has changed location already.
@@ -96,6 +96,7 @@ public:
 																			// sections, used to accurately determine
 																			// the current camera angle to use.
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Misc.")
 	AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
 
 private:
