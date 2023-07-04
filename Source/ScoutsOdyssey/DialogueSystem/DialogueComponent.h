@@ -30,6 +30,9 @@ public:
 	UFUNCTION()
 	virtual void Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) override;
 
+	UFUNCTION(BlueprintCallable)
+	void StartDialogue();
+	
 	// Widgets
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> PlayerSpeechBubble_WidgetAsset;

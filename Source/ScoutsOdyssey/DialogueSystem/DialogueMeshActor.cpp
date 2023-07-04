@@ -20,10 +20,12 @@ ADialogueMeshActor::ADialogueMeshActor()
 	PropCollider->SetupAttachment(RootComponent);
 }
 
+
+
 void ADialogueMeshActor::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	MyPlayerController = Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	// Spawn AI Controller 
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
@@ -31,21 +33,6 @@ void ADialogueMeshActor::BeginPlay()
 
 	// Start input component. will start on all DialogueMeshActors in scene. 
 	StartPlayerInputComponent();
-	
-	if(PlayOnStart)
-	{
-		LocalAnimTime = 0.0f;
-		bAnimFlipFlop = true;	
-	} else
-	{
-		LocalAnimTime = 0.0f;
-		bAnimFlipFlop = false;
-	}
-	
-	DynamicAnimMaterial = UMaterialInstanceDynamic::Create(
-		GetStaticMeshComponent()->GetMaterial(0), this);
-	
-	GetStaticMeshComponent()->SetMaterial(0, DynamicAnimMaterial);
 }
 
 UInputComponent* ADialogueMeshActor::CreatePlayerInputComponent()
@@ -77,13 +64,7 @@ void ADialogueMeshActor::StartPlayerInputComponent()
 void ADialogueMeshActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	// TODO: Extend this to choose animation transition duration!
-	LocalAnimTime += bAnimFlipFlop ? DeltaSeconds * AnimationSpeed : -DeltaSeconds * AnimationSpeed;
-	LocalAnimTime = FMath::Clamp(LocalAnimTime, 0.0f, 1.0f);	
 	
-	if (DynamicAnimMaterial)
-		DynamicAnimMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", LocalAnimTime);
 }
 
 void ADialogueMeshActor::BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
@@ -94,11 +75,11 @@ void ADialogueMeshActor::BehaviorTree_Start(UPrimitiveComponent* TouchedComponen
 		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
 		if(Blackboard)
 		{
-			UDialogueComponent* DiagueComponent =
+			UDialogueComponent* DialogueComponent =
 				Cast<UDialogueComponent>(GetComponentByClass(UDialogueComponent::StaticClass()));
-			if (DiagueComponent)
+			if (DialogueComponent)
 			{
-				Blackboard->SetValueAsObject("DialogueComponent", DiagueComponent);
+				Blackboard->SetValueAsObject("DialogueComponent", DialogueComponent);
 				UE_LOG(LogTemp, Warning, TEXT("Registered dialogue component reference in blackboard!"));
 			}
 
@@ -137,11 +118,6 @@ void ADialogueMeshActor::Clickable_SetUp()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Dialogue mesh actor OnClicked delegate wasn't set up (DialogueComponent was nullptr)"));
 	}
-}
-
-void ADialogueMeshActor::ToggleAnimation()
-{
-	bAnimFlipFlop = !bAnimFlipFlop;
 }
 
 void ADialogueMeshActor::LeftMouseButtonDown()

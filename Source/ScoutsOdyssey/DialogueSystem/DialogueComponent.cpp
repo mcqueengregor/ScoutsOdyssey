@@ -25,8 +25,6 @@ UDialogueComponent::UDialogueComponent()
 
 void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) 
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Clicked! From Dialogue Component"));
-
 	// Enable input on click.
 	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
 	if(DialogueMeshActor)
@@ -39,6 +37,17 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 
 	// Set as -1 when you first start. So won't call speak finish
 	SpeakClickCount = -1;
+}
+
+void UDialogueComponent::StartDialogue()
+{
+	Click_Implementation(nullptr,EKeys::A);
+
+	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
+	if(DialogueMeshActor)
+		DialogueMeshActor->BehaviorTree_Start(nullptr, EKeys::A);
+	else
+		LOG_ERROR("Couldn't start behavior tree.");
 }
 
 void UDialogueComponent::BeginPlay()
@@ -293,6 +302,10 @@ void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& St
 			GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
 		} else
 		{
+			// Play Sound
+			if(String[CurChar_Index] != TCHAR('.') && String[CurChar_Index] != TCHAR(' '))
+				PlayRandomVoice(VoiceType);
+			
 			// Set Text
 			CurSpeakString += String[CurChar_Index];
 			CurChar_Index++;
@@ -301,9 +314,6 @@ void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& St
 				TextBlock->SetText(FText::FromString(CurSpeakString));
 			else
 				LOG_ERROR("Can't Set Text. TextBlock is null!");
-			
-			// Play Sound
-			PlayRandomVoice(VoiceType);
 		}
 	} else
 	{
