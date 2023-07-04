@@ -24,8 +24,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	UTextureRenderTarget2D* RenderTarget;
+	void ResizeRenderTarget(FViewport* Viewport, uint32 val);
 
+	UPROPERTY(BlueprintReadOnly)
+		class APlayerPawn* PlayerPawnRef;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		class USceneCaptureComponent2D SceneCaptureComponent;
+		class USceneCaptureComponent2D* SceneCaptureComponent;
 };
