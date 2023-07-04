@@ -26,8 +26,9 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	virtual void OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef) PURE_VIRTUAL(UInteractComponentBase::OnInteractWithItem,);
-
+	virtual bool OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
+	PURE_VIRTUAL(UInteractComponentBase::OnInteractWithItem, return false;);
+	
 	UFUNCTION(BlueprintCallable)
 	virtual void DoTask() PURE_VIRTUAL(UInteractComponentBase::DoTask,);
 };

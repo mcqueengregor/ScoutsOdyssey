@@ -60,6 +60,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void ChangeItem(FCurrentItem NewItem);
+
+	UFUNCTION(BlueprintCallable)
+		void StartInteracting() {}
 	
 protected:
 	// Action/axis methods:
@@ -135,5 +138,7 @@ private:
 	float CurrentGameTime;		// The amount of time that has passed since the game started, in seconds.
 	
 	bool bIsChangingItem;		// Flag for indicating if the current animation is a "switch item" animation.
-	float ChangeItemLocalTime;	// Whereabouts in the animation spritesheet 
+	float ChangeItemLocalTime;	// Whereabouts in the animation spritesheet is being drawn onto the player plane.
+
+	bool bIsInteracting;		// Flag for indicating if the player is in the middle of interacting with a scene prop.
 };
