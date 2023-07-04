@@ -2,8 +2,7 @@
 
 #include "PlayerPawn.h"
 
-#include <string>
-
+#include "../Level/StageSectionVolume.h"
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -56,6 +55,7 @@ APlayerPawn::APlayerPawn()
 	CameraTransitionDuration = 1.0f;
 	bHasCameraAngleChangedAlready = false;
 	LastEnteredSection = nullptr;
+	bIsChangingItem = false;
 }
 
 // Called when the game starts or when spawned
@@ -79,25 +79,33 @@ void APlayerPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	CurrentGameTime += DeltaTime;
 	
-	// Update animation based on this frame's movement vector:
-	if (MovementDirection.IsNearlyZero())
-		ChangeAnimation(FPlayerAnimation::IDLE);
+	// Update animation based on this frame's movement vector, if the player isn't currently changing item:
+	if (!bIsChangingItem)
+	{
+		if (MovementDirection.IsNearlyZero())
+			ChangeAnimation(FPlayerAnimation::IDLE);
+		else
+		{
+			FVector NewLocation = GetActorLocation() + MovementDirection * DeltaTime;
+			SetActorLocation(NewLocation);
+			ChangeAnimation(FPlayerAnimation::WALK);
+		
+			// Flip sprite mesh based on horizontal movement direction:
+			FVector NewScale = OriginalMeshScale;
+			NewScale.X *= MovementDirection.Y < 0 ? -OriginalMeshScale.X : OriginalMeshScale.X;
+			MeshComponent->SetRelativeScale3D(FVector(
+				MovementDirection.Y < 0 ? -OriginalMeshScale.X : OriginalMeshScale.X,
+				OriginalMeshScale.Y,
+				OriginalMeshScale.Z));
+		}
+		CalculateLocalAnimTime();
+	}
+	// If the player is currently playing a "switch item" animation, figure out
+	// which sprite in the spritesheet should be displayed:
 	else
 	{
-		FVector NewLocation = GetActorLocation() + MovementDirection * DeltaTime;
-		SetActorLocation(NewLocation);
-		ChangeAnimation(FPlayerAnimation::WALK);
-		
-		// Flip sprite mesh based on horizontal movement direction:
-		FVector NewScale = OriginalMeshScale;
-		NewScale.X *= MovementDirection.Y < 0 ? -OriginalMeshScale.X : OriginalMeshScale.X;
-		MeshComponent->SetRelativeScale3D(FVector(
-			MovementDirection.Y < 0 ? -OriginalMeshScale.X : OriginalMeshScale.X,
-			OriginalMeshScale.Y,
-			OriginalMeshScale.Z));
+		CalculateChangeItemLocalAnimTime(DeltaTime);
 	}
-
-	CalculateLocalAnimTime();
 
 	// Reset movement speed so that turning off input axis calls doesn't force player to continue moving:
 	MovementDirection = FVector(0.0f);
@@ -152,8 +160,11 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 
 void APlayerPawn::ChangeItem(FCurrentItem NewItem)
 {
+	PreviouslyHeldItemType = CurrentHeldItemType;
 	CurrentHeldItemType = NewItem;
-	ChangeAnimation(CurrentAnimation->AnimationType);
+	
+	bIsChangingItem = true;
+	ChangeItemLocalTime = -1.0f;
 }
 
 void APlayerPawn::MoveRight(float Value)
@@ -170,8 +181,6 @@ void APlayerPawn::InteractWhileHoldingItem()
 {
 	TArray<AActor*> OverlappingSceneProps;
 	GetOverlappingActors(OverlappingSceneProps, ADialogueMeshActor::StaticClass());
-
-	//PRINT_CLASS_LINE_FLOAT("Overlapped actors count: ", OverlappingSceneProps.Num());
 	
 	// If standing next to enough scene props, get interaction component and call OnInteractWithItem on it:
 	if (OverlappingSceneProps.Num() >= 1)
@@ -224,6 +233,40 @@ void APlayerPawn::CalculateLocalAnimTime()
 	float AdjustedLocalTimeNorm = FGenericPlatformMath::Fmod(LocalTimeNorm,
 		FMath::Max(NumSprites / static_cast<float>(NumSpriteCells), 1e-5f));
 	
+	if (DynamicMaterial) DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", AdjustedLocalTimeNorm);
+}
+
+void APlayerPawn::CalculateChangeItemLocalAnimTime(float DeltaTime)
+{
+	const USpriteAnimationDataAsset* SpriteDA = ChangeItemLocalTime < 0.0f ?
+		ChangeItemAnimationsList.Find(PreviouslyHeldItemType)->SpriteAnimDA :
+		ChangeItemAnimationsList.Find(CurrentHeldItemType)->SpriteAnimDA;
+	
+	const float NumSprites = SpriteDA->NumSpritesheetColumns * SpriteDA->NumSpritesheetRows - SpriteDA->NumEmptyFrames;
+	const float AnimDuration = NumSprites / SpriteDA->PlaybackFramerate;
+
+	const float AnimAdvanceAmount = DeltaTime / AnimDuration;
+	ChangeItemLocalTime += AnimAdvanceAmount;
+
+	// If change item animation has reached the end of the currently-held item's animation,
+	// restore input and revert to IDLE animation:
+	if (ChangeItemLocalTime >= 1.0f)
+	{	
+		bIsChangingItem = false;
+		ChangeAnimation(FPlayerAnimation::IDLE);
+	}
+	
 	if (DynamicMaterial)
-		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", AdjustedLocalTimeNorm);
+	{
+		DynamicMaterial->SetTextureParameterValue("AnimationSpritesheet", SpriteDA->SpritesheetTexture);
+		DynamicMaterial->SetScalarParameterValue("NumSpritesheetRows", SpriteDA->NumSpritesheetRows);
+		DynamicMaterial->SetScalarParameterValue("NumSpritesheetColumns", SpriteDA->NumSpritesheetColumns);
+		
+		// ("1 - LocalTime" is done because the pocket animations start at "holding" and end at "pocket")
+		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",1.0f - FMath::Abs(ChangeItemLocalTime) * 
+			(SpriteDA->NumSpritesheetColumns * SpriteDA->NumSpritesheetRows - NumSprites));
+
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald,
+			FString::Printf(TEXT("%f"), 1.0 - FMath::Abs(ChangeItemLocalTime)));
+	}
 }
