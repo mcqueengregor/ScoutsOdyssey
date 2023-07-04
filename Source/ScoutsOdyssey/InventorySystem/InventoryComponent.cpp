@@ -56,14 +56,12 @@ void UInventoryComponent::SwitchItem(float Mouse_AxisValue)
 
 	SelectedItem_Index = NewIndex;
 
-	if (Items.Num() > 0)
+	// Don't tell the player to change item if there isn't another item to change to:
+	if (Items.Num() > 1)
 	{
 		// If the Tag->Enum map knows about this item, make the player start holding the item:
-		if (TagToEnumMap.Contains(Items[SelectedItem_Index]->ItemTag))
-		{
-			if (PlayerPawnRef)
-				PlayerPawnRef->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)));
-		}
+		if (TagToEnumMap.Contains(Items[SelectedItem_Index]->ItemTag) && PlayerPawnRef)
+			PlayerPawnRef->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)));
 	}
 }
 

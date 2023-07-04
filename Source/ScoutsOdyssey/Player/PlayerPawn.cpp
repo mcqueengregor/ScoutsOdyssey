@@ -241,10 +241,11 @@ void APlayerPawn::CalculateChangeItemLocalAnimTime(float DeltaTime)
 	const USpriteAnimationDataAsset* SpriteDA = ChangeItemLocalTime < 0.0f ?
 		ChangeItemAnimationsList.Find(PreviouslyHeldItemType)->SpriteAnimDA :
 		ChangeItemAnimationsList.Find(CurrentHeldItemType)->SpriteAnimDA;
-	
-	const float NumSprites = SpriteDA->NumSpritesheetColumns * SpriteDA->NumSpritesheetRows - SpriteDA->NumEmptyFrames;
-	const float AnimDuration = NumSprites / SpriteDA->PlaybackFramerate;
 
+	const int NumCells = SpriteDA->NumSpritesheetColumns * SpriteDA->NumSpritesheetRows;
+	const int NumSprites = NumCells - SpriteDA->NumEmptyFrames;
+	const float AnimDuration = static_cast<float>(NumSprites) / SpriteDA->PlaybackFramerate;
+	
 	const float AnimAdvanceAmount = DeltaTime / AnimDuration;
 	ChangeItemLocalTime += AnimAdvanceAmount;
 
@@ -254,6 +255,7 @@ void APlayerPawn::CalculateChangeItemLocalAnimTime(float DeltaTime)
 	{	
 		bIsChangingItem = false;
 		ChangeAnimation(FPlayerAnimation::IDLE);
+		return;
 	}
 	
 	if (DynamicMaterial)
@@ -263,10 +265,7 @@ void APlayerPawn::CalculateChangeItemLocalAnimTime(float DeltaTime)
 		DynamicMaterial->SetScalarParameterValue("NumSpritesheetColumns", SpriteDA->NumSpritesheetColumns);
 		
 		// ("1 - LocalTime" is done because the pocket animations start at "holding" and end at "pocket")
-		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",1.0f - FMath::Abs(ChangeItemLocalTime) * 
-			(SpriteDA->NumSpritesheetColumns * SpriteDA->NumSpritesheetRows - NumSprites));
-
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald,
-			FString::Printf(TEXT("%f"), 1.0 - FMath::Abs(ChangeItemLocalTime)));
+		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",1.0f - FMath::Abs(ChangeItemLocalTime) *
+			(NumSprites / NumCells));
 	}
 }
