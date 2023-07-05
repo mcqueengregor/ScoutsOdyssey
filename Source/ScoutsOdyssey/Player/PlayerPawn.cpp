@@ -158,9 +158,6 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 	{
 		CurrentAnimation = AnimationsList.Find(NewAnimWithItem);
 		UpdateDynamicMaterialParameters();
-
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White,
-			UEnum::GetValueAsString(NewAnimWithItem));
 	}
 	
 	// TODO: If there's additional logic for playing back certain animations (e.g. only playing an animation once
