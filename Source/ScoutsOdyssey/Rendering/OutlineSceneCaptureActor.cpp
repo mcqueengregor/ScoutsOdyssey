@@ -8,6 +8,7 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "Kismet/GameplayStatics.h"
 #include "ScoutsOdyssey/Player/PlayerPawn.h"
+#include "ScoutsOdyssey/Level/StageSectionVolume.h"
 
 // Sets default values
 AOutlineSceneCaptureActor::AOutlineSceneCaptureActor()
@@ -47,10 +48,10 @@ void AOutlineSceneCaptureActor::Tick(float DeltaTime)
 
 	if (PlayerPawnRef && PlayerPawnRef->LastEnteredSection)
 	{
-		const FTransform NewWorldTransform =
-			PlayerPawnRef->LastEnteredSection->StageSectionCameraComponent->GetComponentTransform();
+		const UCameraComponent* StageSectionCamera = PlayerPawnRef->LastEnteredSection->StageSectionCameraComponent;
 
-		SceneCaptureComponent->SetWorldTransform(NewWorldTransform);
+		SceneCaptureComponent->SetWorldTransform(StageSectionCamera->GetComponentTransform());
+		SceneCaptureComponent->FOVAngle = StageSectionCamera->FieldOfView;
 	}
 	else
 		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red,

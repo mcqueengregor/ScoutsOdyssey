@@ -34,8 +34,6 @@ void ADialogueMeshActor::BeginPlay()
 
 	OnActorBeginOverlap.AddDynamic(this, &ADialogueMeshActor::OnOverlapBegin);
 	OnActorEndOverlap.AddDynamic(this, &ADialogueMeshActor::OnOverlapEnd);
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("Working!"));
 }
 
 UInputComponent* ADialogueMeshActor::CreatePlayerInputComponent()
