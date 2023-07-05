@@ -198,7 +198,7 @@ void UDialogueComponent::SetTextBlockText(const FString& String, UTextBlock& Tex
 }
 
 // Was const, now no longer const given TypeNextLetter isn't const
-void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType)
+void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType, const int FontSize)
 {
 	
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
@@ -208,6 +208,9 @@ void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, cons
 		auto SetTimerLambda = [=](const UUserWidget& UserWidget)
 		{
 			CurTextBlock = Cast<UTextBlock>(UserWidget.GetWidgetFromName(TEXT("TextBlock_Speak")));
+			FSlateFontInfo FontInfo = CurTextBlock->Font;
+			FontInfo.Size = FontSize;
+			CurTextBlock->SetFont(FontInfo);
 			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([=]()
 			{
 				TypeNextLetter(CurTextBlock, String, VoiceType);
