@@ -113,10 +113,27 @@ void ADialogueMeshActor::Clickable_SetUp()
 	{
 		MyStaticMeshComponent->OnClicked.AddDynamic(DialogueComponent, &UDialogueComponent::Click_Implementation);
 		MyStaticMeshComponent->OnClicked.AddDynamic(this, &ADialogueMeshActor::BehaviorTree_Start);
+		if(OnlyTriggerOnce)
+			DialogueComponent->OnDialogueEnd.AddUObject(this, &ADialogueMeshActor::Clickable_CleanUp);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Dialogue mesh actor OnClicked delegate wasn't set up (DialogueComponent was nullptr)"));
+	}
+}
+
+void ADialogueMeshActor::Clickable_CleanUp()
+{
+	UStaticMeshComponent* MyStaticMeshComponent =
+		Cast<UStaticMeshComponent>(GetComponentByClass(UStaticMeshComponent::StaticClass()));
+
+	if (MyStaticMeshComponent)
+	{
+		MyStaticMeshComponent->OnClicked.RemoveAll(this);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Dialogue mesh actor OnClicked delegate wasn't clean up (DialogueComponent was nullptr)"));
 	}
 }
 
