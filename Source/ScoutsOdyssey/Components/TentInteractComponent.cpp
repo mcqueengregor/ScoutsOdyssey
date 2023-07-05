@@ -57,7 +57,7 @@ void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	}
 }
 
-bool UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
+FCurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
 	if (ItemType->ItemTag.MatchesTag(ValidItemTag))
 	{
@@ -72,14 +72,14 @@ bool UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemTyp
 
 			// TODO: Make this proportional to differences in resolution between tent sprites:
 			OwnerActor->SetActorLocation(OriginalLocation + (FVector(0.0f, 0.0f, 30.0f) *  OriginalScaleMultipler));
-			return true;
+			return FCurrentInteraction::SUCCESS_NO_ANIM;
 		}
 	}
 	else
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red,
 			FString("Tags don't match!"));
 
-	return false;
+	return FCurrentInteraction::NO_INTERACTION;
 }
 
 void UTentInteractComponent::DoTask()

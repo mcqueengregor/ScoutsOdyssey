@@ -79,8 +79,8 @@ void APlayerPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	CurrentGameTime += DeltaTime;
 	
-	// Update animation based on this frame's movement vector, if the player isn't currently changing item:
-	if (!bIsChangingItem)
+	// Update animation based on this frame's movement vector, if the player isn't changing item or in an interaction:
+	if (!bIsChangingItem && !bIsInteracting)
 	{
 		if (MovementDirection.IsNearlyZero())
 			ChangeAnimation(FPlayerAnimation::IDLE);
@@ -99,6 +99,12 @@ void APlayerPawn::Tick(float DeltaTime)
 				OriginalMeshScale.Z));
 		}
 		CalculateLocalAnimTime();
+	}
+	// If the player is currently playing an "interact with scene" animation (e.g. shrugging, swinging
+	// hammer, throwing acorn, etc.), update that animation until the interaction has completed:
+	else if (bIsInteracting)
+	{
+		CalculateInteractLocalAnimTime(DeltaTime);
 	}
 	// If the player is currently playing a "switch item" animation, figure out
 	// which sprite in the spritesheet should be displayed:
@@ -148,10 +154,13 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 	}
 
 	// If the animation set to play on this frame is different from the currently-used one, update material:
-	if (NewAnimWithItem != CurrentAnimation->AnimationType)
+	if (NewAnimWithItem != CurrentAnimation->AnimationType || bIsInteracting)
 	{
 		CurrentAnimation = AnimationsList.Find(NewAnimWithItem);
 		UpdateDynamicMaterialParameters();
+
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White,
+			UEnum::GetValueAsString(NewAnimWithItem));
 	}
 	
 	// TODO: If there's additional logic for playing back certain animations (e.g. only playing an animation once
@@ -182,7 +191,7 @@ void APlayerPawn::InteractWhileHoldingItem()
 	TArray<AActor*> OverlappingSceneProps;
 	GetOverlappingActors(OverlappingSceneProps, ADialogueMeshActor::StaticClass());
 	
-	// If standing next to enough scene props, get interaction component and call OnInteractWithItem on it:
+	// If standing next to enough scene props, check for interaction component and call OnInteractWithItem on it:
 	if (OverlappingSceneProps.Num() >= 1)
 	{
 		UInventoryComponent* InventoryComponent =
@@ -193,8 +202,23 @@ void APlayerPawn::InteractWhileHoldingItem()
 			UInteractComponentBase* ScenePropInteractComp =
 				Cast<UInteractComponentBase>(OverlappingSceneProps[0]->GetComponentByClass(UInteractComponentBase::StaticClass()));
 
+			// If a nearby item has an interaction component associated with it, perform the interaction and update
+			// player animation accordingly:
 			if (ScenePropInteractComp)
-				ScenePropInteractComp->OnInteractWithItem(InventoryComponent->GetCurrentItem(), this);
+			{
+				FCurrentInteraction interactType =
+					ScenePropInteractComp->OnInteractWithItem(InventoryComponent->GetCurrentItem(), this);
+
+				// If interaction was successful but there isn't an animation associated with it, do nothing:
+				if (interactType == FCurrentInteraction::SUCCESS_NO_ANIM) return;
+
+				// Change current sprite animation to the appropriate interaction anim:
+				bIsInteracting = true;
+				InteractLocalTime = 0.0f;
+				
+				CurrentAnimation = InteractAnimationsList.Find(interactType);
+				UpdateDynamicMaterialParameters();
+			}
 		}
 	}
 }
@@ -266,6 +290,30 @@ void APlayerPawn::CalculateChangeItemLocalAnimTime(float DeltaTime)
 		
 		// ("1 - LocalTime" is done because the pocket animations start at "holding" and end at "pocket")
 		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",1.0f - FMath::Abs(ChangeItemLocalTime) *
+			(NumSprites / NumCells));
+	}
+}
+
+void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
+{
+	const USpriteAnimationDataAsset* SpriteDA = CurrentAnimation->SpriteAnimDA;
+	const int NumCells = SpriteDA->NumSpritesheetColumns * SpriteDA->NumSpritesheetRows;
+	const int NumSprites = NumCells - SpriteDA->NumEmptyFrames;
+	const float AnimDuration = static_cast<float>(NumSprites) / SpriteDA->PlaybackFramerate;
+	
+	const float AnimAdvanceAmount = DeltaTime / AnimDuration;
+	InteractLocalTime += AnimAdvanceAmount;
+
+	if (InteractLocalTime >= 1.0f)
+	{
+		ChangeAnimation(FPlayerAnimation::IDLE);
+		bIsInteracting = false;
+		return;
+	}
+
+	if (DynamicMaterial)
+	{
+		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",FMath::Abs(InteractLocalTime) *
 			(NumSprites / NumCells));
 	}
 }

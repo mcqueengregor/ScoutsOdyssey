@@ -35,6 +35,19 @@ enum class FCurrentItem : uint8
 	// TODO: Add more items!
 };
 
+UENUM()
+enum class FCurrentInteraction : uint8
+{
+	NO_INTERACTION = 0		UMETA(DisplayName = "Shrugging (invalid interaction)"),
+	SMASH_GREENHOUSE = 1	UMETA(DisplayName = "Smashing greenhouse with hammer"),
+	COLLECT_HONEY = 2		UMETA(DisplayName = "Collect honey in boot"),
+	HIT_TREE = 3			UMETA(DisplayName = "Hit tree with hammer"),
+	THROW_ACORN = 4			UMETA(DisplayName = "Throw acorn"),
+	PLACE_BOOT = 5			UMETA(DisplayName = "Placing honey boot at log"),
+
+	SUCCESS_NO_ANIM = 0xFF,	// Used when the interaction is successful, but has no animation associated with it.
+};
+
 UCLASS()
 class SCOUTSODYSSEY_API APlayerPawn : public APawn
 {
@@ -75,6 +88,7 @@ protected:
 	void UpdateDynamicMaterialParameters();
 	void CalculateLocalAnimTime();
 	void CalculateChangeItemLocalAnimTime(float DeltaTime);
+	void CalculateInteractLocalAnimTime(float DeltaTime);
 	
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FPlayerAnimation, FSpriteAnimDetails> AnimationsList;	// List of data assets for IDLE and WALK animations,
@@ -85,6 +99,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FCurrentItem, FSpriteAnimDetails> ChangeItemAnimationsList;	// As above, but for animations used when
 																		// changing items.
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<FCurrentInteraction, FSpriteAnimDetails> InteractAnimationsList;	// As above, but for animations used when
+																			// performing interactions.
 	
 	UMaterialInstanceDynamic* DynamicMaterial;
 	FSpriteAnimDetails* CurrentAnimation;
@@ -141,4 +159,5 @@ private:
 	float ChangeItemLocalTime;	// Whereabouts in the animation spritesheet is being drawn onto the player plane.
 
 	bool bIsInteracting;		// Flag for indicating if the player is in the middle of interacting with a scene prop.
+	float InteractLocalTime;
 };
