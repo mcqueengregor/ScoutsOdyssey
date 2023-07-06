@@ -135,6 +135,10 @@ void ADialogueMeshActor::Clickable_CleanUp()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Dialogue mesh actor OnClicked delegate wasn't clean up (DialogueComponent was nullptr)"));
 	}
+
+	//For cleaning up instances
+	if(DestroyOnDialogueEnd)
+		Destroy();
 }
 
 void ADialogueMeshActor::LeftMouseButtonDown()

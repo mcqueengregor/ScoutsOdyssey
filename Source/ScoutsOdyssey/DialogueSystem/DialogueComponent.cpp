@@ -105,6 +105,7 @@ void UDialogueComponent::SpeakFinish()
 	} else if (SpeakClickCount == 1)
 	{
 		CurSpeakString = "";
+		SetTextBlockText(CurSpeakString, *CurTextBlock);
 		CurChar_Index = 0;
 		SpeakClickCount = -1;
 		OnSpeakFinish.Broadcast();
@@ -200,7 +201,6 @@ void UDialogueComponent::SetTextBlockText(const FString& String, UTextBlock& Tex
 // Was const, now no longer const given TypeNextLetter isn't const
 void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType, const int FontSize)
 {
-	
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
 		SpeakClickCount = 0;
@@ -211,6 +211,7 @@ void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, cons
 			FSlateFontInfo FontInfo = CurTextBlock->Font;
 			FontInfo.Size = FontSize;
 			CurTextBlock->SetFont(FontInfo);
+			
 			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([=]()
 			{
 				TypeNextLetter(CurTextBlock, String, VoiceType);
