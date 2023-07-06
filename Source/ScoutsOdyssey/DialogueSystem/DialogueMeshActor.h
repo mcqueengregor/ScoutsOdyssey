@@ -40,6 +40,7 @@ public:
 	UFUNCTION()
 	void BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
 	void Clickable_SetUp();
+	void Clickable_CleanUp();
 
 	UFUNCTION()
 	void LeftMouseButtonDown();
@@ -48,4 +49,8 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	class UBoxComponent* PropCollider;
+
+private:
+	UPROPERTY(EditInstanceOnly)
+	bool OnlyTriggerOnce = true;
 };
