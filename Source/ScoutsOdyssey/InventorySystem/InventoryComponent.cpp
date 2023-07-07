@@ -24,8 +24,12 @@ void UInventoryComponent::BeginPlay()
 	
 	SelectedItem_Index = 0;
 
+	// Add "empty hand" to inventory:
 	if (EmptyHandDataAsset)
 		AddItem(EmptyHandDataAsset);
+
+	APlayerPawn* OwnerPawn = Cast<APlayerPawn>(GetOwner());
+	if (OwnerPawn) PlayerPawnRef = OwnerPawn;
 }
 
 void UInventoryComponent::AddItem(UInventoryItemDataAsset* Item)
@@ -40,8 +44,9 @@ void UInventoryComponent::RemoveSelectedItem()
 
 void UInventoryComponent::SwitchItem(float Mouse_AxisValue)
 {
-	// Early-out if scroll wheel isn't being used:
-	if (FMath::IsNearlyZero(Mouse_AxisValue)) return;
+	// Early-out if scroll wheel isn't being used or player is in the middle of switching items:
+	if (FMath::IsNearlyZero(Mouse_AxisValue) || (PlayerPawnRef && PlayerPawnRef->GetIsChangingItem()))
+			return;
 	
 	int NewIndex = SelectedItem_Index + Mouse_AxisValue;
 
@@ -51,15 +56,12 @@ void UInventoryComponent::SwitchItem(float Mouse_AxisValue)
 
 	SelectedItem_Index = NewIndex;
 
-	if (Items.Num() > 0)
+	// Don't tell the player to change item if there isn't another item to change to:
+	if (Items.Num() > 1)
 	{
 		// If the Tag->Enum map knows about this item, make the player start holding the item:
-		if (TagToEnumMap.Contains(Items[SelectedItem_Index]->ItemTag))
-		{
-			APlayerPawn* PlayerPawn = Cast<APlayerPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-
-			if (PlayerPawn) PlayerPawn->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)));
-		}
+		if (TagToEnumMap.Contains(Items[SelectedItem_Index]->ItemTag) && PlayerPawnRef)
+			PlayerPawnRef->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)));
 	}
 }
 

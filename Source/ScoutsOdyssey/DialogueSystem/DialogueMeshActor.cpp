@@ -20,8 +20,6 @@ ADialogueMeshActor::ADialogueMeshActor()
 	PropCollider->SetupAttachment(RootComponent);
 }
 
-
-
 void ADialogueMeshActor::BeginPlay()
 {
 	Super::BeginPlay();
@@ -33,6 +31,9 @@ void ADialogueMeshActor::BeginPlay()
 
 	// Start input component. will start on all DialogueMeshActors in scene. 
 	StartPlayerInputComponent();
+
+	OnActorBeginOverlap.AddDynamic(this, &ADialogueMeshActor::OnOverlapBegin);
+	OnActorEndOverlap.AddDynamic(this, &ADialogueMeshActor::OnOverlapEnd);
 }
 
 UInputComponent* ADialogueMeshActor::CreatePlayerInputComponent()
@@ -59,6 +60,24 @@ void ADialogueMeshActor::StartPlayerInputComponent()
 		SetupPlayerInputComponent(InputComponent);
 		InputComponent->RegisterComponent();
 	}
+}
+
+void ADialogueMeshActor::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
+{
+	APlayerPawn* PawnRef = Cast<APlayerPawn>(OtherActor);
+	
+	// If player overlapped this object, turn on glowing effect:
+	if (PawnRef && DynamicMaterial)
+		DynamicMaterial->SetScalarParameterValue("EmissionOnOrOff", 1.0);
+}
+
+void ADialogueMeshActor::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
+{
+	APlayerPawn* PawnRef = Cast<APlayerPawn>(OtherActor);
+
+	// If player stopped overlapping this object, turn off glowing effect:
+	if (PawnRef && DynamicMaterial)
+		DynamicMaterial->SetScalarParameterValue("EmissionOnOrOff", 0.0);
 }
 
 void ADialogueMeshActor::Tick(float DeltaSeconds)
