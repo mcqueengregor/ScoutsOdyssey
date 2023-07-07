@@ -21,11 +21,14 @@ void UTentInteractComponent::BeginPlay()
 		UMaterialInterface* MatInterface = OwnerActor->GetStaticMeshComponent()->GetMaterial(0);
 		DynamicMaterial = UMaterialInstanceDynamic::Create(MatInterface, this);
 		OwnerActor->GetStaticMeshComponent()->SetMaterial(0, DynamicMaterial);
-
+		OwnerActor->DynamicMaterial = DynamicMaterial;
+		
 		OriginalLocation = OwnerActor->GetActorLocation();
 		OriginalScaleMultipler = OwnerActor->GetActorScale().X;
 	}
 
+	// Store scales of each tent texture relative to the "supplies" texture, so that sprite plane
+	// can change scale without warping the sprite applied to it:
 	for (auto& Texture : TentStateTextures)
 	{
 		if (Texture.Value.TentStateTexture)
@@ -35,14 +38,16 @@ void UTentInteractComponent::BeginPlay()
 				Texture.Value.TentStateTexture->GetSizeY(),
 				0.0f);
 			Texture.Value.TextureScale.Normalize();
+
+			// Force x-component to 1 without warping texture.
 			Texture.Value.TextureScale /= Texture.Value.TextureScale.X;
+
+			// Adjust scale relative to "supplies" texture:
 			Texture.Value.TextureScale *= Texture.Value.TentStateTexture->GetSizeX() /
 				static_cast<float>(TentStateTextures.Find(FTentState::START)->TentStateTexture->GetSizeX());
 			Texture.Value.TextureScale.Z = 1.0f;
-
 		}
 	}
-
 }
 
 void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -57,7 +62,7 @@ void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	}
 }
 
-void UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
+FCurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
 	if (ItemType->ItemTag.MatchesTag(ValidItemTag))
 	{
@@ -72,11 +77,14 @@ void UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemTyp
 
 			// TODO: Make this proportional to differences in resolution between tent sprites:
 			OwnerActor->SetActorLocation(OriginalLocation + (FVector(0.0f, 0.0f, 30.0f) *  OriginalScaleMultipler));
+			return FCurrentInteraction::SUCCESS_NO_ANIM;
 		}
 	}
 	else
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red,
 			FString("Tags don't match!"));
+
+	return FCurrentInteraction::NO_INTERACTION;
 }
 
 void UTentInteractComponent::DoTask()

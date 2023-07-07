@@ -27,6 +27,12 @@ protected:
 	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent);
 	void StartPlayerInputComponent();
 
+	UFUNCTION()
+		void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
+
+	UFUNCTION()
+		void OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
+	
 public:
 	virtual void Tick(float DeltaSeconds) override;
 	
@@ -45,6 +51,7 @@ public:
 	UFUNCTION()
 	void LeftMouseButtonDown();
 	FOnLeftMouseClick OnLeftMouseClick;
+	UMaterialInstanceDynamic* DynamicMaterial;
 
 protected:
 	UPROPERTY(EditDefaultsOnly)

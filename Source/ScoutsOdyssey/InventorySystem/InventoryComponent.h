@@ -36,12 +36,15 @@ public:
 	
 private:
 	UPROPERTY(VisibleAnywhere, Category=Inventory)
-	TArray<UInventoryItemDataAsset*> Items;
+		TArray<UInventoryItemDataAsset*> Items;
+	
 	UPROPERTY(VisibleAnywhere, Category=Inventory)
-	int SelectedItem_Index;
+		int SelectedItem_Index;
 
 	UPROPERTY(EditAnywhere, Category = "Inventory")
-	TMap<FGameplayTag, FCurrentItem> TagToEnumMap;
+		TMap<FGameplayTag, FCurrentItem> TagToEnumMap;
 
+	APlayerPawn* PlayerPawnRef;
+	
 	UInventoryItemDataAsset* EmptyHandDataAsset;
 };
