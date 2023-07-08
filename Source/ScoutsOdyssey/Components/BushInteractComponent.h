@@ -13,21 +13,31 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SCOUTSODYSSEY_API UBushInteractComponent : public UInteractComponentBase
 {
 	GENERATED_BODY()
+
 	UBushInteractComponent();
-
-
+    
 protected:
 	virtual void BeginPlay() override;
 
 public:
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual FCurrentInteraction OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef) override;
+    
 	virtual void DoTask() override;
 
-	FVector StartScale = FVector(3);
-	FVector EndScale = FVector(1);
-	float TransformTime = 1;
+	UPROPERTY(EditAnywhere)
+	FVector FinalScale;
+
+	UPROPERTY(EditAnywhere)
+	float ShrunkLocationOffsetZ;
 
 private:
-	UStaticMeshComponent* StaticMeshComponent;
-	FTimerHandle TimerHandle;
-	float TransformTimer;
+	FVector OriginalScale;
+	FVector OriginalLocation;
+	float OriginalLocationZ;
+	float ShrinkDuration;
+	float LerpT;
+	bool bIsShrinking;
 };

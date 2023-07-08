@@ -64,27 +64,29 @@ void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 FCurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
-	if (ItemType->ItemTag.MatchesTag(ValidItemTag))
-	{
-		CurrentState = CurrentState == FTentState::START ? FTentState::MIDDLE : FTentState::END;
-		UTexture* CurrentTexture = TentStateTextures.Find(CurrentState)->TentStateTexture;
-		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
+    if (ItemType->ItemTag.MatchesTag(ValidItemTag) && CurrentState != FTentState::END)
+    {
+        CurrentState = CurrentState == FTentState::START ? FTentState::MIDDLE : FTentState::END;
+        UTexture* CurrentTexture = TentStateTextures.Find(CurrentState)->TentStateTexture;
+        DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
 
-		if (ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner()))
-		{
-			OwnerActor->GetStaticMeshComponent()->SetRelativeScale3D(
-				TentStateTextures.Find(CurrentState)->TextureScale * OriginalScaleMultipler);
+        if (ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner()))
+        {
+            OwnerActor->GetStaticMeshComponent()->SetRelativeScale3D(
+                TentStateTextures.Find(CurrentState)->TextureScale * OriginalScaleMultipler);
 
-			// TODO: Make this proportional to differences in resolution between tent sprites:
-			OwnerActor->SetActorLocation(OriginalLocation + (FVector(0.0f, 0.0f, 30.0f) *  OriginalScaleMultipler));
-			return FCurrentInteraction::SUCCESS_NO_ANIM;
-		}
-	}
-	else
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red,
-			FString("Tags don't match!"));
+            // TODO: Make this proportional to differences in resolution between tent sprites:
+            OwnerActor->SetActorLocation(OriginalLocation + (FVector(0.0f, 0.0f, 30.0f) *  OriginalScaleMultipler));
 
-	return FCurrentInteraction::NO_INTERACTION;
+            // NOTE FOR HAO: Add logic for keeping track of the number of tents fully put up here!
+            //if (CurrentState == FTentState::END)
+            //    ;
+
+            return FCurrentInteraction::SUCCESS_NO_ANIM;
+        }
+    }
+
+    return FCurrentInteraction::NO_INTERACTION;
 }
 
 void UTentInteractComponent::DoTask()
