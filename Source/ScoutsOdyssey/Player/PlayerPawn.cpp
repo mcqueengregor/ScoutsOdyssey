@@ -83,7 +83,10 @@ void APlayerPawn::Tick(float DeltaTime)
 	if (!bIsChangingItem && !bIsInteracting)
 	{
 		if (MovementDirection.IsNearlyZero())
+		{
 			ChangeAnimation(FPlayerAnimation::IDLE);
+			// WalkSoundCue.SetVolume(0.0f);
+		}
 		else
 		{
 			FVector NewLocation = GetActorLocation() + MovementDirection * DeltaTime;
@@ -97,6 +100,8 @@ void APlayerPawn::Tick(float DeltaTime)
 				MovementDirection.Y < 0 ? -OriginalMeshScale.X : OriginalMeshScale.X,
 				OriginalMeshScale.Y,
 				OriginalMeshScale.Z));
+
+			// WalkSoundCue.SetVolume(1.0f);
 		}
 		CalculateLocalAnimTime();
 	}
@@ -244,8 +249,27 @@ void APlayerPawn::UpdateDynamicMaterialParameters()
 
 void APlayerPawn::CalculateLocalAnimTime()
 {
+	// If current animation is an IDLE one, use irregular blinking logic:
+	if (static_cast<int32>(CurrentAnimation->AnimationType) % 2 == 0)
+	{
+		// Blinking periods - making these coprime ensures that there won't be any repetition.
+		// Shamelessly stolen from https://www.youtube.com/watch?v=8--5LwHRhjk&t=775s:
+		float BlinkPeriods[] = { 4.1f, 7.3f };
+
+		for (int32 i = 0; i < 2; ++i)
+		{
+			float ModResults = FMath::Min(1.0f, FGenericPlatformMath::Fmod(CurrentGameTime, BlinkPeriods[i]));
+			float SmoothResults = FMath::SmoothStep(0.0f, 0.1f, ModResults) -
+				FMath::SmoothStep(0.18f, 0.4f, ModResults);
+			BlinkPeriods[i] = SmoothResults;
+		}
+		float FinalLocalTimeNorm = FMath::Max(BlinkPeriods[0], BlinkPeriods[1]);
+		if (DynamicMaterial) DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", FinalLocalTimeNorm);
+		return;
+	}
+
 	const USpriteAnimationDataAsset* CurrentAnimDetails = CurrentAnimation->SpriteAnimDA;
-	
+    
 	const int32 NumSpriteCells = CurrentAnimDetails->NumSpritesheetColumns * CurrentAnimDetails->NumSpritesheetRows;
 	const int32 NumSprites = NumSpriteCells - CurrentAnimation->SpriteAnimDA->NumEmptyFrames;
 
@@ -253,7 +277,7 @@ void APlayerPawn::CalculateLocalAnimTime()
 	float LocalTimeNorm = (CurrentAnimDetails->PlaybackFramerate / static_cast<float>(NumSpriteCells)) * CurrentGameTime;
 	float AdjustedLocalTimeNorm = FGenericPlatformMath::Fmod(LocalTimeNorm,
 		FMath::Max(NumSprites / static_cast<float>(NumSpriteCells), 1e-5f));
-	
+    
 	if (DynamicMaterial) DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", AdjustedLocalTimeNorm);
 }
 
