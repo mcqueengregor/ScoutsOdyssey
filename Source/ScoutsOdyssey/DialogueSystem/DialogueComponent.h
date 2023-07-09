@@ -41,6 +41,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NPCSpeechBubble_WidgetAsset;
 	class USpeechBubbleUserWidget* BubbleTwo;
+	UPROPERTY(EditInstanceOnly)
+	AActor* SpeakerTwo;
 	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NarratorSpeechBubble_WidgetAsset;

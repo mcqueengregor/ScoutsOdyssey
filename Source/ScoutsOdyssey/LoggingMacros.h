@@ -33,7 +33,6 @@ TEXT macros can cause issue due to its L identifier
 #define COLORED_PRINT(Text, Color) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, Color, Text, false) 
 
 
-
 //Current Class Name + Function Name where this is called
 #define CUR_CLASS_FUNC (FString(__FUNCTION__))
 

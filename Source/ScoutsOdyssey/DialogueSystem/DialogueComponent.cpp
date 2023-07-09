@@ -142,7 +142,10 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
 			break;
 		case EBubble::Two:
-			BubbleTwo->SetPositionInViewport(Owner->MyPlayerController->GetActorScreenCoordinate(*GetOwner(), BubbleTwoOffSet));	
+			if(SpeakerTwo)
+				BubbleTwo->SetPositionInViewport(Owner->MyPlayerController->GetActorScreenCoordinate(*SpeakerTwo, BubbleTwoOffSet));
+			else 
+				BubbleTwo->SetPositionInViewport(Owner->MyPlayerController->GetActorScreenCoordinate(*GetOwner(), BubbleTwoOffSet));	
 			BubbleOne->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleTwo->SetVisibility(ESlateVisibility::Visible);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);

@@ -6,6 +6,9 @@
 #include "InteractComponentBase.h"
 #include "TentInteractComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllTentBuilt);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFailToInteract);
+
 UENUM()
 enum class FTentState : uint8
 {
@@ -47,6 +50,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FTentState, FTentDetails> TentStateTextures;
+
+	UPROPERTY(EditAnywhere, Category=Tent)
+	int RequiredNumberOfTents = 4;
+	static int NumberOfTents;
+	UPROPERTY(BlueprintAssignable)
+	FOnAllTentBuilt OnAllTentBuilt;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFailToInteract OnFailToInteract;
 
 private:
 	UMaterialInstanceDynamic* DynamicMaterial;	// Dynamic material instance applied to owner mesh, used to change the

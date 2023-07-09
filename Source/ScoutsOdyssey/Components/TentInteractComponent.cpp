@@ -2,8 +2,15 @@
 
 
 #include "TentInteractComponent.h"
+
+#include <string>
+
 #include "../DialogueSystem/DialogueMeshActor.h"
+#include "Chaos/ChaosPerfTest.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
+
+int UTentInteractComponent::NumberOfTents = 0;
 
 UTentInteractComponent::UTentInteractComponent()
 {
@@ -13,6 +20,8 @@ UTentInteractComponent::UTentInteractComponent()
 void UTentInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	NumberOfTents = 0;
 
 	ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
 	
@@ -51,7 +60,7 @@ void UTentInteractComponent::BeginPlay()
 }
 
 void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+                                           FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -79,13 +88,22 @@ FCurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDat
             OwnerActor->SetActorLocation(OriginalLocation + (FVector(0.0f, 0.0f, 30.0f) *  OriginalScaleMultipler));
 
             // NOTE FOR HAO: Add logic for keeping track of the number of tents fully put up here!
-            //if (CurrentState == FTentState::END)
-            //    ;
+            if (CurrentState == FTentState::END)
+            {
+	            NumberOfTents++;
+            	PRINT(FString::FromInt(NumberOfTents));
+            	if(NumberOfTents == RequiredNumberOfTents)
+            	{
+            		OnAllTentBuilt.Broadcast();
+            	} 
+            }
 
             return FCurrentInteraction::SUCCESS_NO_ANIM;
         }
     }
 
+	// if interaction fails
+	OnFailToInteract.Broadcast();
     return FCurrentInteraction::NO_INTERACTION;
 }
 
