@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "BushInteractComponent.h"
 #include "../Player/PlayerPawn.h"
 #include "../DialogueSystem/DialogueMeshActor.h"
-#include "BushInteractComponent.h"
 
 UBushInteractComponent::UBushInteractComponent()
 {

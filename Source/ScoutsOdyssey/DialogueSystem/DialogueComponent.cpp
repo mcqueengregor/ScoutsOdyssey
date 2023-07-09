@@ -25,10 +25,13 @@ UDialogueComponent::UDialogueComponent()
 
 void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) 
 {
+	
 	// Enable input on click.
 	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
 	if(DialogueMeshActor)
-		DialogueMeshActor->EnableInput(DialogueMeshActor->MyPlayerController);
+	{
+		DialogueMeshActor->EnableInput(DialogueMeshActor->MyPlayerController);	
+	}
 	else
 		LOG_ERROR("Couldn't enable input.");
 	

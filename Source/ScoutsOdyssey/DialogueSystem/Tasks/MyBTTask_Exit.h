@@ -19,6 +19,10 @@ class SCOUTSODYSSEY_API UMyBTTask_Exit : public UBTTaskNode
 	/** initialize any asset related data */
 	virtual void InitializeFromAsset(UBehaviorTree& Asset) override;
 
+public:
+	UPROPERTY(EditAnywhere, Category=Speak)
+	bool DisableDialogueAfterExit = false;
+	
 private:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
