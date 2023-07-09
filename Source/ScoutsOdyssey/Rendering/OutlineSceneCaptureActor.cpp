@@ -77,7 +77,7 @@ void AOutlineSceneCaptureActor::Tick(float DeltaTime)
 
 void AOutlineSceneCaptureActor::ResizeRenderTarget(FViewport* Viewport, uint32 val)
 {
-	if (SceneCaptureComponent->TextureTarget && Viewport)
+	if (SceneCaptureComponent->TextureTarget && Viewport->GetSizeXY().X != 0 && Viewport->GetSizeXY().Y != 0)
 		SceneCaptureComponent->TextureTarget->ResizeTarget(Viewport->GetSizeXY().X, Viewport->GetSizeXY().Y);
 }
 

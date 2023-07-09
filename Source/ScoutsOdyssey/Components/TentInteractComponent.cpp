@@ -57,6 +57,8 @@ void UTentInteractComponent::BeginPlay()
 			Texture.Value.TextureScale.Z = 1.0f;
 		}
 	}
+
+	ValidItemTag = FGameplayTag::RequestGameplayTag(FName("Item.PhilbertsHammer"));
 }
 
 void UTentInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
