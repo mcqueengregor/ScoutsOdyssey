@@ -64,7 +64,7 @@ private:
 	UMaterialInstanceDynamic* DynamicMaterial;	// Dynamic material instance applied to owner mesh, used to change the
 												// tent texture to match the tent's state.
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	FGameplayTag ValidItemTag;
 
 	FVector OriginalLocation;
