@@ -31,4 +31,6 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		class USceneCaptureComponent2D* SceneCaptureComponent;
+
+	FIntPoint CurrentViewportDimensions;
 };
