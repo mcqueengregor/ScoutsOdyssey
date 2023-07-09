@@ -35,10 +35,15 @@ void AOutlineSceneCaptureActor::BeginPlay()
 
 	// Init render target dimensions:
 	FViewport* Viewport = GEngine->GameViewport->Viewport;
-	ResizeRenderTarget(Viewport, 0);
-	
-	// Add render target resize function to resize delegate:
-	Viewport->ViewportResizedEvent.AddUObject(this, &AOutlineSceneCaptureActor::ResizeRenderTarget);
+
+	if (Viewport)
+	{
+		//ResizeRenderTarget(Viewport, 0);
+		// Add render target resize function to resize delegate:
+		//Viewport->ViewportResizedEvent.AddUObject(this, &AOutlineSceneCaptureActor::ResizeRenderTarget);
+	}
+
+	CurrentViewportDimensions = FIntPoint(0, 0);
 }
 
 // Called every frame
@@ -56,11 +61,23 @@ void AOutlineSceneCaptureActor::Tick(float DeltaTime)
 	else
 		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red,
 			FString("PlayerPawnRef is null!"));
+
+	FViewport* Viewport = GEngine->GameViewport->Viewport;
+
+	if (Viewport)
+	{
+		if (SceneCaptureComponent->TextureTarget && Viewport->GetSizeXY() != CurrentViewportDimensions
+			&& Viewport->GetSizeXY().X != 0 && Viewport->GetSizeXY().Y != 0)
+		{
+			CurrentViewportDimensions = Viewport->GetSizeXY();
+			SceneCaptureComponent->TextureTarget->ResizeTarget(CurrentViewportDimensions.X, CurrentViewportDimensions.Y);
+		}
+	}
 }
 
 void AOutlineSceneCaptureActor::ResizeRenderTarget(FViewport* Viewport, uint32 val)
 {
-	if (SceneCaptureComponent->TextureTarget)
+	if (SceneCaptureComponent->TextureTarget && Viewport)
 		SceneCaptureComponent->TextureTarget->ResizeTarget(Viewport->GetSizeXY().X, Viewport->GetSizeXY().Y);
 }
 
