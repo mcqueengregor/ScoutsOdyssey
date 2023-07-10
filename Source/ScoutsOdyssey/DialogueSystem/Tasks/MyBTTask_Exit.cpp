@@ -3,7 +3,9 @@
 
 #include "MyBTTask_Exit.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueComponent.h"
+#include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 
 
 UMyBTTask_Exit::UMyBTTask_Exit()
@@ -38,7 +40,20 @@ EBTNodeResult::Type UMyBTTask_Exit::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		BlackboardComponent->GetValueAsObject(DialogueComponent_BlackboardKey.SelectedKeyName));
 
 	if(DialogueComponent)
+	{
 		DialogueComponent->OnDialogueEnd.Broadcast();
+		if(DisableDialogueAfterExit)
+		{
+			ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(DialogueComponent->GetOwner());
+			if(DialogueMeshActor)
+			{
+				DialogueMeshActor->Clickable_CleanUp();
+			} else
+			{
+				LOG_ERROR("Cast failed!");
+			}	
+		}
+	}
 	else
 		UE_LOG(LogTemp, Error, TEXT("DialogueComponent is Null: %s"), *GetClass()->GetName());
 	

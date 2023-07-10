@@ -39,8 +39,12 @@ private:
 	UPROPERTY(EditAnywhere, Category=Speak)
 	FBlackboardKeySelector DialogueComponent_BlackboardKey;
 	UPROPERTY(EditAnywhere, Category=Speak, meta = (AllowPrivateAccess = true))
-	FText Text;
+	FString String;
 	UPROPERTY(EditAnywhere, Category=Speak, meta = (AllowPrivateAccess = true))
 	EBubble BubbleChoice;
-
+	UPROPERTY(EditAnywhere, Category=Speak, meta = (AllowPrivateAccess = true))
+	EVoiceType VoiceType = EVoiceType::High;
+	UPROPERTY(EditAnywhere, Category=Speak, meta = (AllowPrivateAccess = true))
+	int Fontsize = 24;
+	
 };

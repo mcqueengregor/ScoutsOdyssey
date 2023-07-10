@@ -8,11 +8,13 @@
 #include "ScoutsOdyssey/Interfaces/Clickable.h"
 #include "DialogueEnums.h"
 #include "Blueprint/UserWidget.h"
+#include "Sound/SoundCue.h"
 #include "DialogueComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnSpeakFinish);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnChoiceFinish, int);
 DECLARE_MULTICAST_DELEGATE(FOnDialogueEnd);
+
 
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -26,41 +28,45 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UFUNCTION()
-	virtual void Click_Implementation(UPrimitiveComponent* TouchedComponent ,FKey ButtonPressed) override;
+	virtual void Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) override;
 
+	UFUNCTION(BlueprintCallable)
+	void StartDialogue();
+	
 	// Widgets
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> PlayerSpeechBubble_WidgetAsset;
 	class USpeechBubbleUserWidget* BubbleOne;
+	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NPCSpeechBubble_WidgetAsset;
 	class USpeechBubbleUserWidget* BubbleTwo;
+	UPROPERTY(EditInstanceOnly)
+	AActor* SpeakerTwo;
+	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NarratorSpeechBubble_WidgetAsset;
 	class USpeechBubbleUserWidget* BubbleNarrator;
-	UPROPERTY(EditDefaultsOnly, Category=Widgets)
-	FVector2D BubbleOneOffSet;
-	UPROPERTY(EditDefaultsOnly, Category=Widgets)
-	FVector2D BubbleTwoOffSet;
-
+	UPROPERTY(EditAnywhere, Category=Widgets)
+	FVector2D BubbleOneOffSet_PercentageViewPort;
+	UPROPERTY(EditAnywhere, Category=Widgets)
+	FVector2D BubbleTwoOffSet_PercentageViewPort;
+	
 	// Widget Utility Methods
 	void SwitchToBubble(EBubble Bubble) const;
 	void SwitchBubbleOneState(EBubbleState BubbleState) const;
-	void SetTextBlockText(const FText& Text, const UUserWidget& Parent) const;
-	
-	// Behavior Tree
-	UPROPERTY(EditInstanceOnly, Category=Dialogue)
-	UBehaviorTree* DialogueTree;
+	void SetTextBlockText(const FString& String, class UTextBlock& TextWidget) const;
 
 	// Tasks Setup Methods
-	void Speak(const FText& Text, const EBubble Bubble) const;
+	void Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType,  const int FontSize);
 	void Choice(TArray<FText>& Choices);
 	
 	// Delegates
 	FOnSpeakFinish OnSpeakFinish;
 	FOnChoiceFinish OnChoiceFinish;
 	FOnDialogueEnd OnDialogueEnd;
-	void SpeakFinish() const;
+
+	void SpeakFinish();
 	UFUNCTION()
 	void ChoiceFinish(const int ReplyIndex);
 	
@@ -69,15 +75,29 @@ protected:
 
 private:
 	// SetUp Methods
-	void Clickable_SetUp();
 	void Widget_SetUp();
-	void BehaviorTree_SetUp();
 	void Delegate_SetUp();
 
+	// Clean up
 	void DialogueEnd_CleanUp() const;
-	
-	class AMyPlayerController* MyPlayerController;
-	class AAIController* AIController;
+
+	// Typewriter Effect
+	class UTextBlock* CurTextBlock;
+	FString CurFullString;
+	FString CurSpeakString;
+	int CurChar_Index;
+	FTimerHandle SpeakTimerHandle;
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true), Category=TypeWriterEffect)
+	float LetterTypeRate = 0.1f;
+	UPROPERTY(EditDefaultsOnly, Category=TypeWriterEffect)
+	TArray<USoundCue*> LowVoices;
+	UPROPERTY(EditDefaultsOnly, Category=TypeWriterEffect)
+	TArray<USoundCue*> HighVoices;
+	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String, const EVoiceType VoiceType);
+	void PlayRandomVoice(EVoiceType VoiceType) const;
+	// Check number of clicks. First click would complete typewriting immediately, while second click would go to next string.
+	// can be -1, 0 and 1. 
+	int SpeakClickCount;
 };
 
 

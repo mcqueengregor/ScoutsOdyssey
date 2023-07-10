@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
 #include "DialogueChoiceObject.h"
+#include "DialogueMeshActor.h"
 #include "Blueprint/UserWidget.h"
 #include "SpeechBubbleUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -13,42 +14,49 @@
 #include "Components/Overlay.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
+#include "Engine/World.h"
 
 UDialogueComponent::UDialogueComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 }
 
 void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) 
 {
-	UE_LOG(LogTemp, Warning, TEXT("Clicked! From Dialogue Component"));
-
+	
+	// Enable input on click.
+	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
+	if(DialogueMeshActor)
+	{
+		DialogueMeshActor->EnableInput(DialogueMeshActor->MyPlayerController);	
+	}
+	else
+		LOG_ERROR("Couldn't enable input.");
+	
 	Widget_SetUp();
 	Delegate_SetUp();
-	BehaviorTree_SetUp();
+
+	// Set as -1 when you first start. So won't call speak finish
+	SpeakClickCount = -1;
 }
 
+void UDialogueComponent::StartDialogue()
+{
+	Click_Implementation(nullptr,EKeys::A);
+
+	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
+	if(DialogueMeshActor)
+		DialogueMeshActor->BehaviorTree_Start(nullptr, EKeys::A);
+	else
+		LOG_ERROR("Couldn't start behavior tree.");
+}
 
 void UDialogueComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	MyPlayerController = Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-	// Spawn AI Controller 
-	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
-	Clickable_SetUp();
-}
 
-void UDialogueComponent::Clickable_SetUp()
-{
-	UStaticMeshComponent* OwnerMesh = Cast<UStaticMeshComponent>(GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-	if(OwnerMesh)
-	{
-		OwnerMesh->OnClicked.AddDynamic(this, &UDialogueComponent::Click_Implementation);	
-	} else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("cast failed!"));	
-	}	
 }
 
 void UDialogueComponent::Widget_SetUp()
@@ -70,64 +78,74 @@ void UDialogueComponent::Widget_SetUp()
 	}
 }
 
-void UDialogueComponent::BehaviorTree_SetUp()
-{
-	if(AIController)
-	{
-		AIController->RunBehaviorTree(DialogueTree);
-		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
-		if(Blackboard)
-		{
-			Blackboard->SetValueAsObject("DialogueComponent", this);
-		} else
-		{
-			UE_LOG(LogTemp, Error, TEXT("BlackBoardComponent is not assigned in AIController!"));	
-		}	
-	} else
-	{
-		UE_LOG(LogTemp, Error, TEXT("AI Controller was not constructed For Dialogue Tree!"));		
-	}
-
-}
-
 void UDialogueComponent::Delegate_SetUp()
 {
 	OnDialogueEnd.AddUObject(this, &UDialogueComponent::DialogueEnd_CleanUp);
 
-	// LeftMouseClick Delegates, should always trigger, always on the same UI.
-	BubbleOne->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
-	BubbleTwo->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
-	BubbleNarrator->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
+	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
+	if(DialogueMeshActor)
+	{
+		DialogueMeshActor->OnLeftMouseClick.BindUObject(this, &UDialogueComponent::SpeakFinish);
+	}
+	else 
+	{
+		LOG_ERROR("Couldn't cast to DialogueMeshActor.");	
+	}
+	
 }
 
-
-void UDialogueComponent::SpeakFinish() const
+// Issue: given input is bound immediately, this is also invoked every time left mouse is clicked, regardless whether you have started speaking or not. 
+void UDialogueComponent::SpeakFinish() 
 {
-	UE_LOG(LogTemp, Warning, TEXT("SpeakFinish Broadcasted!"));
-	OnSpeakFinish.Broadcast();
+	if (SpeakClickCount == -1)
+	{
+		return;
+	} else if(SpeakClickCount == 0)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
+		SetTextBlockText(CurFullString, *CurTextBlock);
+		SpeakClickCount = 1;
+	} else if (SpeakClickCount == 1)
+	{
+		CurSpeakString = "";
+		SetTextBlockText(CurSpeakString, *CurTextBlock);
+		CurChar_Index = 0;
+		SpeakClickCount = -1;
+		OnSpeakFinish.Broadcast();
+	} else
+	{
+		LOG_ERROR("Click Count not -1, 0 or 1!");
+	}
 }
 
 void UDialogueComponent::ChoiceFinish(const int ReplyIndex)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ChoiceFinish Broadcasted!"));
 	OnChoiceFinish.Broadcast(ReplyIndex);	
 }
 
-
 void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 {
+	ADialogueMeshActor* Owner = Cast<ADialogueMeshActor>(GetOwner());
+		
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
+		const FVector2D ViewPortSize = AMyPlayerController::GetViewportSize();
+		const FVector2D BubbleOneOffSet = ViewPortSize * BubbleOneOffSet_PercentageViewPort;
+		const FVector2D BubbleTwoOffSet = ViewPortSize * BubbleTwoOffSet_PercentageViewPort;
+		
 		switch (Bubble)
 		{
 		case EBubble::One:
-			BubbleOne->SetPositionInViewport(MyPlayerController->GetPlayerScreenCoordinate(BubbleOneOffSet));
+			BubbleOne->SetPositionInViewport(Owner->MyPlayerController->GetPlayerScreenCoordinate(BubbleOneOffSet));
 			BubbleOne->SetVisibility(ESlateVisibility::Visible);
 			BubbleTwo->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
 			break;
 		case EBubble::Two:
-			BubbleTwo->SetPositionInViewport(MyPlayerController->GetActorScreenCoordinate(*GetOwner(), BubbleTwoOffSet));	
+			if(SpeakerTwo)
+				BubbleTwo->SetPositionInViewport(Owner->MyPlayerController->GetActorScreenCoordinate(*SpeakerTwo, BubbleTwoOffSet));
+			else 
+				BubbleTwo->SetPositionInViewport(Owner->MyPlayerController->GetActorScreenCoordinate(*GetOwner(), BubbleTwoOffSet));	
 			BubbleOne->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleTwo->SetVisibility(ESlateVisibility::Visible);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
@@ -181,30 +199,41 @@ void UDialogueComponent::SwitchBubbleOneState(const EBubbleState BubbleState) co
 	}
 }
 
-void UDialogueComponent::SetTextBlockText(const FText& Text, const UUserWidget& Parent) const
+void UDialogueComponent::SetTextBlockText(const FString& String, UTextBlock& TextWidget) const
 {
-	UTextBlock* TextWidget = Cast<UTextBlock>(Parent.GetWidgetFromName(TEXT("TextBlock_Speak")));
-	if(TextWidget)
-		TextWidget->SetText(Text);
-	else
-		UE_LOG(LogTemp, Error, TEXT("Speak failed, Bubble One TextWidget not found!"))	
+	TextWidget.SetText(FText::FromString(String));
 }
 
-
-void UDialogueComponent::Speak(const FText& Text, const EBubble Bubble) const
+// Was const, now no longer const given TypeNextLetter isn't const
+void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType, const int FontSize)
 {
 	if(BubbleOne && BubbleTwo && BubbleNarrator)
 	{
+		SpeakClickCount = 0;
+		CurFullString = String;
+		auto SetTimerLambda = [=](const UUserWidget& UserWidget)
+		{
+			CurTextBlock = Cast<UTextBlock>(UserWidget.GetWidgetFromName(TEXT("TextBlock_Speak")));
+			FSlateFontInfo FontInfo = CurTextBlock->Font;
+			FontInfo.Size = FontSize;
+			CurTextBlock->SetFont(FontInfo);
+			
+			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([=]()
+			{
+				TypeNextLetter(CurTextBlock, String, VoiceType);
+			}), LetterTypeRate, true); 
+		};
+		
 		switch (Bubble)
 		{
 		case EBubble::One:
-			SetTextBlockText(Text, *BubbleOne);	
+			SetTimerLambda(*BubbleOne);
 			break;
 		case EBubble::Two:
-			SetTextBlockText(Text, *BubbleTwo);		
+			SetTimerLambda(*BubbleTwo);
 			break;
 		case EBubble::Narrator:
-			SetTextBlockText(Text, *BubbleNarrator);	
+			SetTimerLambda(*BubbleNarrator);
 			break;
 		default:
 			UE_LOG(LogTemp, Error, TEXT("Speak method took in undefined EBubble value!"));	
@@ -216,6 +245,8 @@ void UDialogueComponent::Speak(const FText& Text, const EBubble Bubble) const
 		if(!BubbleNarrator) UE_LOG(LogTemp, Error, TEXT("Failed to Speak, Bubble Narrator wasn't created!"));
 	}	
 }
+
+
 
 void UDialogueComponent::Choice(TArray<FText>& Choices)
 {
@@ -240,9 +271,20 @@ void UDialogueComponent::Choice(TArray<FText>& Choices)
 
 void UDialogueComponent::DialogueEnd_CleanUp() const
 {
+	ADialogueMeshActor* Owner = Cast<ADialogueMeshActor>(GetOwner());
+
+	// Disable Input
+	if(Owner)
+	{
+		Owner->DisableInput(Owner->MyPlayerController);
+	} else
+	{
+		LOG_ERROR("Failed to disable Input!");
+	}
+	
 	// Stop BehaviorTree
-	 if(AIController)
-	 	AIController->GetBrainComponent()->StopLogic("Dialogue End Clean Up");
+	 if(Owner->AIController)
+	 	Owner->AIController->GetBrainComponent()->StopLogic("Dialogue End Clean Up");
 	 else
 	 	UE_LOG(LogTemp, Error, TEXT("Failed to Clean Up AI Controller! NullPointer!"));	
 	
@@ -257,6 +299,58 @@ void UDialogueComponent::DialogueEnd_CleanUp() const
 		if(!BubbleOne) UE_LOG(LogTemp, Error, TEXT("Bubble One Clean up failed! NullPointer!"));
 		if(!BubbleTwo) UE_LOG(LogTemp, Error, TEXT("Bubble Two Clean up failed! NullPointer!"));
 		if(!BubbleNarrator) UE_LOG(LogTemp, Error, TEXT("Bubble Narrator Clean up failed! NullPointer!"));
+	}
+}
+
+void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& String, const EVoiceType VoiceType)
+{
+	if(TextBlock)
+	{
+		if(CurChar_Index >= String.Len())
+		{
+			SpeakClickCount = 1;
+			GetWorld()->GetTimerManager().ClearTimer(SpeakTimerHandle);
+		} else
+		{
+			// Play Sound
+			if(String[CurChar_Index] != TCHAR('.') && String[CurChar_Index] != TCHAR(' '))
+				PlayRandomVoice(VoiceType);
+			
+			// Set Text
+			CurSpeakString += String[CurChar_Index];
+			CurChar_Index++;
+			
+			if(TextBlock)
+				TextBlock->SetText(FText::FromString(CurSpeakString));
+			else
+				LOG_ERROR("Can't Set Text. TextBlock is null!");
+		}
+	} else
+	{
+		LOG_ERROR("Can't type next letter. TextBlock is null!");
+	}
+}
+
+void UDialogueComponent::PlayRandomVoice(EVoiceType VoiceType) const
+{
+	auto PlayRandomVoiceInArray = [=](TArray<USoundCue*> Voices)
+	{
+		if(Voices.Num() > 0)
+			UGameplayStatics::PlaySound2D(this, Voices[FMath::RandRange(0, Voices.Num()-1)]);
+		else
+			LOG_ERROR("No voice inside the voices array!")
+	};
+	
+	switch (VoiceType)
+	{
+		case EVoiceType::High:
+			PlayRandomVoiceInArray(HighVoices);
+			break;
+		case EVoiceType::Low:
+			PlayRandomVoiceInArray(LowVoices);
+			break;
+		default:
+			LOG_ERROR("Non-existent VoiceType.");
 	}
 }
 

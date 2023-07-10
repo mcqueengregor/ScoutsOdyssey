@@ -18,5 +18,12 @@ enum class EBubbleState : uint8
 	Choice,
 };
 
+UENUM(BlueprintType)
+enum class EVoiceType : uint8
+{
+	Low,
+	High
+};
+
 
 
