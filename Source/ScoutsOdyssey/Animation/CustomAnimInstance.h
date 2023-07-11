@@ -16,7 +16,7 @@ class SCOUTSODYSSEY_API UCustomAnimInstance : public UAnimInstance
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Controls")
-	bool bIsPlaybackReversed;
+	bool bIsPlayingForwards;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation controls")
 	float AnimationDuration;
