@@ -18,9 +18,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Controls")
 	bool bIsPlayingForwards;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Controls")
+	bool bStartAtBeginning;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation controls")
 	float AnimationDuration;
 
 	UFUNCTION(BlueprintCallable)
-	float GetSequenceDuration(UAnimSequence* Sequence) { return Sequence->GetPlayLength(); }
+	static float GetSequenceDuration(UAnimSequence* Sequence) { return Sequence->GetPlayLength(); }
 };
