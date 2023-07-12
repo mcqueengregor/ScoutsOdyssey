@@ -3,3 +3,8 @@
 
 #include "CustomAnimInstance.h"
 
+UCustomAnimInstance::UCustomAnimInstance()
+{
+	bIsPlayingForwards = true;
+	bStartAtBeginning = true;
+}
