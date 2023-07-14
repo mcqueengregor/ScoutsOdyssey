@@ -31,7 +31,7 @@ APlayerPawn::APlayerPawn()
 	BoxColliderComponent->SetupAttachment(GetRootComponent());
 
 	static ConstructorHelpers::FObjectFinder<UMaterial>
-		Material(TEXT("Material'/Game/Art/MeshMaterials/CharacterMaterials/M_ScoutAnimBase.M_ScoutAnimBase'"));
+		Material(TEXT("Material'/Game/Art/MeshMaterials/MaterialLibrary/BaseMaterials/M_ScoutAnimBase.M_ScoutAnimBase'"));
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh component"));
 	MeshComponent->SetStaticMesh(PlaneMesh.Object);
