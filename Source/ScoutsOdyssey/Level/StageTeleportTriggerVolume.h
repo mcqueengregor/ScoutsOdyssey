@@ -36,7 +36,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UBoxComponent* TriggerVolume;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	AActor* TeleportLocationActor;	// Reference to empty actor which simply describes where to teleport to.
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
@@ -45,8 +45,14 @@ protected:
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void GetFadeToBlackMatRef();	// BP function which retrieves reference to "fade to black" post process material.
+
+	UFUNCTION(BlueprintNativeEvent)
+	void SetupDynamicFadeToBlackMat();
 	
 private:
-	UMaterial* FadeToBlackMaterial;
-	bool bIsPlayingFadeToBlack;		// Flag which toggles fading from SceneColor to black or from black to SceneColour.
+	inline void ToggleFadeToBlack() { bIsFadingToBlack = !bIsFadingToBlack; }
+	
+	UMaterialInstanceDynamic* FadeToBlackMaterialDynamic;
+	float FadeToBlackLerpT;
+	bool bIsFadingToBlack;			// Flag which toggles fading from SceneColor to black or from black to SceneColour.
 };
