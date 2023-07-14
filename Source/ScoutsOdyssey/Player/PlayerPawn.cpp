@@ -338,3 +338,25 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 			(NumSprites / NumCells));
 	}
 }
+
+void APlayerPawn::StartTeleportationTimer(FVector TeleportLocation, float TeleportWaitTime)
+{
+	FTimerDelegate TeleportDelegate = FTimerDelegate::CreateUObject(this, &APlayerPawn::Teleport, TeleportLocation);
+	
+	GetWorldTimerManager().SetTimer(TeleportTimerHandle, TeleportDelegate,
+		0.0f, false, TeleportWaitTime);
+	bHasTeleported = false;
+}
+
+void APlayerPawn::CancelTeleportTimer()
+{
+	// TODO: This bool check is probably unnecessary since this function should only be called if (!bHasTeleported)
+	if (!bHasTeleported)
+		GetWorldTimerManager().ClearTimer(TeleportTimerHandle);			
+}
+
+void APlayerPawn::Teleport(FVector TeleportLocation)
+{
+	bHasTeleported = true;
+	SetActorLocation(TeleportLocation);
+}
