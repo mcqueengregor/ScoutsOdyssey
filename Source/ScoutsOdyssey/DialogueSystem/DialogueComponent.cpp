@@ -267,7 +267,8 @@ void UDialogueComponent::Choice(TArray<FText>& Choices)
 		{
 			UDialogueChoiceObject* DialogueChoiceObject = NewObject<UDialogueChoiceObject>(
 				this, UDialogueChoiceObject::StaticClass());
-			DialogueChoiceObject->SetValues(i, Choices[i]);
+			FText ChoiceText = FText::FromString("[" + Choices[i].ToString() + "]");
+			DialogueChoiceObject->SetValues(i, ChoiceText);
 			ListView->AddItem(DialogueChoiceObject);
 
 			// Bind OnClick. ButtonClick => DialogueChoiceOBJ_OnClick => OnChoiceFinished => Choice_TaskFinish
