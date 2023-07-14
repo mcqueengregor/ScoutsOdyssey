@@ -29,6 +29,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	inline void ForceFadeToSceneColour() { bIsFadingToBlack = false; }
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USceneComponent* SceneComponent;
@@ -43,6 +45,9 @@ protected:
 	float TeleportDuration;			// How much time passes between the player entering the volume and being
 									// teleported, in seconds.
 	
+	UPROPERTY(BlueprintReadWrite)
+	UMaterialInstanceDynamic* FadeToBlackMaterialDynamic;
+	
 	UFUNCTION(BlueprintNativeEvent)
 	void GetFadeToBlackMatRef();	// BP function which retrieves reference to "fade to black" post process material.
 
@@ -51,8 +56,7 @@ protected:
 	
 private:
 	inline void ToggleFadeToBlack() { bIsFadingToBlack = !bIsFadingToBlack; }
-	
-	UMaterialInstanceDynamic* FadeToBlackMaterialDynamic;
+
 	float FadeToBlackLerpT;
 	bool bIsFadingToBlack;			// Flag which toggles fading from SceneColor to black or from black to SceneColour.
 };

@@ -344,7 +344,7 @@ void APlayerPawn::StartTeleportationTimer(FVector TeleportLocation, float Telepo
 	FTimerDelegate TeleportDelegate = FTimerDelegate::CreateUObject(this, &APlayerPawn::Teleport, TeleportLocation);
 	
 	GetWorldTimerManager().SetTimer(TeleportTimerHandle, TeleportDelegate,
-		0.0f, false, TeleportWaitTime);
+		1.0f, false, TeleportWaitTime);
 	bHasTeleported = false;
 }
 
@@ -357,6 +357,11 @@ void APlayerPawn::CancelTeleportTimer()
 
 void APlayerPawn::Teleport(FVector TeleportLocation)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Teleported!"));
 	bHasTeleported = true;
+	bHasCameraAngleChangedAlready = false;
 	SetActorLocation(TeleportLocation);
+
+	if (LastTriggerVolumeEntered)
+		LastTriggerVolumeEntered->ForceFadeToSceneColour();
 }

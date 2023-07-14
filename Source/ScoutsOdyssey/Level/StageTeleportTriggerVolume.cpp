@@ -31,16 +31,6 @@ void AStageTeleportTriggerVolume::BeginPlay()
 
 	OnActorBeginOverlap.AddDynamic(this, &AStageTeleportTriggerVolume::OnOverlapBegin);
 	OnActorEndOverlap.AddDynamic(this, &AStageTeleportTriggerVolume::OnOverlapEnd);
-
-	UMaterial* FadeToBlackMaterial;
-	GetFadeToBlackMatRef(FadeToBlackMaterial);
-	
-	if (FadeToBlackMaterial)
-	{
-		UMaterialInterface* MaterialInterface = FadeToBlackMaterial;
-		UMaterialInstanceDynamic::Create(MaterialInterface, this);
-		SetupDynamicFadeToBlackMat();	// Set post process material in BP.
-	}
 }
 
 void AStageTeleportTriggerVolume::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
@@ -49,12 +39,15 @@ void AStageTeleportTriggerVolume::OnOverlapBegin(AActor* OverlappedActor, AActor
 
 	if (PawnRef && TeleportLocationActor)
 	{
+		PawnRef->SetLastTeleportVolumeEntered(this);
 		PawnRef->StartTeleportationTimer(TeleportLocationActor->GetActorLocation(), TeleportDuration);
 		ToggleFadeToBlack();
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald,
+			FString("Overlap begin!"));
 	}
 
 	// If this teleport trigger volume doesn't know where to teleport the player, print a debug message:
-	else if (TeleportLocationActor)
+	else if (!TeleportLocationActor)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red,
 			UKismetSystemLibrary::GetDisplayName(this) +
@@ -70,6 +63,9 @@ void AStageTeleportTriggerVolume::OnOverlapEnd(AActor* OverlappedActor, AActor* 
 	{
 		PawnRef->CancelTeleportTimer();
 		ToggleFadeToBlack();
+
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald, 
+		FString("Overlap end!"));
 	}
 }
 
@@ -89,7 +85,7 @@ void AStageTeleportTriggerVolume::Tick(float DeltaTime)
 	}
 }
 
-void AStageTeleportTriggerVolume::GetFadeToBlackMatRef_Implementation(UMaterial*& RetrievedMaterial)
+void AStageTeleportTriggerVolume::GetFadeToBlackMatRef_Implementation()
 {
 }
 

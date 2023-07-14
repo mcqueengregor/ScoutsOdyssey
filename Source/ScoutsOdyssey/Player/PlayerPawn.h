@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "../Animation/SpriteAnimationDataAsset.h"
+#include "../Level/StageTeleportTriggerVolume.h"
 #include "PlayerPawn.generated.h"
 
 // NOTE: Order of animations with items MUST match order of items in FCurrentItem!
@@ -154,9 +155,11 @@ public:
 		class AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
 	
 	
-	// GETTERS:
+	// GETTERS & SETTERS:
 	inline bool GetIsChangingItem() { return bIsChangingItem; }
 	inline bool GetHasTeleported()	{ return bHasTeleported; }
+
+	inline void SetLastTeleportVolumeEntered(AStageTeleportTriggerVolume* Volume) { LastTriggerVolumeEntered = Volume; }
 	
 private:
 	FVector MovementDirection;	// Direction the player will move on the current frame, in Unreal units.
@@ -173,5 +176,7 @@ private:
 	bool bHasTeleported;		// Flag for indicating if the player has teleported between stages before entering a
 								// new one (set to 'true' when teleport occurs, then 'false' when player re-enters vol).
 	FTimerHandle TeleportTimerHandle;
+
+	AStageTeleportTriggerVolume* LastTriggerVolumeEntered;
 };
 
