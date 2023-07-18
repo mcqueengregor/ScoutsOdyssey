@@ -7,6 +7,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "ScoutsOdyssey/Player/PlayerPawn.h"
 
+bool AStageTeleportTriggerVolume::bHasCreatedDynamicFadeToBlackMat = false;
+
 // Sets default values
 AStageTeleportTriggerVolume::AStageTeleportTriggerVolume()
 {

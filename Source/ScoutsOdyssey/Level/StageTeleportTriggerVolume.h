@@ -30,6 +30,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	inline void ForceFadeToSceneColour() { bIsFadingToBlack = false; }
+
+	// Whether or not a dynamic version of PP_FadeToBlack has been created by an instance of this actor:
+	static bool bHasCreatedDynamicFadeToBlackMat;
+
+	UFUNCTION(BlueprintCallable)
+	void ConfirmCreatedFadeToBlackMat() { bHasCreatedDynamicFadeToBlackMat = true; }
+	UFUNCTION(BlueprintCallable)
+	bool HasCreatedFadeToBlackMat() const { return bHasCreatedDynamicFadeToBlackMat; }
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
