@@ -33,8 +33,8 @@ void AAIActor::CreateDynamicAnimationMaterial()
 
 void AAIActor::SetUpNewAnimation()
 {
-	void UpdateDynamicMaterialParameters();
-	void ResetAnimationTimes();
+	UpdateDynamicMaterialParameters();
+	ResetAnimationTimes();
 }
 
 void AAIActor::UpdateDynamicMaterialParameters()
@@ -57,8 +57,14 @@ void AAIActor::ResetAnimationTimes()
 {
 	const int32 NumCells = CurrentAnimDetails->NumSpritesheetColumns * CurrentAnimDetails->NumSpritesheetRows;
 	const int32 NumSprites = NumCells - CurrentAnimDetails->NumEmptyFrames;
+
+	LOG_INT("num cells", NumCells);
+	LOG_INT("num sprites", NumSprites);
 	
 	AnimDuration = static_cast<float>(NumSprites) / CurrentAnimDetails->PlaybackFramerate;
+
+	LOG_FLOAT("anim duration", AnimDuration);
+	
 	AnimRunningTime = 0;
 }
 
@@ -76,4 +82,7 @@ void AAIActor::Tick(float DeltaTime)
 		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",
 			FMath::Lerp(0, 1, Alpha));	
 	}
+
+	// LOG_FLOAT("anim duration", AnimDuration);
+	// LOG_FLOAT("anim running time", AnimRunningTime);
 }
