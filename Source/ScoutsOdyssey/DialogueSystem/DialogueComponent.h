@@ -95,10 +95,8 @@ private:
 	TArray<USoundCue*> HighVoices;
 	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String, const EVoiceType VoiceType);
 	void PlayRandomVoice(EVoiceType VoiceType) const;
+	void PlayVoiceAtIndex(EVoiceType VoiceType, int Index) const;
 	// Check number of clicks. First click would complete typewriting immediately, while second click would go to next string.
 	// can be -1, 0 and 1. 
 	int SpeakClickCount;
 };
-
-
-
