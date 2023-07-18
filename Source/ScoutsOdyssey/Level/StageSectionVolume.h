@@ -27,10 +27,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-		void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
+	void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
 
 	UFUNCTION()
-		void OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
+	void OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
 
 	FViewTargetTransitionParams GetCameraTransitionParams(class APlayerPawn* const Pawn) const;
 	

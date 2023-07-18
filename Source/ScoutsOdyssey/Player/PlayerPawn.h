@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "../Animation/SpriteAnimationDataAsset.h"
+#include "../Level/StageTeleportTriggerVolume.h"
 #include "PlayerPawn.generated.h"
 
 // NOTE: Order of animations with items MUST match order of items in FCurrentItem!
@@ -69,13 +70,16 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-		void ChangeAnimation(FPlayerAnimation NewAnimation);
+	void ChangeAnimation(FPlayerAnimation NewAnimation);
 
 	UFUNCTION(BlueprintCallable)
-		void ChangeItem(FCurrentItem NewItem);
+	void ChangeItem(FCurrentItem NewItem);
 
 	UFUNCTION(BlueprintCallable)
-		void StartInteracting() {}
+	void StartTeleportationTimer(FVector LocationToTeleportTo, float TeleportWaitTime);
+
+	UFUNCTION(BlueprintCallable)
+	void CancelTeleportTimer();
 	
 protected:
 	// Action/axis methods:
@@ -89,6 +93,9 @@ protected:
 	void CalculateLocalAnimTime();
 	void CalculateChangeItemLocalAnimTime(float DeltaTime);
 	void CalculateInteractLocalAnimTime(float DeltaTime);
+
+	// Teleportation methods:
+	void Teleport(FVector TeleportLocation);
 	
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FPlayerAnimation, FSpriteAnimDetails> AnimationsList;	// List of data assets for IDLE and WALK animations,
@@ -146,8 +153,13 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Misc.")
 		class AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
-
+	
+	
+	// GETTERS & SETTERS:
 	inline bool GetIsChangingItem() { return bIsChangingItem; }
+	inline bool GetHasTeleported()	{ return bHasTeleported; }
+
+	inline void SetLastTeleportVolumeEntered(AStageTeleportTriggerVolume* Volume) { LastTriggerVolumeEntered = Volume; }
 	
 private:
 	FVector MovementDirection;	// Direction the player will move on the current frame, in Unreal units.
@@ -160,4 +172,11 @@ private:
 
 	bool bIsInteracting;		// Flag for indicating if the player is in the middle of interacting with a scene prop.
 	float InteractLocalTime;
+	
+	bool bHasTeleported;		// Flag for indicating if the player has teleported between stages before entering a
+								// new one (set to 'true' when teleport occurs, then 'false' when player re-enters vol).
+	FTimerHandle TeleportTimerHandle;
+
+	AStageTeleportTriggerVolume* LastTriggerVolumeEntered;
 };
+

@@ -338,3 +338,30 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 			(NumSprites / NumCells));
 	}
 }
+
+void APlayerPawn::StartTeleportationTimer(FVector TeleportLocation, float TeleportWaitTime)
+{
+	FTimerDelegate TeleportDelegate = FTimerDelegate::CreateUObject(this, &APlayerPawn::Teleport, TeleportLocation);
+	
+	GetWorldTimerManager().SetTimer(TeleportTimerHandle, TeleportDelegate,
+		1.0f, false, TeleportWaitTime);
+	bHasTeleported = false;
+}
+
+void APlayerPawn::CancelTeleportTimer()
+{
+	// TODO: This bool check is probably unnecessary since this function should only be called if (!bHasTeleported)
+	if (!bHasTeleported)
+		GetWorldTimerManager().ClearTimer(TeleportTimerHandle);			
+}
+
+void APlayerPawn::Teleport(FVector TeleportLocation)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Teleported!"));
+	bHasTeleported = true;
+	bHasCameraAngleChangedAlready = false;
+	SetActorLocation(TeleportLocation);
+
+	if (LastTriggerVolumeEntered)
+		LastTriggerVolumeEntered->ForceFadeToSceneColour();
+}
