@@ -21,7 +21,6 @@ public:
 
 	void Add(T Key, USpriteAnimationDataAsset* AnimDA)
 	{
-		LOG_INT("huh?", Map.Num());
 		Map.Add(Key, AnimDA);
 	}
 

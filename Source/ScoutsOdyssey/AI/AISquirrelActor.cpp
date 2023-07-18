@@ -16,9 +16,6 @@ void AAISquirrelActor::BeginPlay()
 void AAISquirrelActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	if(CurrentAnimDetails)
-		LOG_INT("Playbackframerate!", CurrentAnimDetails->PlaybackFramerate);
 }
 
 void AAISquirrelActor::ChangeAnimation(int Index)

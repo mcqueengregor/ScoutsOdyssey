@@ -16,6 +16,5 @@ protected:
 
 	virtual void Tick(float DeltaSeconds) override;
 private:
-	//AnimationMap<FBearAnimationState> AnimationMap;
-	TMap<FBearAnimationState, USpriteAnimationDataAsset*> AnimationMap;
+	AnimationMap<FBearAnimationState> AnimationMap;
 };

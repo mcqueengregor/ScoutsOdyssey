@@ -13,12 +13,4 @@ public:
 			AnimationMap.Add(static_cast<T>(i), AnimationDAs[i]);
 		}
 	}
-
-	static void AnimationMap_SetUp(TMap<T, USpriteAnimationDataAsset*>& AnimationMap, TArray<USpriteAnimationDataAsset*>& AnimationDAs)
-	{
-		for (int i = 0; i < AnimationDAs.Num(); i++)
-		{
-			AnimationMap.Add(static_cast<T>(i), AnimationDAs[i]);
-		}
-	}
 };
