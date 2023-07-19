@@ -395,11 +395,6 @@ void APlayerPawn::StartFootstepSoundCycle()
 	
 	GetWorldTimerManager().SetTimer(FootstepSoundTimerHandle, this, &APlayerPawn::PlayFootstepSoundCue,
 		FootstepPlayRate, true, 0.0f);
-
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald,
-		FString::Printf(TEXT("%f"), FootstepStartOffset));
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald,
-		FString::Printf(TEXT("%f"), FootstepPlayRate));
 }
 
 void APlayerPawn::StopFootstepSoundCycle()
@@ -412,8 +407,6 @@ void APlayerPawn::PlayFootstepSoundCue()
 	if (AudioComponent->Sound)
 	{
 		AudioComponent->Play();
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald,
-		FString("Playing sound!"));
 	}
 }
 
