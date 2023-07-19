@@ -4,6 +4,8 @@
 #include "AIActor.h"
 
 #include "AIActorHelper.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "EnvironmentQuery/EnvQueryTypes.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
 
 AAIActor::AAIActor()
@@ -20,7 +22,6 @@ AAIActor::AAIActor()
 void AAIActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	CreateDynamicAnimationMaterial();
 }
 
@@ -31,7 +32,7 @@ void AAIActor::CreateDynamicAnimationMaterial()
 	StaticMeshComponent->SetMaterial(0, DynamicMaterial);
 }
 
-void AAIActor::SetUpNewAnimation()
+void AAIActor::NewAnimation_SetUp()
 {
 	UpdateDynamicMaterialParameters();
 	ResetAnimationTimes();
@@ -68,6 +69,22 @@ void AAIActor::ResetAnimationTimes()
 	AnimRunningTime = 0;
 }
 
+void AAIActor::BehaviorTree_SetUp()
+{
+	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
+
+	if(AIController)
+	{
+		AIController->RunBehaviorTree(BehaviorTree);
+		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
+		if(Blackboard)
+		{
+			// TODO: bloack board requires AI actor. which can be itself.
+			// Need to be able to call change animation function, simply. 
+		}
+	}
+}
+
 
 // Called every frame
 void AAIActor::Tick(float DeltaTime)
@@ -77,12 +94,16 @@ void AAIActor::Tick(float DeltaTime)
 
 	if(DynamicMaterial)
 	{
-		float Alpha = FMath::Clamp(AnimRunningTime/AnimDuration, 0.f, 1.f);
-		
+		float Alpha = AnimRunningTime/AnimDuration;
+		if(LoopCurAnim)
+		{
+			Alpha = FGenericPlatformMath::Fmod(Alpha, 1);
+		}
+		else
+		{
+			Alpha = AnimRunningTime/AnimDuration;
+		}
 		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",
-			FMath::Lerp(0, 1, Alpha));	
+				Alpha);			
 	}
-
-	// LOG_FLOAT("anim duration", AnimDuration);
-	// LOG_FLOAT("anim running time", AnimRunningTime);
 }

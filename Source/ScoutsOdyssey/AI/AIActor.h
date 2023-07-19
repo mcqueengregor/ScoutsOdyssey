@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIAnimationEnums.h"
+#include "AIController.h"
 #include "AnimationMap.h"
 #include "GameFramework/Actor.h"
 #include "ScoutsOdyssey/Player/PlayerPawn.h"
@@ -22,15 +23,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void ChangeAnimation(int Index) PURE_VIRTUAL(AAIActor::ChangeAnimation, );
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category=AI)
 	TArray<USpriteAnimationDataAsset*> AnimationDAs;
+
+	UPROPERTY(EditAnywhere, Category=AI)
+	UBehaviorTree* BehaviorTree;
+
+	UPROPERTY(EditAnywhere, Category=AI)
+	bool LoopCurAnim = false;
 
 protected:
 	virtual void BeginPlay() override;
 	
 	void CreateDynamicAnimationMaterial();
 
-	void SetUpNewAnimation();
+	void NewAnimation_SetUp();
 
 	UPROPERTY(EditDefaultsOnly)
 	USceneComponent* SceneComponent;
@@ -48,8 +55,12 @@ private:
 	float AnimDuration;
 	float AnimRunningTime;
 
+	AAIController* AIController;
+
 	void UpdateDynamicMaterialParameters();
 	void ResetAnimationTimes();
+
+	void BehaviorTree_SetUp();
 
 };
 

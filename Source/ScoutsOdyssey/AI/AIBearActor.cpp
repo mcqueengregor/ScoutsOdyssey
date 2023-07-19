@@ -10,10 +10,11 @@ void AAIBearActor::BeginPlay()
 	Super::BeginPlay();
 
 	AIActorHelper<FBearAnimationState>::AnimationMap_SetUp(AnimationMap, AnimationDAs);
-	LOG_INT("this is the DA num!", AnimationDAs.Num());
-	LOG_INT("this is the num!", AnimationMap.Num());
 	CurrentAnimDetails = AnimationMap.Find(0);
-	SetUpNewAnimation();
+	NewAnimation_SetUp();
+
+	LOG_INT("this is the DA num!", AnimationDAs.Num());
+	LOG_INT("this is the num!", AnimationMap.Num());	
 }
 
 void AAIBearActor::Tick(float DeltaSeconds)
@@ -24,5 +25,5 @@ void AAIBearActor::Tick(float DeltaSeconds)
 void AAIBearActor::ChangeAnimation(int Index)
 {
 	CurrentAnimDetails = AnimationMap.Find(Index);
-	SetUpNewAnimation();	
+	NewAnimation_SetUp();	
 }

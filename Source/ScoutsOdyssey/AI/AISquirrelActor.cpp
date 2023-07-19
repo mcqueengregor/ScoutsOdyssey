@@ -10,7 +10,7 @@ void AAISquirrelActor::BeginPlay()
 	LOG_INT("this is the DA num!", AnimationDAs.Num());
 	LOG_INT("this is the num!", AnimationMap.Num());
 	CurrentAnimDetails = AnimationMap.Find(0);
-	SetUpNewAnimation();
+	NewAnimation_SetUp();
 }
 
 void AAISquirrelActor::Tick(float DeltaSeconds)
@@ -21,5 +21,5 @@ void AAISquirrelActor::Tick(float DeltaSeconds)
 void AAISquirrelActor::ChangeAnimation(int Index)
 {
 	CurrentAnimDetails = AnimationMap.Find(Index);
-	SetUpNewAnimation();	
+	NewAnimation_SetUp();	
 }
