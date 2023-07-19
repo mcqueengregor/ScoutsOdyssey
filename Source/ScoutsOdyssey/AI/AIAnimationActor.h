@@ -8,17 +8,17 @@
 #include "AnimationMap.h"
 #include "GameFramework/Actor.h"
 #include "ScoutsOdyssey/Player/PlayerPawn.h"
-#include "AIActor.generated.h"
+#include "AIAnimationActor.generated.h"
 
 
 UCLASS()
-class SCOUTSODYSSEY_API AAIActor : public AActor
+class SCOUTSODYSSEY_API AAIAnimationActor : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AAIActor();
+	AAIAnimationActor();
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void ChangeAnimation(int Index) PURE_VIRTUAL(AAIActor::ChangeAnimation, );
@@ -29,8 +29,14 @@ public:
 	UPROPERTY(EditAnywhere, Category=AI)
 	UBehaviorTree* BehaviorTree;
 
-	UPROPERTY(EditAnywhere, Category=AI)
+	UPROPERTY(BlueprintSetter=SetCurAnimLoop, Category=AI)
 	bool LoopCurAnim = false;
+
+	UFUNCTION(BlueprintSetter, Category=AI)
+	void SetCurAnimLoop(bool ShouldLoop)
+	{
+		LoopCurAnim = ShouldLoop;
+	}
 
 protected:
 	virtual void BeginPlay() override;
@@ -38,6 +44,8 @@ protected:
 	void CreateDynamicAnimationMaterial();
 
 	void NewAnimation_SetUp();
+
+	void BehaviorTree_SetUp();
 
 	UPROPERTY(EditDefaultsOnly)
 	USceneComponent* SceneComponent;
@@ -59,8 +67,5 @@ private:
 
 	void UpdateDynamicMaterialParameters();
 	void ResetAnimationTimes();
-
-	void BehaviorTree_SetUp();
-
 };
 

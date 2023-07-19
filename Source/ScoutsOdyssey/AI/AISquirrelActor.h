@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "AIActor.h"
+#include "AIAnimationActor.h"
 #include "AISquirrelActor.generated.h"
 
 UCLASS()
-class SCOUTSODYSSEY_API AAISquirrelActor : public AAIActor
+class SCOUTSODYSSEY_API AAISquirrelActor : public AAIAnimationActor
 {
 	GENERATED_BODY()
 	

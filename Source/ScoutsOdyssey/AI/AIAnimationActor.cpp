@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AIActor.h"
+#include "AIAnimationActor.h"
 
 #include "AIActorHelper.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
 
-AAIActor::AAIActor()
+AAIAnimationActor::AAIAnimationActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -19,26 +19,26 @@ AAIActor::AAIActor()
 }
 
 
-void AAIActor::BeginPlay()
+void AAIAnimationActor::BeginPlay()
 {
 	Super::BeginPlay();
 	CreateDynamicAnimationMaterial();
 }
 
-void AAIActor::CreateDynamicAnimationMaterial()
+void AAIAnimationActor::CreateDynamicAnimationMaterial()
 {
 	UMaterialInterface* MaterialInterface = StaticMeshComponent->GetMaterial(0);
 	DynamicMaterial = UMaterialInstanceDynamic::Create(MaterialInterface, this);
 	StaticMeshComponent->SetMaterial(0, DynamicMaterial);
 }
 
-void AAIActor::NewAnimation_SetUp()
+void AAIAnimationActor::NewAnimation_SetUp()
 {
 	UpdateDynamicMaterialParameters();
 	ResetAnimationTimes();
 }
 
-void AAIActor::UpdateDynamicMaterialParameters()
+void AAIAnimationActor::UpdateDynamicMaterialParameters()
 {
 	if (DynamicMaterial)
 	{
@@ -54,7 +54,7 @@ void AAIActor::UpdateDynamicMaterialParameters()
 
 
 // goes from 0 to 1 and stays there. 
-void AAIActor::ResetAnimationTimes()
+void AAIAnimationActor::ResetAnimationTimes()
 {
 	const int32 NumCells = CurrentAnimDetails->NumSpritesheetColumns * CurrentAnimDetails->NumSpritesheetRows;
 	const int32 NumSprites = NumCells - CurrentAnimDetails->NumEmptyFrames;
@@ -69,7 +69,7 @@ void AAIActor::ResetAnimationTimes()
 	AnimRunningTime = 0;
 }
 
-void AAIActor::BehaviorTree_SetUp()
+void AAIAnimationActor::BehaviorTree_SetUp()
 {
 	AIController = GetWorld()->SpawnActor<AAIController>(AAIController::StaticClass(), FVector(0), FRotator(0));
 
@@ -79,15 +79,14 @@ void AAIActor::BehaviorTree_SetUp()
 		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
 		if(Blackboard)
 		{
-			// TODO: bloack board requires AI actor. which can be itself.
-			// Need to be able to call change animation function, simply. 
+			Blackboard->SetValueAsObject("AIAnimationActor", this);	
 		}
 	}
 }
 
 
 // Called every frame
-void AAIActor::Tick(float DeltaTime)
+void AAIAnimationActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	AnimRunningTime += DeltaTime;

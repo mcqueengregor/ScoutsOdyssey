@@ -1,7 +1,4 @@
 ﻿#include "AIBearActor.h"
-
-#include <string>
-
 #include "AIActorHelper.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
 
@@ -15,6 +12,8 @@ void AAIBearActor::BeginPlay()
 
 	LOG_INT("this is the DA num!", AnimationDAs.Num());
 	LOG_INT("this is the num!", AnimationMap.Num());	
+
+	BehaviorTree_SetUp();
 }
 
 void AAIBearActor::Tick(float DeltaSeconds)
