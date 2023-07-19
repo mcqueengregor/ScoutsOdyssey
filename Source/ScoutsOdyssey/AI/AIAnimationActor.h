@@ -60,6 +60,7 @@ public:
 
 private:
 	// Current animation duration and running time
+	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	float AnimDuration;
 	float AnimRunningTime;
 
