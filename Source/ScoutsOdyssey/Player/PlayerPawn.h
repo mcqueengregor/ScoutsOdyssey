@@ -100,7 +100,11 @@ protected:
 	// Audio control methods:
 	UFUNCTION()
 	void OnAudioFinishPlaying();
-
+	
+	void StartFootstepSoundCycle();
+	void StopFootstepSoundCycle();
+	void PlayFootstepSoundCue();
+	
 	// Utility methods:
 	bool IsCurrentAnimOfType(FPlayerAnimation BaseAnimType);	// Returns whether the current animation is a variant
 																// of the passed-in type, e.g. if the current animation
@@ -187,6 +191,7 @@ private:
 	bool bHasTeleported;		// Flag for indicating if the player has teleported between stages before entering a
 								// new one (set to 'true' when teleport occurs, then 'false' when player re-enters vol).
 	FTimerHandle TeleportTimerHandle;
+	FTimerHandle FootstepSoundTimerHandle;
 
 	AStageTeleportTriggerVolume* LastTriggerVolumeEntered;
 };

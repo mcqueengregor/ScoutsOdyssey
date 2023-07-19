@@ -82,8 +82,6 @@ void APlayerPawn::BeginPlay()
 	CurrentHeldItemType = FCurrentItem::EMPTY;
 	CurrentAnimation = AnimationsList.Find(FPlayerAnimation::IDLE);
 	ChangeAnimation(FPlayerAnimation::IDLE);
-
-	AudioComponent->OnAudioFinished.AddDynamic(this, &APlayerPawn::OnAudioFinishPlaying);
 }
 
 // Called every frame
@@ -171,11 +169,15 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 	// If the animation set to play on this frame is different from the currently-used one, update material:
 	if (NewAnimWithItem != CurrentAnimation->AnimationType || bIsInteracting)
 	{
+		CurrentGameTime = 0;
+		
 		CurrentAnimation = AnimationsList.Find(NewAnimWithItem);
 		UpdateDynamicMaterialParameters();
 
 		if (IsCurrentAnimOfType(FPlayerAnimation::WALK))
-			AudioComponent->Play();
+			StartFootstepSoundCycle();
+		else if (IsCurrentAnimOfType(FPlayerAnimation::IDLE))
+			StopFootstepSoundCycle();
 	}
 }
 
@@ -382,6 +384,36 @@ void APlayerPawn::OnAudioFinishPlaying()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald, FString("Finished playing!"));
 		AudioComponent->Play();
+	}
+}
+
+void APlayerPawn::StartFootstepSoundCycle()
+{
+	const USpriteAnimationDataAsset* WalkAsset = AnimationsList.Find(FPlayerAnimation::WALK)->SpriteAnimDA;
+	const float FootstepPlayRate = (1.0f / WalkAsset->PlaybackFramerate) *
+		((WalkAsset->NumSpritesheetColumns * WalkAsset->NumSpritesheetRows) / 2.0f);
+	
+	GetWorldTimerManager().SetTimer(FootstepSoundTimerHandle, this, &APlayerPawn::PlayFootstepSoundCue,
+		FootstepPlayRate, true, 0.0f);
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald,
+		FString::Printf(TEXT("%f"), FootstepStartOffset));
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald,
+		FString::Printf(TEXT("%f"), FootstepPlayRate));
+}
+
+void APlayerPawn::StopFootstepSoundCycle()
+{
+	GetWorldTimerManager().ClearTimer(FootstepSoundTimerHandle);
+}
+
+void APlayerPawn::PlayFootstepSoundCue()
+{
+	if (AudioComponent->Sound)
+	{
+		AudioComponent->Play();
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald,
+		FString("Playing sound!"));
 	}
 }
 
