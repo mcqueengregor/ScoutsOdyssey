@@ -68,9 +68,9 @@ void APlayerPawn::BeginPlay()
 
 	CurrentGameTime = 0.0f;
 	OriginalMeshScale = MeshComponent->GetComponentScale();
-	CurrentHeldItemType = FCurrentItem::EMPTY;
-	CurrentAnimation = AnimationsList.Find(FPlayerAnimation::IDLE);
-	ChangeAnimation(FPlayerAnimation::IDLE);
+	CurrentHeldItemType = ECurrentItem::EMPTY;
+	CurrentAnimation = AnimationsList.Find(EPlayerAnimation::IDLE);
+	ChangeAnimation(EPlayerAnimation::IDLE);
 }
 
 // Called every frame
@@ -84,14 +84,14 @@ void APlayerPawn::Tick(float DeltaTime)
 	{
 		if (MovementDirection.IsNearlyZero())
 		{
-			ChangeAnimation(FPlayerAnimation::IDLE);
+			ChangeAnimation(EPlayerAnimation::IDLE);
 			// WalkSoundCue.SetVolume(0.0f);
 		}
 		else
 		{
 			FVector NewLocation = GetActorLocation() + MovementDirection * DeltaTime;
 			SetActorLocation(NewLocation);
-			ChangeAnimation(FPlayerAnimation::WALK);
+			ChangeAnimation(EPlayerAnimation::WALK);
 		
 			// Flip sprite mesh based on horizontal movement direction:
 			FVector NewScale = OriginalMeshScale;
@@ -140,11 +140,11 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		PlayerInputComponent->BindAxis("MouseScroll", InventoryComponent, &UInventoryComponent::SwitchItem);
 }
 
-void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
+void APlayerPawn::ChangeAnimation(EPlayerAnimation NewAnimation)
 {
 	const int32 EnumAsInt = static_cast<int32>(NewAnimation);
-	const FPlayerAnimation NewAnimWithItem =
-		static_cast<FPlayerAnimation>(EnumAsInt + 2 * static_cast<int32>(CurrentHeldItemType));
+	const EPlayerAnimation NewAnimWithItem =
+		static_cast<EPlayerAnimation>(EnumAsInt + 2 * static_cast<int32>(CurrentHeldItemType));
 	
 	// Change animation material instance, if one exists:
 	if (!AnimationsList.Contains(NewAnimWithItem))
@@ -153,7 +153,7 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 			FString("ERROR: No details registered for ") + UEnum::GetValueAsString(NewAnimation));
 		
 		// Default to IDLE animation if no animation details exist for the requested animation state:
-		CurrentAnimation = AnimationsList.Find(FPlayerAnimation::IDLE);
+		CurrentAnimation = AnimationsList.Find(EPlayerAnimation::IDLE);
 		UpdateDynamicMaterialParameters();
 		return;
 	}
@@ -169,7 +169,7 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 	// before reverting to the previous one), put it here!
 }
 
-void APlayerPawn::ChangeItem(FCurrentItem NewItem)
+void APlayerPawn::ChangeItem(ECurrentItem NewItem)
 {
 	PreviouslyHeldItemType = CurrentHeldItemType;
 	CurrentHeldItemType = NewItem;
@@ -208,11 +208,11 @@ void APlayerPawn::InteractWhileHoldingItem()
 			// player animation accordingly:
 			if (ScenePropInteractComp)
 			{
-				FCurrentInteraction interactType =
+				ECurrentInteraction interactType =
 					ScenePropInteractComp->OnInteractWithItem(InventoryComponent->GetCurrentItem(), this);
 
 				// If interaction was successful but there isn't an animation associated with it, do nothing:
-				if (interactType == FCurrentInteraction::SUCCESS_NO_ANIM) return;
+				if (interactType == ECurrentInteraction::SUCCESS_NO_ANIM) return;
 
 				// Change current sprite animation to the appropriate interaction anim:
 				bIsInteracting = true;
@@ -231,7 +231,7 @@ void APlayerPawn::CreateDynamicAnimationMaterial()
 	DynamicMaterial = UMaterialInstanceDynamic::Create(MaterialInterface, this);
 	MeshComponent->SetMaterial(0, DynamicMaterial);
 
-	CurrentAnimation = AnimationsList.Find(FPlayerAnimation::IDLE);
+	CurrentAnimation = AnimationsList.Find(EPlayerAnimation::IDLE);
 
 	// Log animation type enum as part of the details object:
 	for (auto& Anim : AnimationsList)
@@ -299,7 +299,7 @@ void APlayerPawn::CalculateChangeItemLocalAnimTime(float DeltaTime)
 	if (ChangeItemLocalTime >= 1.0f)
 	{	
 		bIsChangingItem = false;
-		ChangeAnimation(FPlayerAnimation::IDLE);
+		ChangeAnimation(EPlayerAnimation::IDLE);
 		return;
 	}
 	
@@ -327,7 +327,7 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 
 	if (InteractLocalTime >= 1.0f)
 	{
-		ChangeAnimation(FPlayerAnimation::IDLE);
+		ChangeAnimation(EPlayerAnimation::IDLE);
 		bIsInteracting = false;
 		return;
 	}

@@ -8,9 +8,9 @@
 #include "../Level/StageTeleportTriggerVolume.h"
 #include "PlayerPawn.generated.h"
 
-// NOTE: Order of animations with items MUST match order of items in FCurrentItem!
+// NOTE: Order of animations with items MUST match order of items in ECurrentItem!
 UENUM(BlueprintType)
-enum class FPlayerAnimation : uint8
+enum class EPlayerAnimation : uint8
 {
 	IDLE = 0				UMETA(DisplayName = "Idle animation"),
 	WALK = 1				UMETA(DisplayName = "Walk animation"),
@@ -25,11 +25,11 @@ struct FSpriteAnimDetails
 
 	UPROPERTY(EditAnywhere)
 	USpriteAnimationDataAsset* SpriteAnimDA;
-	FPlayerAnimation AnimationType;
+	EPlayerAnimation AnimationType;
 };
 
 UENUM()
-enum class FCurrentItem : uint8
+enum class ECurrentItem : uint8
 {
 	EMPTY = 0	UMETA(DisplayName = "Holding no item"),
 	HAMMER = 1	UMETA(DisplayName = "Holding Philbert's hammer"),
@@ -37,7 +37,7 @@ enum class FCurrentItem : uint8
 };
 
 UENUM()
-enum class FCurrentInteraction : uint8
+enum class ECurrentInteraction : uint8
 {
 	NO_INTERACTION = 0		UMETA(DisplayName = "Shrugging (invalid interaction)"),
 	SMASH_GREENHOUSE = 1	UMETA(DisplayName = "Smashing greenhouse with hammer"),
@@ -70,10 +70,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-	void ChangeAnimation(FPlayerAnimation NewAnimation);
+	void ChangeAnimation(EPlayerAnimation NewAnimation);
 
 	UFUNCTION(BlueprintCallable)
-	void ChangeItem(FCurrentItem NewItem);
+	void ChangeItem(ECurrentItem NewItem);
 
 	UFUNCTION(BlueprintCallable)
 	void StartTeleportationTimer(FVector LocationToTeleportTo, float TeleportWaitTime);
@@ -98,23 +98,23 @@ protected:
 	void Teleport(FVector TeleportLocation);
 	
 	UPROPERTY(EditDefaultsOnly)
-	TMap<FPlayerAnimation, FSpriteAnimDetails> AnimationsList;	// List of data assets for IDLE and WALK animations,
+	TMap<EPlayerAnimation, FSpriteAnimDetails> AnimationsList;	// List of data assets for IDLE and WALK animations,
 																// exposed in the editor to be populated by a designer.
 																// Used to update a dynamic material instance when
 																// playing and/or switching animations.
 	
 	UPROPERTY(EditDefaultsOnly)
-	TMap<FCurrentItem, FSpriteAnimDetails> ChangeItemAnimationsList;	// As above, but for animations used when
+	TMap<ECurrentItem, FSpriteAnimDetails> ChangeItemAnimationsList;	// As above, but for animations used when
 																		// changing items.
 
 	UPROPERTY(EditDefaultsOnly)
-	TMap<FCurrentInteraction, FSpriteAnimDetails> InteractAnimationsList;	// As above, but for animations used when
+	TMap<ECurrentInteraction, FSpriteAnimDetails> InteractAnimationsList;	// As above, but for animations used when
 																			// performing interactions.
 	
 	UMaterialInstanceDynamic* DynamicMaterial;
 	FSpriteAnimDetails* CurrentAnimation;
-	FCurrentItem CurrentHeldItemType;
-	FCurrentItem PreviouslyHeldItemType;
+	ECurrentItem CurrentHeldItemType;
+	ECurrentItem PreviouslyHeldItemType;
 	
 public:
 	// COMPONENTS:

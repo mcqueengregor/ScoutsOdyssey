@@ -32,7 +32,7 @@ protected:
 
 	UFUNCTION()
 	void OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
-	
+
 public:
 	virtual void Tick(float DeltaSeconds) override;
 	
@@ -42,6 +42,8 @@ public:
 	
 	class AMyPlayerController* MyPlayerController;
 	class AAIController* AIController;
+
+	UMaterialInstanceDynamic* CreateAndAssignDynamicMaterial();
 
 	UFUNCTION()
 	void BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);

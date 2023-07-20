@@ -41,10 +41,10 @@ void UBushInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
     }
 }
 
-FCurrentInteraction UBushInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
+ECurrentInteraction UBushInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
     // Do nothing:
-    return FCurrentInteraction::NO_INTERACTION;
+    return ECurrentInteraction::NO_INTERACTION;
 }
 
 void UBushInteractComponent::DoTask()
