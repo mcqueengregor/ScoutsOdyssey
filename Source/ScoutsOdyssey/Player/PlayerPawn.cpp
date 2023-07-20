@@ -5,9 +5,11 @@
 #include "../Level/StageSectionVolume.h"
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Chaos/AABBTree.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
+#include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
 #include "ScoutsOdyssey/Components/InteractComponentBase.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 #include "ScoutsOdyssey/InventorySystem/InventoryComponent.h"
@@ -190,19 +192,26 @@ void APlayerPawn::MoveForward(float Value)
 
 void APlayerPawn::InteractWhileHoldingItem()
 {
-	TArray<AActor*> OverlappingSceneProps;
-	GetOverlappingActors(OverlappingSceneProps, ADialogueMeshActor::StaticClass());
+	TArray<AActor*> Overlapping2DSceneProps;
+	TArray<AActor*> Overlapping3DSceneProps;
+	GetOverlappingActors(Overlapping2DSceneProps, ADialogueMeshActor::StaticClass());
+	GetOverlappingActors(Overlapping3DSceneProps, ACustomSkeletalMeshActor::StaticClass());
 	
 	// If standing next to enough scene props, check for interaction component and call OnInteractWithItem on it:
-	if (OverlappingSceneProps.Num() >= 1)
+	if (Overlapping2DSceneProps.Num() >= 1 || Overlapping3DSceneProps.Num() >= 1)
 	{
+		AActor* ActorToInteractWith =
+			Overlapping2DSceneProps.Num() > Overlapping3DSceneProps.Num() ?
+			Overlapping2DSceneProps[0] :
+			Overlapping3DSceneProps[0];
+		
 		UInventoryComponent* InventoryComponent =
 			Cast<UInventoryComponent>(GetComponentByClass(UInventoryComponent::StaticClass()));
 
 		if (InventoryComponent && InventoryComponent->GetCurrentItem())
 		{
 			UInteractComponentBase* ScenePropInteractComp =
-				Cast<UInteractComponentBase>(OverlappingSceneProps[0]->GetComponentByClass(UInteractComponentBase::StaticClass()));
+				Cast<UInteractComponentBase>(ActorToInteractWith->GetComponentByClass(UInteractComponentBase::StaticClass()));
 
 			// If a nearby item has an interaction component associated with it, perform the interaction and update
 			// player animation accordingly:
