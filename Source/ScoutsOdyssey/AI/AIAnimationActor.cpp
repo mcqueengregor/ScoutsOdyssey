@@ -45,6 +45,7 @@ void AAIAnimationActor::UpdateDynamicMaterialParameters()
 		DynamicMaterial->SetTextureParameterValue("AnimationSpritesheet", CurrentAnimDetails->SpritesheetTexture);
 		DynamicMaterial->SetScalarParameterValue("NumSpritesheetRows", CurrentAnimDetails->NumSpritesheetRows);
 		DynamicMaterial->SetScalarParameterValue("NumSpritesheetColumns", CurrentAnimDetails->NumSpritesheetColumns);
+		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",0);			
 	}
 	else
 	{
@@ -100,7 +101,7 @@ void AAIAnimationActor::Tick(float DeltaTime)
 		}
 		else
 		{
-			Alpha = AnimRunningTime/AnimDuration;
+			Alpha = FMath::Clamp(Alpha, 0.f, 1.f);
 		}
 		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",
 				Alpha);			
