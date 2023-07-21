@@ -34,8 +34,6 @@ void UInventoryComponent::BeginPlay()
 void UInventoryComponent::AddItem(UInventoryItemDataAsset* Item)
 {
 	Items.AddUnique(Item);
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald,
-		FString("Added ") + Item->ItemTag.ToString());
 }
 
 void UInventoryComponent::RemoveSelectedItem()
