@@ -163,7 +163,7 @@ public:
 																			// sections, used to accurately determine
 																			// the current camera angle to use.
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Misc.")
+	UPROPERTY(BlueprintReadOnly, Category = "Misc.")
 		class AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
 	
 	
