@@ -106,7 +106,7 @@ protected:
 	void PlayFootstepSoundCue();
 	
 	// Utility methods:
-	bool IsCurrentAnimOfType(FPlayerAnimation BaseAnimType);	// Returns whether the current animation is a variant
+	bool IsCurrentAnimOfType(EPlayerAnimation BaseAnimType);	// Returns whether the current animation is a variant
 																// of the passed-in type, e.g. if the current animation
 																// is IDLE_WITH_HAMMER, passing in IDLE would return 'true'.
 	
