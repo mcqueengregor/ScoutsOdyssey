@@ -58,7 +58,7 @@ public:
 	void SetTextBlockText(const FString& String, class UTextBlock& TextWidget) const;
 
 	// Tasks Setup Methods
-	void Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType,  const int FontSize);
+	void Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType,  const int FontSize, const float TalkRate);
 	void Choice(TArray<FText>& Choices);
 	
 	// Delegates

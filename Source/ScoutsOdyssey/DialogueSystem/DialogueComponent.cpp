@@ -232,7 +232,7 @@ void UDialogueComponent::SetTextBlockText(const FString& String, UTextBlock& Tex
 
 // Was const, now no longer const given TypeNextLetter isn't const
 void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType,
-                               const int FontSize)
+                               const int FontSize, const float TalkRate)
 {
 	if (BubbleOne && BubbleTwo && BubbleNarrator)
 	{
@@ -248,7 +248,7 @@ void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, cons
 			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([=]()
 			{
 				TypeNextLetter(CurTextBlock, String, VoiceType);
-			}), LetterTypeRate, true);
+			}), TalkRate, true);
 		};
 
 		switch (Bubble)
