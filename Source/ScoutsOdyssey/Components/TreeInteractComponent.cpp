@@ -2,8 +2,8 @@
 
 
 #include "TreeInteractComponent.h"
-
-#include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
+#include "ScoutsOdyssey/InventorySystem/ItemSpawner.h"
+#include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
 
 UTreeInteractComponent::UTreeInteractComponent()
 {
@@ -14,19 +14,14 @@ void UTreeInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
+	OwnerActor = Cast<ACustomSkeletalMeshActor>(GetOwner());
 
 	if (OwnerActor)
 	{
-		LocalAnimTime = 0.0f;
-		bAnimFlipFlop = bPlayOnStart;
-		
-	
-		DynamicAnimMaterial = UMaterialInstanceDynamic::Create(
-			OwnerActor->GetStaticMeshComponent()->GetMaterial(0), this);
-	
-		OwnerActor->GetStaticMeshComponent()->SetMaterial(0, DynamicAnimMaterial);
+		OwnerActor->CreateAndAssignDynamicMaterial();
 	}
+
+	ValidItemTag = FGameplayTag::RequestGameplayTag(FName("Item.PhilbertsHammer"));
 }
 
 void UTreeInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -34,24 +29,36 @@ void UTreeInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
-	LocalAnimTime += DeltaTime * (1.0f / AnimationDuration) * static_cast<int32>(bAnimFlipFlop);
-	LocalAnimTime = FMath::Clamp(LocalAnimTime, 0.0f, 1.0f);	
-	
-	if (DynamicAnimMaterial)
-		DynamicAnimMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", LocalAnimTime);
 }
 
 ECurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
-	return ECurrentInteraction::SUCCESS_NO_ANIM;
+	if (ValidItemTag.MatchesTag(ItemType->ItemTag) && !OwnerActor->GetHasBeenInteractedWith())
+	{
+		OwnerActor->DisableInteractions();
+
+		if (AcornPropRef)
+			AcornPropRef->Destroy();
+
+		if (AcornSpawnerRef)
+		{
+			AcornSpawnerRef->Spawn();
+		}
+		
+		return ECurrentInteraction::SUCCESS_NO_ANIM;
+	}
+	
+	return ECurrentInteraction::NO_INTERACTION;
 }
 
 void UTreeInteractComponent::DoTask()
 {
-	ToggleAnimation();
-}
-
-void UTreeInteractComponent::ToggleAnimation()
-{
-	bAnimFlipFlop = !bAnimFlipFlop;	
+	if (!OwnerActor->GetHasBeenInteractedWith())
+	{
+		if (AcornPropRef)
+			AcornPropRef->Destroy();
+		
+		OwnerActor->ToggleAnimationPlayback();
+		OwnerActor->DisableInteractions();
+	}
 }

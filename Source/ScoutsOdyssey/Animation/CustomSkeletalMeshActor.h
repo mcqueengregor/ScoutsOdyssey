@@ -26,6 +26,11 @@ public:
 	UFUNCTION()
 	void OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
 	
+	UMaterialInstanceDynamic* CreateAndAssignDynamicMaterial();
+
+	inline bool GetHasBeenInteractedWith() { return bHasBeenInteractedWith; }
+	void DisableInteractions();
+	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -38,4 +43,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UBoxComponent* BlockingBoxCollider;
+
+private:
+	bool bHasBeenInteractedWith;
 };
