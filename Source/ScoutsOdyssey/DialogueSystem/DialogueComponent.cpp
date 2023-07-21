@@ -10,6 +10,7 @@
 #include "Blueprint/UserWidget.h"
 #include "SpeechBubbleUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/Image.h"
 #include "Components/ListView.h"
 #include "Components/Overlay.h"
 #include "Components/TextBlock.h"
@@ -134,7 +135,26 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 		const FVector2D ViewPortSize = AMyPlayerController::GetViewportSize();
 		const FVector2D BubbleOneOffSet = ViewPortSize * BubbleOneOffSet_PercentageViewPort;
 		const FVector2D BubbleTwoOffSet = ViewPortSize * BubbleTwoOffSet_PercentageViewPort;
-
+		
+		auto ClampBubbleWithinScreen = [&](USpeechBubbleUserWidget& BubbleWidget, AActor& Actor, FVector2D OffSet)
+		{
+			FVector2D BubblePosition = Owner->MyPlayerController->GetActorScreenCoordinate(Actor, OffSet);
+			if(BubblePosition.X - 0.1 * ViewPortSize.X < 0)
+			{
+				BubblePosition.X += 0.15 * ViewPortSize.X;
+				BubbleWidget.SetPositionInViewport(BubblePosition);
+			} else if (BubblePosition.X + 0.1 * ViewPortSize.X > ViewPortSize.X)
+			{
+				UImage* Image = Cast<UImage>(BubbleWidget.GetWidgetFromName(TEXT("Image_Tail")));
+				Image->SetRenderScale(FVector2D(-1, 1));
+				BubblePosition.X -= 0.15 * ViewPortSize.X;
+				BubbleWidget.SetPositionInViewport(BubblePosition);
+			} else
+			{
+				BubbleWidget.SetPositionInViewport(BubblePosition);
+			}
+		};
+		
 		switch (Bubble)
 		{
 		case EBubble::One:
@@ -145,11 +165,9 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 			break;
 		case EBubble::Two:
 			if (SpeakerTwo)
-				BubbleTwo->SetPositionInViewport(
-					Owner->MyPlayerController->GetActorScreenCoordinate(*SpeakerTwo, BubbleTwoOffSet));
+				ClampBubbleWithinScreen(*BubbleTwo, *SpeakerTwo, BubbleTwoOffSet);
 			else
-				BubbleTwo->SetPositionInViewport(
-					Owner->MyPlayerController->GetActorScreenCoordinate(*GetOwner(), BubbleTwoOffSet));
+				ClampBubbleWithinScreen(*BubbleTwo, *Owner, BubbleTwoOffSet);	
 			BubbleOne->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleTwo->SetVisibility(ESlateVisibility::Visible);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
@@ -214,7 +232,7 @@ void UDialogueComponent::SetTextBlockText(const FString& String, UTextBlock& Tex
 
 // Was const, now no longer const given TypeNextLetter isn't const
 void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType,
-                               const int FontSize)
+                               const int FontSize, const float TalkRate)
 {
 	if (BubbleOne && BubbleTwo && BubbleNarrator)
 	{
@@ -230,7 +248,7 @@ void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, cons
 			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([=]()
 			{
 				TypeNextLetter(CurTextBlock, String, VoiceType);
-			}), LetterTypeRate, true);
+			}), TalkRate, true);
 		};
 
 		switch (Bubble)

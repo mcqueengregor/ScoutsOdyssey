@@ -266,6 +266,7 @@ void APlayerPawn::CalculateLocalAnimTime()
 	{
 		// Blinking periods - making these coprime ensures that there won't be any repetition.
 		// Shamelessly stolen from https://www.youtube.com/watch?v=8--5LwHRhjk&t=775s:
+		// ^ Brilliant Vid, ngl.
 		float BlinkPeriods[] = { 4.1f, 7.3f };
 
 		for (int32 i = 0; i < 2; ++i)

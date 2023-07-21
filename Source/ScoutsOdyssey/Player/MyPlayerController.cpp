@@ -29,12 +29,16 @@ FVector2D AMyPlayerController::GetViewportSize()
 	return Result;
 }
 
+// If actor is off the screen, spawn the textbox on the edge, rotated the other way.
+// I can get the tail and spin it around
 FVector2D AMyPlayerController::GetActorScreenCoordinate(const AActor& Actor, const FVector2D Offset) const
 {
 	FVector2D ScreenLocation;
 	ProjectWorldLocationToScreen(Actor.GetActorLocation(), ScreenLocation);
 	return ScreenLocation + Offset;	
 }
+
+
 
 
 
