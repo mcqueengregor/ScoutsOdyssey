@@ -17,7 +17,6 @@ UInventoryComponent::UInventoryComponent()
 		EmptyHandDataAsset = EmptyHandDA.Object;
 }
 
-
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -61,7 +60,11 @@ void UInventoryComponent::SwitchItem(float Mouse_AxisValue)
 	{
 		// If the Tag->Enum map knows about this item, make the player start holding the item:
 		if (TagToEnumMap.Contains(Items[SelectedItem_Index]->ItemTag) && PlayerPawnRef)
+		{
 			PlayerPawnRef->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)));
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald,
+				FString("Switched to ") + Items[SelectedItem_Index]->ItemTag.ToString());
+		}
 	}
 }
 

@@ -46,5 +46,7 @@ private:
 	EVoiceType VoiceType = EVoiceType::High;
 	UPROPERTY(EditAnywhere, Category=Speak, meta = (AllowPrivateAccess = true))
 	int Fontsize = 24;
+	UPROPERTY(EditAnywhere, Category=Speak)
+	float TalkRate = 0.07f;
 	
 };

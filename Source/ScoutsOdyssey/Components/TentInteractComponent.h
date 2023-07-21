@@ -10,7 +10,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllTentBuilt);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFailToInteract);
 
 UENUM()
-enum class FTentState : uint8
+enum class ETentState : uint8
 {
 	START = 0	UMETA(DisplayName = "Tent not put up"),
 	MIDDLE = 1	UMETA(DisplayName = "Tent partially put up"),
@@ -41,19 +41,21 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	virtual FCurrentInteraction OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef) override;
+	virtual ECurrentInteraction OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef) override;
 
 	virtual void DoTask() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FTentState CurrentState;
+	ETentState CurrentState;
 
 	UPROPERTY(EditDefaultsOnly)
-	TMap<FTentState, FTentDetails> TentStateTextures;
+	TMap<ETentState, FTentDetails> TentStateTextures;
 
 	UPROPERTY(EditAnywhere, Category=Tent)
 	int RequiredNumberOfTents = 4;
+	
 	static int NumberOfTents;
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnAllTentBuilt OnAllTentBuilt;
 
@@ -61,12 +63,6 @@ public:
 	FOnFailToInteract OnFailToInteract;
 
 private:
-	UMaterialInstanceDynamic* DynamicMaterial;	// Dynamic material instance applied to owner mesh, used to change the
-												// tent texture to match the tent's state.
-
-	UPROPERTY(EditAnywhere)
-	FGameplayTag ValidItemTag;
-
 	FVector OriginalLocation;
-	float OriginalScaleMultipler;
+	float OriginalScaleMultiplier;
 };

@@ -83,5 +83,7 @@ TEXT macros can cause issue due to its L identifier
 
 #define LOG_FLOAT(Text, Float) 	UE_LOG(LogTemp, Warning,TEXT("%s: %s %f"), *CUR_CLASS_FUNC_LINE, *FString(Text), Float)
 
+#define LOG_INT(Text, Integer) 	UE_LOG(LogTemp, Warning,TEXT("%s: %s %d"), *CUR_CLASS_FUNC_LINE, *FString(Text), Integer)
+
 #define LOG_MULTI(FormatString , ...) UE_LOG(LogTemp, Warning,TEXT("%s: %s"), *CUR_CLASS_FUNC_LINE, *FString::Printf(TEXT(FormatString), ##__VA_ARGS__ ) )
 

@@ -26,9 +26,16 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	virtual FCurrentInteraction OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
-	PURE_VIRTUAL(UInteractComponentBase::OnInteractWithItem, return FCurrentInteraction::NO_INTERACTION;);
+	virtual ECurrentInteraction OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
+	PURE_VIRTUAL(UInteractComponentBase::OnInteractWithItem, return ECurrentInteraction::NO_INTERACTION;);
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void DoTask() PURE_VIRTUAL(UInteractComponentBase::DoTask,);
+
+protected:
+	UMaterialInstanceDynamic* DynamicMaterial;	// Dynamic material instance applied to owner mesh, used to change the
+												// tent texture to match the tent's state.
+
+	UPROPERTY(EditAnywhere)
+	FGameplayTag ValidItemTag;
 };

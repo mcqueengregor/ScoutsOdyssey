@@ -5,16 +5,27 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "../Animation/SpriteAnimationDataAsset.h"
+#include "../Level/StageTeleportTriggerVolume.h"
 #include "PlayerPawn.generated.h"
 
-// NOTE: Order of animations with items MUST match order of items in FCurrentItem!
+// NOTE: Order of animations with items MUST match order of items in ECurrentItem!
 UENUM(BlueprintType)
-enum class FPlayerAnimation : uint8
+enum class EPlayerAnimation : uint8
 {
-	IDLE = 0				UMETA(DisplayName = "Idle animation"),
-	WALK = 1				UMETA(DisplayName = "Walk animation"),
-	IDLE_WITH_HAMMER = 2 	UMETA(DisplayName = "Idle with hammer animation"),
-	WALK_WITH_HAMMER = 3 	UMETA(DisplayName = "Walk with hammer animation"),
+	IDLE = 0					UMETA(DisplayName = "Idle animation"),
+	WALK = 1					UMETA(DisplayName = "Walk animation"),
+	
+	IDLE_WITH_HAMMER = 2 		UMETA(DisplayName = "Idle with hammer animation"),
+	WALK_WITH_HAMMER = 3 		UMETA(DisplayName = "Walk with hammer animation"),
+	
+	IDLE_WITH_ACORN = 4			UMETA(DisplayName = "Idle with acorn animation"),
+	WALK_WITH_ACORN = 5			UMETA(DisplayName = "Walk with acorn animation"),
+
+	IDLE_WITH_LONELY_BOOT = 6	UMETA(DisplayName = "Idle with lonely boot animation"),
+	WALK_WITH_LONELY_BOOT = 7	UMETA(DisplayName = "Walk with lonely boot animation"),
+
+	IDLE_WITH_HONEY_BOOT = 8	UMETA(DisplayName = "Idle with honey boot animation"),
+	WALK_WITH_HONEY_BOOT = 9	UMETA(DisplayName = "Walk with honey boot animation"),
 };
 
 USTRUCT(BlueprintType)
@@ -24,19 +35,21 @@ struct FSpriteAnimDetails
 
 	UPROPERTY(EditAnywhere)
 	USpriteAnimationDataAsset* SpriteAnimDA;
-	FPlayerAnimation AnimationType;
+	EPlayerAnimation AnimationType;
 };
 
 UENUM()
-enum class FCurrentItem : uint8
+enum class ECurrentItem : uint8
 {
-	EMPTY = 0	UMETA(DisplayName = "Holding no item"),
-	HAMMER = 1	UMETA(DisplayName = "Holding Philbert's hammer"),
-	// TODO: Add more items!
+	EMPTY = 0		UMETA(DisplayName = "Holding no item"),
+	HAMMER = 1		UMETA(DisplayName = "Holding Philbert's hammer"),
+	ACORN = 2		UMETA(DisplayName = "Holding acorn"),
+	BOOT = 3		UMETA(DisplayName = "Holding lonely boot"),
+	HONEY_BOOT = 4	UMETA(DisplayName = "Holding boot filled with honey"),
 };
 
 UENUM()
-enum class FCurrentInteraction : uint8
+enum class ECurrentInteraction : uint8
 {
 	NO_INTERACTION = 0		UMETA(DisplayName = "Shrugging (invalid interaction)"),
 	SMASH_GREENHOUSE = 1	UMETA(DisplayName = "Smashing greenhouse with hammer"),
@@ -69,13 +82,16 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-		void ChangeAnimation(FPlayerAnimation NewAnimation);
+	void ChangeAnimation(EPlayerAnimation NewAnimation);
 
 	UFUNCTION(BlueprintCallable)
-		void ChangeItem(FCurrentItem NewItem);
+	void ChangeItem(ECurrentItem NewItem);
 
 	UFUNCTION(BlueprintCallable)
-		void StartInteracting() {}
+	void StartTeleportationTimer(FVector LocationToTeleportTo, float TeleportWaitTime);
+
+	UFUNCTION(BlueprintCallable)
+	void CancelTeleportTimer();
 	
 protected:
 	// Action/axis methods:
@@ -89,25 +105,41 @@ protected:
 	void CalculateLocalAnimTime();
 	void CalculateChangeItemLocalAnimTime(float DeltaTime);
 	void CalculateInteractLocalAnimTime(float DeltaTime);
+
+	// Teleportation methods:
+	void Teleport(FVector TeleportLocation);
+
+	// Audio control methods:
+	UFUNCTION()
+	void OnAudioFinishPlaying();
+	
+	void StartFootstepSoundCycle();
+	void StopFootstepSoundCycle();
+	void PlayFootstepSoundCue();
+	
+	// Utility methods:
+	bool IsCurrentAnimOfType(EPlayerAnimation BaseAnimType);	// Returns whether the current animation is a variant
+																// of the passed-in type, e.g. if the current animation
+																// is IDLE_WITH_HAMMER, passing in IDLE would return 'true'.
 	
 	UPROPERTY(EditDefaultsOnly)
-	TMap<FPlayerAnimation, FSpriteAnimDetails> AnimationsList;	// List of data assets for IDLE and WALK animations,
+	TMap<EPlayerAnimation, FSpriteAnimDetails> AnimationsList;	// List of data assets for IDLE and WALK animations,
 																// exposed in the editor to be populated by a designer.
 																// Used to update a dynamic material instance when
 																// playing and/or switching animations.
 	
 	UPROPERTY(EditDefaultsOnly)
-	TMap<FCurrentItem, FSpriteAnimDetails> ChangeItemAnimationsList;	// As above, but for animations used when
+	TMap<ECurrentItem, FSpriteAnimDetails> ChangeItemAnimationsList;	// As above, but for animations used when
 																		// changing items.
 
 	UPROPERTY(EditDefaultsOnly)
-	TMap<FCurrentInteraction, FSpriteAnimDetails> InteractAnimationsList;	// As above, but for animations used when
+	TMap<ECurrentInteraction, FSpriteAnimDetails> InteractAnimationsList;	// As above, but for animations used when
 																			// performing interactions.
 	
 	UMaterialInstanceDynamic* DynamicMaterial;
 	FSpriteAnimDetails* CurrentAnimation;
-	FCurrentItem CurrentHeldItemType;
-	FCurrentItem PreviouslyHeldItemType;
+	ECurrentItem CurrentHeldItemType;
+	ECurrentItem PreviouslyHeldItemType;
 	
 public:
 	// COMPONENTS:
@@ -116,24 +148,27 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class UStaticMeshComponent* MeshComponent;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class UCameraComponent* CameraComponent;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class USpringArmComponent* SpringArmComponent;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+		class UAudioComponent* AudioComponent;
+	
+	// AUDIO CLIPS:
+	// TODO: Abstract audio playback functionality into AudioManager, instead of bloating actor classes with this logic?
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	class USoundCue* FootstepSoundCue;
 	
 	// ATTRIBUTES:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-		float HoriMoveSpeed;	// Left/right speed in Unreal units per second.
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-		float VertMoveSpeed;	// Front/back speed in Unreal units per second.
-
+		float MoveSpeed;	// Movement speed in Unreal units per second.
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 		float CameraTransitionDuration;	// The amount of time a camera angle transition takes, in seconds.
-
 	
 	// MISC.
 	bool bHasCameraAngleChangedAlready;	// Whether or not the camera component has changed location already.
@@ -144,10 +179,15 @@ public:
 																			// sections, used to accurately determine
 																			// the current camera angle to use.
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Misc.")
-		class AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
 
+	UPROPERTY(BlueprintReadOnly, Category = "Misc.")
+		class AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
+	
+	// GETTERS & SETTERS:
 	inline bool GetIsChangingItem() { return bIsChangingItem; }
+	inline bool GetHasTeleported()	{ return bHasTeleported; }
+	
+	inline void SetLastTeleportVolumeEntered(AStageTeleportTriggerVolume* Volume) { LastTriggerVolumeEntered = Volume; }
 	
 private:
 	FVector MovementDirection;	// Direction the player will move on the current frame, in Unreal units.
@@ -160,4 +200,12 @@ private:
 
 	bool bIsInteracting;		// Flag for indicating if the player is in the middle of interacting with a scene prop.
 	float InteractLocalTime;
+	
+	bool bHasTeleported;		// Flag for indicating if the player has teleported between stages before entering a
+								// new one (set to 'true' when teleport occurs, then 'false' when player re-enters vol).
+	FTimerHandle TeleportTimerHandle;
+	FTimerHandle FootstepSoundTimerHandle;
+
+	AStageTeleportTriggerVolume* LastTriggerVolumeEntered;
 };
+

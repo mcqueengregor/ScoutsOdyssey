@@ -5,12 +5,16 @@
 #include "../Level/StageSectionVolume.h"
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
+#include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
 #include "ScoutsOdyssey/Components/InteractComponentBase.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 #include "ScoutsOdyssey/InventorySystem/InventoryComponent.h"
+#include "UnrealAudio/Private/UnrealAudioDeviceFormat.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -31,7 +35,7 @@ APlayerPawn::APlayerPawn()
 	BoxColliderComponent->SetupAttachment(GetRootComponent());
 
 	static ConstructorHelpers::FObjectFinder<UMaterial>
-		Material(TEXT("Material'/Game/Art/MeshMaterials/CharacterMaterials/M_ScoutAnimBase.M_ScoutAnimBase'"));
+		Material(TEXT("Material'/Game/Art/MeshMaterials/MaterialLibrary/BaseMaterials/M_ScoutAnimBase.M_ScoutAnimBase'"));
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh component"));
 	MeshComponent->SetStaticMesh(PlaneMesh.Object);
@@ -49,8 +53,16 @@ APlayerPawn::APlayerPawn()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera component"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	
-	HoriMoveSpeed = 200.0f;
-	VertMoveSpeed = 200.0f;
+	static ConstructorHelpers::FObjectFinder<USoundCue>
+		FootstepSC(TEXT("SoundCue'/Game/Audio/SFX/Footstep/SC_GrassFootstep.SC_GrassFootstep'"));
+	
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio component"));
+	AudioComponent->SetAutoActivate(false);
+	if (FootstepSC.Object)
+		AudioComponent->SetSound(FootstepSC.Object);
+	AudioComponent->SetupAttachment(RootComponent);
+	
+	MoveSpeed = 200.0f;
 
 	CameraTransitionDuration = 1.0f;
 	bHasCameraAngleChangedAlready = false;
@@ -68,9 +80,9 @@ void APlayerPawn::BeginPlay()
 
 	CurrentGameTime = 0.0f;
 	OriginalMeshScale = MeshComponent->GetComponentScale();
-	CurrentHeldItemType = FCurrentItem::EMPTY;
-	CurrentAnimation = AnimationsList.Find(FPlayerAnimation::IDLE);
-	ChangeAnimation(FPlayerAnimation::IDLE);
+	CurrentHeldItemType = ECurrentItem::EMPTY;
+	CurrentAnimation = AnimationsList.Find(EPlayerAnimation::IDLE);
+	ChangeAnimation(EPlayerAnimation::IDLE);
 }
 
 // Called every frame
@@ -84,14 +96,13 @@ void APlayerPawn::Tick(float DeltaTime)
 	{
 		if (MovementDirection.IsNearlyZero())
 		{
-			ChangeAnimation(FPlayerAnimation::IDLE);
-			// WalkSoundCue.SetVolume(0.0f);
+			ChangeAnimation(EPlayerAnimation::IDLE);
 		}
 		else
 		{
-			FVector NewLocation = GetActorLocation() + MovementDirection * DeltaTime;
+			FVector NewLocation = GetActorLocation() + MovementDirection * MoveSpeed * DeltaTime;
 			SetActorLocation(NewLocation);
-			ChangeAnimation(FPlayerAnimation::WALK);
+			ChangeAnimation(EPlayerAnimation::WALK);
 		
 			// Flip sprite mesh based on horizontal movement direction:
 			FVector NewScale = OriginalMeshScale;
@@ -100,8 +111,6 @@ void APlayerPawn::Tick(float DeltaTime)
 				MovementDirection.Y < 0 ? -OriginalMeshScale.X : OriginalMeshScale.X,
 				OriginalMeshScale.Y,
 				OriginalMeshScale.Z));
-
-			// WalkSoundCue.SetVolume(1.0f);
 		}
 		CalculateLocalAnimTime();
 	}
@@ -134,17 +143,17 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		&APlayerPawn::InteractWhileHoldingItem);
 
 	UInventoryComponent* InventoryComponent =
-		Cast<UInventoryComponent>((UInventoryComponent::StaticClass()));
+		Cast<UInventoryComponent>(UInventoryComponent::StaticClass());
 
 	if (InventoryComponent)
 		PlayerInputComponent->BindAxis("MouseScroll", InventoryComponent, &UInventoryComponent::SwitchItem);
 }
 
-void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
+void APlayerPawn::ChangeAnimation(EPlayerAnimation NewAnimation)
 {
 	const int32 EnumAsInt = static_cast<int32>(NewAnimation);
-	const FPlayerAnimation NewAnimWithItem =
-		static_cast<FPlayerAnimation>(EnumAsInt + 2 * static_cast<int32>(CurrentHeldItemType));
+	const EPlayerAnimation NewAnimWithItem =
+		static_cast<EPlayerAnimation>(EnumAsInt + 2 * static_cast<int32>(CurrentHeldItemType));
 	
 	// Change animation material instance, if one exists:
 	if (!AnimationsList.Contains(NewAnimWithItem))
@@ -153,7 +162,7 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 			FString("ERROR: No details registered for ") + UEnum::GetValueAsString(NewAnimation));
 		
 		// Default to IDLE animation if no animation details exist for the requested animation state:
-		CurrentAnimation = AnimationsList.Find(FPlayerAnimation::IDLE);
+		CurrentAnimation = AnimationsList.Find(EPlayerAnimation::IDLE);
 		UpdateDynamicMaterialParameters();
 		return;
 	}
@@ -161,15 +170,19 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 	// If the animation set to play on this frame is different from the currently-used one, update material:
 	if (NewAnimWithItem != CurrentAnimation->AnimationType || bIsInteracting)
 	{
+		CurrentGameTime = 0;
+		
 		CurrentAnimation = AnimationsList.Find(NewAnimWithItem);
 		UpdateDynamicMaterialParameters();
+
+		if (IsCurrentAnimOfType(EPlayerAnimation::WALK))
+			StartFootstepSoundCycle();
+		else if (IsCurrentAnimOfType(EPlayerAnimation::IDLE))
+			StopFootstepSoundCycle();
 	}
-	
-	// TODO: If there's additional logic for playing back certain animations (e.g. only playing an animation once
-	// before reverting to the previous one), put it here!
 }
 
-void APlayerPawn::ChangeItem(FCurrentItem NewItem)
+void APlayerPawn::ChangeItem(ECurrentItem NewItem)
 {
 	PreviouslyHeldItemType = CurrentHeldItemType;
 	CurrentHeldItemType = NewItem;
@@ -180,39 +193,46 @@ void APlayerPawn::ChangeItem(FCurrentItem NewItem)
 
 void APlayerPawn::MoveRight(float Value)
 {
-	MovementDirection.Y = FMath::Clamp(Value, -1.0f, 1.0f) * HoriMoveSpeed;
+	MovementDirection.Y = FMath::Clamp(Value, -1.0f, 1.0f);
 }
 
 void APlayerPawn::MoveForward(float Value)
 {
-	MovementDirection.X = FMath::Clamp(Value, -1.0f, 1.0f) * VertMoveSpeed;
+	MovementDirection.X = FMath::Clamp(Value, -1.0f, 1.0f);
 }
 
 void APlayerPawn::InteractWhileHoldingItem()
 {
-	TArray<AActor*> OverlappingSceneProps;
-	GetOverlappingActors(OverlappingSceneProps, ADialogueMeshActor::StaticClass());
+	TArray<AActor*> Overlapping2DSceneProps;
+	TArray<AActor*> Overlapping3DSceneProps;
+	GetOverlappingActors(Overlapping2DSceneProps, ADialogueMeshActor::StaticClass());
+	GetOverlappingActors(Overlapping3DSceneProps, ACustomSkeletalMeshActor::StaticClass());
 	
 	// If standing next to enough scene props, check for interaction component and call OnInteractWithItem on it:
-	if (OverlappingSceneProps.Num() >= 1)
+	if (Overlapping2DSceneProps.Num() >= 1 || Overlapping3DSceneProps.Num() >= 1)
 	{
+		AActor* ActorToInteractWith =
+			Overlapping2DSceneProps.Num() > Overlapping3DSceneProps.Num() ?
+			Overlapping2DSceneProps[0] :
+			Overlapping3DSceneProps[0];
+		
 		UInventoryComponent* InventoryComponent =
 			Cast<UInventoryComponent>(GetComponentByClass(UInventoryComponent::StaticClass()));
 
 		if (InventoryComponent && InventoryComponent->GetCurrentItem())
 		{
 			UInteractComponentBase* ScenePropInteractComp =
-				Cast<UInteractComponentBase>(OverlappingSceneProps[0]->GetComponentByClass(UInteractComponentBase::StaticClass()));
+				Cast<UInteractComponentBase>(ActorToInteractWith->GetComponentByClass(UInteractComponentBase::StaticClass()));
 
 			// If a nearby item has an interaction component associated with it, perform the interaction and update
 			// player animation accordingly:
 			if (ScenePropInteractComp)
 			{
-				FCurrentInteraction interactType =
+				ECurrentInteraction interactType =
 					ScenePropInteractComp->OnInteractWithItem(InventoryComponent->GetCurrentItem(), this);
 
 				// If interaction was successful but there isn't an animation associated with it, do nothing:
-				if (interactType == FCurrentInteraction::SUCCESS_NO_ANIM) return;
+				if (interactType == ECurrentInteraction::SUCCESS_NO_ANIM) return;
 
 				// Change current sprite animation to the appropriate interaction anim:
 				bIsInteracting = true;
@@ -231,7 +251,7 @@ void APlayerPawn::CreateDynamicAnimationMaterial()
 	DynamicMaterial = UMaterialInstanceDynamic::Create(MaterialInterface, this);
 	MeshComponent->SetMaterial(0, DynamicMaterial);
 
-	CurrentAnimation = AnimationsList.Find(FPlayerAnimation::IDLE);
+	CurrentAnimation = AnimationsList.Find(EPlayerAnimation::IDLE);
 
 	// Log animation type enum as part of the details object:
 	for (auto& Anim : AnimationsList)
@@ -254,6 +274,7 @@ void APlayerPawn::CalculateLocalAnimTime()
 	{
 		// Blinking periods - making these coprime ensures that there won't be any repetition.
 		// Shamelessly stolen from https://www.youtube.com/watch?v=8--5LwHRhjk&t=775s:
+		// ^ Brilliant Vid, ngl.
 		float BlinkPeriods[] = { 4.1f, 7.3f };
 
 		for (int32 i = 0; i < 2; ++i)
@@ -299,7 +320,7 @@ void APlayerPawn::CalculateChangeItemLocalAnimTime(float DeltaTime)
 	if (ChangeItemLocalTime >= 1.0f)
 	{	
 		bIsChangingItem = false;
-		ChangeAnimation(FPlayerAnimation::IDLE);
+		ChangeAnimation(EPlayerAnimation::IDLE);
 		return;
 	}
 	
@@ -327,7 +348,7 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 
 	if (InteractLocalTime >= 1.0f)
 	{
-		ChangeAnimation(FPlayerAnimation::IDLE);
+		ChangeAnimation(EPlayerAnimation::IDLE);
 		bIsInteracting = false;
 		return;
 	}
@@ -336,5 +357,79 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 	{
 		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",FMath::Abs(InteractLocalTime) *
 			(NumSprites / NumCells));
+	}
+}
+
+void APlayerPawn::StartTeleportationTimer(FVector TeleportLocation, float TeleportWaitTime)
+{
+	FTimerDelegate TeleportDelegate = FTimerDelegate::CreateUObject(this, &APlayerPawn::Teleport, TeleportLocation);
+	
+	GetWorldTimerManager().SetTimer(TeleportTimerHandle, TeleportDelegate,
+		1.0f, false, TeleportWaitTime);
+	bHasTeleported = false;
+}
+
+void APlayerPawn::CancelTeleportTimer()
+{
+	// TODO: This bool check is probably unnecessary since this function should only be called if (!bHasTeleported)
+	if (!bHasTeleported)
+		GetWorldTimerManager().ClearTimer(TeleportTimerHandle);			
+}
+
+void APlayerPawn::Teleport(FVector TeleportLocation)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Teleported!"));
+	bHasTeleported = true;
+	bHasCameraAngleChangedAlready = false;
+	SetActorLocation(TeleportLocation);
+
+	if (LastTriggerVolumeEntered)
+		LastTriggerVolumeEntered->ForceFadeToSceneColour();
+}
+
+void APlayerPawn::OnAudioFinishPlaying()
+{
+	if (AudioComponent->Sound && IsCurrentAnimOfType(EPlayerAnimation::WALK))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald, FString("Finished playing!"));
+		AudioComponent->Play();
+	}
+}
+
+void APlayerPawn::StartFootstepSoundCycle()
+{
+	const USpriteAnimationDataAsset* WalkAsset = AnimationsList.Find(EPlayerAnimation::WALK)->SpriteAnimDA;
+	const float FootstepPlayRate = (1.0f / WalkAsset->PlaybackFramerate) *
+		((WalkAsset->NumSpritesheetColumns * WalkAsset->NumSpritesheetRows) / 2.0f);
+	
+	GetWorldTimerManager().SetTimer(FootstepSoundTimerHandle, this, &APlayerPawn::PlayFootstepSoundCue,
+		FootstepPlayRate, true, 0.0f);
+}
+
+void APlayerPawn::StopFootstepSoundCycle()
+{
+	GetWorldTimerManager().ClearTimer(FootstepSoundTimerHandle);
+}
+
+void APlayerPawn::PlayFootstepSoundCue()
+{
+	if (AudioComponent->Sound)
+	{
+		AudioComponent->Play();
+	}
+}
+
+bool APlayerPawn::IsCurrentAnimOfType(EPlayerAnimation BaseAnimType)
+{
+	// TODO: This code is absolutely disgusting
+	switch (BaseAnimType)
+	{
+	case EPlayerAnimation::IDLE:
+		return static_cast<int32>(CurrentAnimation->AnimationType) % 2 == 0;
+	case EPlayerAnimation::WALK:
+		return static_cast<int32>(CurrentAnimation->AnimationType) % 2 == 1;
+
+	default:
+		return false;
 	}
 }

@@ -17,6 +17,7 @@
 ADialogueMeshActor::ADialogueMeshActor()
 {
 	PropCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("PropCollider"));
+	PropCollider->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
 	PropCollider->SetupAttachment(RootComponent);
 }
 
@@ -66,18 +67,26 @@ void ADialogueMeshActor::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherAc
 {
 	APlayerPawn* PawnRef = Cast<APlayerPawn>(OtherActor);
 	
-	// If player overlapped this object, turn on glowing effect:
+	// If player overlapped this object, turn on pulsing glow effect:
 	if (PawnRef && DynamicMaterial)
-		DynamicMaterial->SetScalarParameterValue("EmissionOnOrOff", 1.0);
+		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", 1.0f);
 }
 
 void ADialogueMeshActor::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
 {
 	APlayerPawn* PawnRef = Cast<APlayerPawn>(OtherActor);
 
-	// If player stopped overlapping this object, turn off glowing effect:
+	// If player stopped overlapping this object, turn off pulsing glow effect:
 	if (PawnRef && DynamicMaterial)
-		DynamicMaterial->SetScalarParameterValue("EmissionOnOrOff", 0.0);
+		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", 0.0f);
+}
+
+UMaterialInstanceDynamic* ADialogueMeshActor::CreateAndAssignDynamicMaterial()
+{
+	UMaterialInterface* MatInterface = GetStaticMeshComponent()->GetMaterial(0);
+	DynamicMaterial = UMaterialInstanceDynamic::Create(MatInterface, this);
+	GetStaticMeshComponent()->SetMaterial(0, DynamicMaterial);
+	return DynamicMaterial;
 }
 
 void ADialogueMeshActor::Tick(float DeltaSeconds)
