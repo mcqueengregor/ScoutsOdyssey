@@ -12,10 +12,20 @@
 UENUM(BlueprintType)
 enum class EPlayerAnimation : uint8
 {
-	IDLE = 0				UMETA(DisplayName = "Idle animation"),
-	WALK = 1				UMETA(DisplayName = "Walk animation"),
-	IDLE_WITH_HAMMER = 2 	UMETA(DisplayName = "Idle with hammer animation"),
-	WALK_WITH_HAMMER = 3 	UMETA(DisplayName = "Walk with hammer animation"),
+	IDLE = 0					UMETA(DisplayName = "Idle animation"),
+	WALK = 1					UMETA(DisplayName = "Walk animation"),
+	
+	IDLE_WITH_HAMMER = 2 		UMETA(DisplayName = "Idle with hammer animation"),
+	WALK_WITH_HAMMER = 3 		UMETA(DisplayName = "Walk with hammer animation"),
+	
+	IDLE_WITH_ACORN = 4			UMETA(DisplayName = "Idle with acorn animation"),
+	WALK_WITH_ACORN = 5			UMETA(DisplayName = "Walk with acorn animation"),
+
+	IDLE_WITH_LONELY_BOOT = 6	UMETA(DisplayName = "Idle with lonely boot animation"),
+	WALK_WITH_LONELY_BOOT = 7	UMETA(DisplayName = "Walk with lonely boot animation"),
+
+	IDLE_WITH_HONEY_BOOT = 8	UMETA(DisplayName = "Idle with honey boot animation"),
+	WALK_WITH_HONEY_BOOT = 9	UMETA(DisplayName = "Walk with honey boot animation"),
 };
 
 USTRUCT(BlueprintType)
@@ -31,9 +41,11 @@ struct FSpriteAnimDetails
 UENUM()
 enum class ECurrentItem : uint8
 {
-	EMPTY = 0	UMETA(DisplayName = "Holding no item"),
-	HAMMER = 1	UMETA(DisplayName = "Holding Philbert's hammer"),
-	// TODO: Add more items!
+	EMPTY = 0		UMETA(DisplayName = "Holding no item"),
+	HAMMER = 1		UMETA(DisplayName = "Holding Philbert's hammer"),
+	ACORN = 2		UMETA(DisplayName = "Holding acorn"),
+	BOOT = 3		UMETA(DisplayName = "Holding lonely boot"),
+	HONEY_BOOT = 4	UMETA(DisplayName = "Holding boot filled with honey"),
 };
 
 UENUM()

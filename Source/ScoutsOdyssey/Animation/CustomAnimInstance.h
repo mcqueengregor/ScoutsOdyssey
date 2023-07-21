@@ -18,6 +18,8 @@ class SCOUTSODYSSEY_API UCustomAnimInstance : public UAnimInstance
 
 public:
 	inline void ToggleAnimationPlayback() { bIsPlayingForwards = !bIsPlayingForwards; }
+
+	inline bool GetIsPlayingForwards() { return bIsPlayingForwards; }
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Controls")

@@ -18,7 +18,7 @@ ACustomSkeletalMeshActor::ACustomSkeletalMeshActor()
 	OverlapBoxCollider->SetupAttachment(RootComponent);
 
 	BlockingBoxCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("Blocking box collider"));
-	//BlockingBoxCollider->SetCollisionProfileName(TEXT("BlockAll"));
+	BlockingBoxCollider->SetCollisionProfileName(TEXT("BlockAll"));
 	BlockingBoxCollider->SetupAttachment(RootComponent);
 
 	bHasBeenInteractedWith = false;
@@ -43,7 +43,12 @@ void ACustomSkeletalMeshActor::ToggleAnimationPlayback()
 	if (AnimInstance)
 	{
 		AnimInstance->ToggleAnimationPlayback();
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Working!"));
+
+		if (!AnimInstance->GetIsPlayingForwards())
+		{
+			BlockingBoxCollider->SetCollisionProfileName(TEXT("NoCollision"));
+			DisableInteractions();
+		}
 	}
 }
 
@@ -84,3 +89,17 @@ UMaterialInstanceDynamic* ACustomSkeletalMeshActor::CreateAndAssignDynamicMateri
 	return DynamicMaterial;
 }
 
+void ACustomSkeletalMeshActor::DisableInteractions()
+{
+	bHasBeenInteractedWith = true;
+	
+	OverlapBoxCollider->SetGenerateOverlapEvents(false);
+	OnActorBeginOverlap.RemoveDynamic(this, &ACustomSkeletalMeshActor::OnOverlapBegin);
+	OnActorEndOverlap.RemoveDynamic(this, &ACustomSkeletalMeshActor::OnOverlapEnd);
+
+	if (DynamicMaterial)
+		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", 0.0f);
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald,
+		FString("Interactions disabled!"));
+}

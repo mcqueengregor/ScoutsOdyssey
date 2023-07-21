@@ -29,7 +29,7 @@ public:
 	UMaterialInstanceDynamic* CreateAndAssignDynamicMaterial();
 
 	inline bool GetHasBeenInteractedWith() { return bHasBeenInteractedWith; }
-	inline void SetHasBeenInteractedWith(bool val) { bHasBeenInteractedWith = val; }
+	void DisableInteractions();
 	
 protected:
 	virtual void BeginPlay() override;

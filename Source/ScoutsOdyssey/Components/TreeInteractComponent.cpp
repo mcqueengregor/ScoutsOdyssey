@@ -2,7 +2,7 @@
 
 
 #include "TreeInteractComponent.h"
-
+#include "ScoutsOdyssey/InventorySystem/ItemSpawner.h"
 #include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
 
 UTreeInteractComponent::UTreeInteractComponent()
@@ -35,8 +35,16 @@ ECurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDat
 {
 	if (ValidItemTag.MatchesTag(ItemType->ItemTag) && !OwnerActor->GetHasBeenInteractedWith())
 	{
-		OwnerActor->ToggleAnimationPlayback();
-		OwnerActor->SetHasBeenInteractedWith(true);
+		OwnerActor->DisableInteractions();
+
+		if (AcornPropRef)
+			AcornPropRef->Destroy();
+
+		if (AcornSpawnerRef)
+		{
+			AcornSpawnerRef->Spawn();
+		}
+		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}
 	
@@ -46,5 +54,11 @@ ECurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDat
 void UTreeInteractComponent::DoTask()
 {
 	if (!OwnerActor->GetHasBeenInteractedWith())
+	{
+		if (AcornPropRef)
+			AcornPropRef->Destroy();
+		
 		OwnerActor->ToggleAnimationPlayback();
+		OwnerActor->DisableInteractions();
+	}
 }
