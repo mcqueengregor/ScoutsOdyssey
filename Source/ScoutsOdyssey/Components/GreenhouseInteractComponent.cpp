@@ -3,7 +3,14 @@
 
 #include "GreenhouseInteractComponent.h"
 
+#include "Kismet/KismetSystemLibrary.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
+
+UGreenhouseInteractComponent::UGreenhouseInteractComponent()
+{
+	SmokeLocalAnimTime = 0.0f;
+	bIsPlayingSmokeAnim = false;
+}
 
 void UGreenhouseInteractComponent::BeginPlay()
 {
@@ -14,6 +21,20 @@ void UGreenhouseInteractComponent::BeginPlay()
 	if (OwnerActor)
 	{
 		DynamicMaterial = OwnerActor->CreateAndAssignDynamicMaterial();
+
+		if (SmokeAnimPlaneMesh && SmokeAnimDataAsset)
+		{
+			UMaterialInterface* MaterialInterface = SmokeAnimPlaneMesh->GetMaterial(0);
+			SmokeAnimDynamicMaterial = UMaterialInstanceDynamic::Create(MaterialInterface, this);
+			SmokeAnimPlaneMesh->SetMaterial(0, SmokeAnimDynamicMaterial);
+			SmokeAnimPlaneMesh->SetVisibility(false);
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red,
+				UKismetSystemLibrary::GetDisplayName(this) +
+				FString(" missing either material or animation data asset!"));
+		}
 	}
 	
 	ValidItemTag = FGameplayTag::RequestGameplayTag(FName("Item.PhilbertsHammer"));
@@ -37,9 +58,12 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}
-	else
+	else if (!bIsPlayingSmokeAnim)
 	{
 		// TODO: Start "was the greenhouse old?" dialogue
+		bIsPlayingSmokeAnim = true;
+		
+		GetOwner()->GetWorldTimerManager().SetTimer()
 	}
 	
 	return ECurrentInteraction::NO_INTERACTION;

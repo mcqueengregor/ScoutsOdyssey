@@ -19,6 +19,8 @@ class SCOUTSODYSSEY_API UGreenhouseInteractComponent : public UInteractComponent
 {
 	GENERATED_BODY()
 
+	UGreenhouseInteractComponent();
+	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -36,4 +38,18 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TMap<EGreenhouseState, UTexture2D*> GreenhouseStateTextures;
+
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* SmokeAnimPlaneMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	USpriteAnimationDataAsset* SmokeAnimDataAsset;
+	
+	UMaterialInstanceDynamic* SmokeAnimDynamicMaterial;
+	
+	FTimerHandle SwitchToOldHandle;
+	
+private:
+	float SmokeLocalAnimTime;
+	bool bIsPlayingSmokeAnim;
 };
