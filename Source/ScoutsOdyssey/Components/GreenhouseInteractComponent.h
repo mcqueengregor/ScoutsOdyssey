@@ -39,17 +39,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<EGreenhouseState, UTexture2D*> GreenhouseStateTextures;
 
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* SmokeAnimPlaneMesh;
+	UPROPERTY(EditAnywhere)
+	AActor* SmokePropActorRef;
 
+	UStaticMeshComponent* SmokePropPlaneMesh;
+	
+	UPROPERTY(BlueprintReadWrite)
+	UMaterialInstanceDynamic* SmokeAnimDynamicMaterial;
+	
 	UPROPERTY(EditDefaultsOnly)
 	USpriteAnimationDataAsset* SmokeAnimDataAsset;
 	
-	UMaterialInstanceDynamic* SmokeAnimDynamicMaterial;
-	
 	FTimerHandle SwitchToOldHandle;
-	
+
 private:
+	void SwitchToOldGreenhouseSprite();
+	
 	float SmokeLocalAnimTime;
 	bool bIsPlayingSmokeAnim;
 };

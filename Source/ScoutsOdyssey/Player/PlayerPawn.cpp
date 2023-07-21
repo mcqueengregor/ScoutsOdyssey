@@ -87,7 +87,6 @@ void APlayerPawn::Tick(float DeltaTime)
 		if (MovementDirection.IsNearlyZero())
 		{
 			ChangeAnimation(EPlayerAnimation::IDLE);
-			// WalkSoundCue.SetVolume(0.0f);
 		}
 		else
 		{
