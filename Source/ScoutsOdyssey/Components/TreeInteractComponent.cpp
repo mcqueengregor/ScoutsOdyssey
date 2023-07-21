@@ -41,9 +41,9 @@ void UTreeInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		DynamicAnimMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", LocalAnimTime);
 }
 
-FCurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
+ECurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
-	return FCurrentInteraction::SUCCESS_NO_ANIM;
+	return ECurrentInteraction::SUCCESS_NO_ANIM;
 }
 
 void UTreeInteractComponent::DoTask()

@@ -42,7 +42,7 @@ private:
 		int SelectedItem_Index;
 
 	UPROPERTY(EditAnywhere, Category = "Inventory")
-		TMap<FGameplayTag, FCurrentItem> TagToEnumMap;
+		TMap<FGameplayTag, ECurrentItem> TagToEnumMap;
 
 	APlayerPawn* PlayerPawnRef;
 	
