@@ -96,6 +96,19 @@ protected:
 
 	// Teleportation methods:
 	void Teleport(FVector TeleportLocation);
+
+	// Audio control methods:
+	UFUNCTION()
+	void OnAudioFinishPlaying();
+	
+	void StartFootstepSoundCycle();
+	void StopFootstepSoundCycle();
+	void PlayFootstepSoundCue();
+	
+	// Utility methods:
+	bool IsCurrentAnimOfType(FPlayerAnimation BaseAnimType);	// Returns whether the current animation is a variant
+																// of the passed-in type, e.g. if the current animation
+																// is IDLE_WITH_HAMMER, passing in IDLE would return 'true'.
 	
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FPlayerAnimation, FSpriteAnimDetails> AnimationsList;	// List of data assets for IDLE and WALK animations,
@@ -123,24 +136,27 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class UStaticMeshComponent* MeshComponent;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class UCameraComponent* CameraComponent;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class USpringArmComponent* SpringArmComponent;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+		class UAudioComponent* AudioComponent;
+	
+	// AUDIO CLIPS:
+	// TODO: Abstract audio playback functionality into AudioManager, instead of bloating actor classes with this logic?
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	class USoundCue* FootstepSoundCue;
 	
 	// ATTRIBUTES:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-		float HoriMoveSpeed;	// Left/right speed in Unreal units per second.
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-		float VertMoveSpeed;	// Front/back speed in Unreal units per second.
-
+		float MoveSpeed;	// Movement speed in Unreal units per second.
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 		float CameraTransitionDuration;	// The amount of time a camera angle transition takes, in seconds.
-
 	
 	// MISC.
 	bool bHasCameraAngleChangedAlready;	// Whether or not the camera component has changed location already.
@@ -150,15 +166,14 @@ public:
 	class TDoubleLinkedList<class AStageSectionVolume*> OverlappedStageSections;	// List of currently-overlapping stage
 																			// sections, used to accurately determine
 																			// the current camera angle to use.
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Misc.")
 		class AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
-	
 	
 	// GETTERS & SETTERS:
 	inline bool GetIsChangingItem() { return bIsChangingItem; }
 	inline bool GetHasTeleported()	{ return bHasTeleported; }
-
+	
 	inline void SetLastTeleportVolumeEntered(AStageTeleportTriggerVolume* Volume) { LastTriggerVolumeEntered = Volume; }
 	
 private:
@@ -176,6 +191,7 @@ private:
 	bool bHasTeleported;		// Flag for indicating if the player has teleported between stages before entering a
 								// new one (set to 'true' when teleport occurs, then 'false' when player re-enters vol).
 	FTimerHandle TeleportTimerHandle;
+	FTimerHandle FootstepSoundTimerHandle;
 
 	AStageTeleportTriggerVolume* LastTriggerVolumeEntered;
 };

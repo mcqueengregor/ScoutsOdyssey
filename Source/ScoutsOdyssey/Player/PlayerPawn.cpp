@@ -5,12 +5,15 @@
 #include "../Level/StageSectionVolume.h"
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
 #include "ScoutsOdyssey/Components/InteractComponentBase.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 #include "ScoutsOdyssey/InventorySystem/InventoryComponent.h"
+#include "UnrealAudio/Private/UnrealAudioDeviceFormat.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -49,8 +52,16 @@ APlayerPawn::APlayerPawn()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera component"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	
-	HoriMoveSpeed = 200.0f;
-	VertMoveSpeed = 200.0f;
+	static ConstructorHelpers::FObjectFinder<USoundCue>
+		FootstepSC(TEXT("SoundCue'/Game/Audio/SFX/Footstep/SC_GrassFootstep.SC_GrassFootstep'"));
+	
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio component"));
+	AudioComponent->SetAutoActivate(false);
+	if (FootstepSC.Object)
+		AudioComponent->SetSound(FootstepSC.Object);
+	AudioComponent->SetupAttachment(RootComponent);
+	
+	MoveSpeed = 200.0f;
 
 	CameraTransitionDuration = 1.0f;
 	bHasCameraAngleChangedAlready = false;
@@ -85,11 +96,10 @@ void APlayerPawn::Tick(float DeltaTime)
 		if (MovementDirection.IsNearlyZero())
 		{
 			ChangeAnimation(FPlayerAnimation::IDLE);
-			// WalkSoundCue.SetVolume(0.0f);
 		}
 		else
 		{
-			FVector NewLocation = GetActorLocation() + MovementDirection * DeltaTime;
+			FVector NewLocation = GetActorLocation() + MovementDirection * MoveSpeed * DeltaTime;
 			SetActorLocation(NewLocation);
 			ChangeAnimation(FPlayerAnimation::WALK);
 		
@@ -100,8 +110,6 @@ void APlayerPawn::Tick(float DeltaTime)
 				MovementDirection.Y < 0 ? -OriginalMeshScale.X : OriginalMeshScale.X,
 				OriginalMeshScale.Y,
 				OriginalMeshScale.Z));
-
-			// WalkSoundCue.SetVolume(1.0f);
 		}
 		CalculateLocalAnimTime();
 	}
@@ -134,7 +142,7 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		&APlayerPawn::InteractWhileHoldingItem);
 
 	UInventoryComponent* InventoryComponent =
-		Cast<UInventoryComponent>((UInventoryComponent::StaticClass()));
+		Cast<UInventoryComponent>(UInventoryComponent::StaticClass());
 
 	if (InventoryComponent)
 		PlayerInputComponent->BindAxis("MouseScroll", InventoryComponent, &UInventoryComponent::SwitchItem);
@@ -161,12 +169,16 @@ void APlayerPawn::ChangeAnimation(FPlayerAnimation NewAnimation)
 	// If the animation set to play on this frame is different from the currently-used one, update material:
 	if (NewAnimWithItem != CurrentAnimation->AnimationType || bIsInteracting)
 	{
+		CurrentGameTime = 0;
+		
 		CurrentAnimation = AnimationsList.Find(NewAnimWithItem);
 		UpdateDynamicMaterialParameters();
+
+		if (IsCurrentAnimOfType(FPlayerAnimation::WALK))
+			StartFootstepSoundCycle();
+		else if (IsCurrentAnimOfType(FPlayerAnimation::IDLE))
+			StopFootstepSoundCycle();
 	}
-	
-	// TODO: If there's additional logic for playing back certain animations (e.g. only playing an animation once
-	// before reverting to the previous one), put it here!
 }
 
 void APlayerPawn::ChangeItem(FCurrentItem NewItem)
@@ -180,12 +192,12 @@ void APlayerPawn::ChangeItem(FCurrentItem NewItem)
 
 void APlayerPawn::MoveRight(float Value)
 {
-	MovementDirection.Y = FMath::Clamp(Value, -1.0f, 1.0f) * HoriMoveSpeed;
+	MovementDirection.Y = FMath::Clamp(Value, -1.0f, 1.0f);
 }
 
 void APlayerPawn::MoveForward(float Value)
 {
-	MovementDirection.X = FMath::Clamp(Value, -1.0f, 1.0f) * VertMoveSpeed;
+	MovementDirection.X = FMath::Clamp(Value, -1.0f, 1.0f);
 }
 
 void APlayerPawn::InteractWhileHoldingItem()
@@ -364,4 +376,51 @@ void APlayerPawn::Teleport(FVector TeleportLocation)
 
 	if (LastTriggerVolumeEntered)
 		LastTriggerVolumeEntered->ForceFadeToSceneColour();
+}
+
+void APlayerPawn::OnAudioFinishPlaying()
+{
+	if (AudioComponent->Sound && IsCurrentAnimOfType(FPlayerAnimation::WALK))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald, FString("Finished playing!"));
+		AudioComponent->Play();
+	}
+}
+
+void APlayerPawn::StartFootstepSoundCycle()
+{
+	const USpriteAnimationDataAsset* WalkAsset = AnimationsList.Find(FPlayerAnimation::WALK)->SpriteAnimDA;
+	const float FootstepPlayRate = (1.0f / WalkAsset->PlaybackFramerate) *
+		((WalkAsset->NumSpritesheetColumns * WalkAsset->NumSpritesheetRows) / 2.0f);
+	
+	GetWorldTimerManager().SetTimer(FootstepSoundTimerHandle, this, &APlayerPawn::PlayFootstepSoundCue,
+		FootstepPlayRate, true, 0.0f);
+}
+
+void APlayerPawn::StopFootstepSoundCycle()
+{
+	GetWorldTimerManager().ClearTimer(FootstepSoundTimerHandle);
+}
+
+void APlayerPawn::PlayFootstepSoundCue()
+{
+	if (AudioComponent->Sound)
+	{
+		AudioComponent->Play();
+	}
+}
+
+bool APlayerPawn::IsCurrentAnimOfType(FPlayerAnimation BaseAnimType)
+{
+	// TODO: This code is absolutely disgusting
+	switch (BaseAnimType)
+	{
+	case FPlayerAnimation::IDLE:
+		return static_cast<int32>(CurrentAnimation->AnimationType) % 2 == 0;
+	case FPlayerAnimation::WALK:
+		return static_cast<int32>(CurrentAnimation->AnimationType) % 2 == 1;
+
+	default:
+		return false;
+	}
 }
