@@ -48,6 +48,8 @@ ECurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDat
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}
 	
+	DoTask();
+	
 	return ECurrentInteraction::NO_INTERACTION;
 }
 

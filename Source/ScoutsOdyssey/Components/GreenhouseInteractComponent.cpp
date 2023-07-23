@@ -54,9 +54,6 @@ void UGreenhouseInteractComponent::TickComponent(float DeltaTime, ELevelTick Tic
 		const float AnimDuration = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * NumFrames;
 		SmokeLocalAnimTime += DeltaTime / AnimDuration;
 		SmokeAnimDynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", SmokeLocalAnimTime);
-	
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-			FString::Printf(TEXT("%f"), SmokeLocalAnimTime));
 		
 		if (SmokeLocalAnimTime >= 1.0f)
 		{
@@ -88,9 +85,6 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 		
 		GetOwner()->GetWorldTimerManager().SetTimer(SwitchToOldHandle, this,
 			&UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite,	1.0f, false, StartDelay);
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan,
-			FString::Printf(TEXT("%f"), StartDelay));
 	}
 	
 	return ECurrentInteraction::NO_INTERACTION;
@@ -111,6 +105,4 @@ void UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite()
 	CurrentState = EGreenhouseState::OLD;
 	UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
 	DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Working!"));
 }

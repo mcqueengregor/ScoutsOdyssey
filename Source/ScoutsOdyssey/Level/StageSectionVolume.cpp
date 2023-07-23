@@ -87,9 +87,6 @@ void AStageSectionVolume::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherA
 		PlayerController->SetViewTarget(this, GetCameraTransitionParams(Pawn));
 
 		Pawn->bHasCameraAngleChangedAlready = true;
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-			FString("Entered ") + UKismetSystemLibrary::GetDisplayName(this));
 	}
 }
 
