@@ -60,8 +60,8 @@ void AAIAnimationActor::ResetAnimationTimes()
 	const int32 NumCells = CurrentAnimDetails->NumSpritesheetColumns * CurrentAnimDetails->NumSpritesheetRows;
 	const int32 NumSprites = NumCells - CurrentAnimDetails->NumEmptyFrames;
 
-	LOG_INT("num cells", NumCells);
-	LOG_INT("num sprites", NumSprites);
+	// LOG_INT("num cells", NumCells);
+	// LOG_INT("num sprites", NumSprites);
 	
 	AnimDuration = static_cast<float>(NumSprites) / CurrentAnimDetails->PlaybackFramerate;
 

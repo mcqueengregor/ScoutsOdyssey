@@ -10,9 +10,6 @@ void AAIBearActor::BeginPlay()
 	CurrentAnimDetails = AnimationMap.Find(0);
 	NewAnimation_SetUp();
 
-	LOG_INT("this is the DA num!", AnimationDAs.Num());
-	LOG_INT("this is the num!", AnimationMap.Num());	
-
 	BehaviorTree_SetUp();
 }
 
