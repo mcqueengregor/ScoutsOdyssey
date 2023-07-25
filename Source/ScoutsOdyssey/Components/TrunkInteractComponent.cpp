@@ -53,18 +53,20 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 		Parameters.bDeferConstruction = true;
 
 		FVector SpawnLocation = PlayerRef->GetActorLocation();
-		FRotator SpawnRotator = FRotator::ZeroRotator;
+		FRotator SpawnRotator = FRotator(0.0f, 90.0f, 90.0f);
 		
-		AAcornProp* NewAcornProp = Cast<AAcornProp>(GetWorld()->SpawnActor(AAcornProp::StaticClass(),
+		AAcornProp* NewAcornProp = Cast<AAcornProp>(GetWorld()->SpawnActor(AcornPropSpawnClass,
 			&SpawnLocation, &SpawnRotator, Parameters));
 
 		if (NewAcornProp)
 		{
 			NewAcornProp->StartDestroyTimer(3.0f);	
-			FVector ImpulseDirection = FVector(-0.5f, 0.0f, 0.5f);
-			const float ImpulseStrength = 1.0f;
+			FVector ImpulseDirection = FVector(0.0f, -0.5f, 0.5f);
+			const float ImpulseStrength = 1000.0f;
 			
-			NewAcornProp->BoxColliderComponent->AddImpulse(ImpulseDirection * ImpulseStrength);
+			NewAcornProp->BoxColliderComponent->AddImpulse(ImpulseDirection * ImpulseStrength, NAME_None, true);
+			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Emerald,
+				FString("Spawned acorn!"));
 		}
 		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;

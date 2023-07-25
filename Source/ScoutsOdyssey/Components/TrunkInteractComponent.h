@@ -30,6 +30,9 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	class AAcornProp* AcornPropActor;
+
+	UPROPERTY(EditDefaultsOnly)
+	UClass* AcornPropSpawnClass;
 	
 private:
 	UPROPERTY(EditInstanceOnly)

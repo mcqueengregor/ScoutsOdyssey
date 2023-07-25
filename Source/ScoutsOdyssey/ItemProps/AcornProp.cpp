@@ -13,13 +13,19 @@ AAcornProp::AAcornProp()
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>
 		PlaneMesh(TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"));
-
+	
+	BoxColliderComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Box collider"));
+	BoxColliderComponent->SetCollisionProfileName(TEXT("NoCollision"));
+	BoxColliderComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	BoxColliderComponent->SetSimulatePhysics(true);
+	BoxColliderComponent->SetupAttachment(RootComponent);
+	
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Prop plane mesh"));
 	StaticMeshComponent->SetStaticMesh(PlaneMesh.Object);
-	StaticMeshComponent->SetupAttachment(RootComponent);
-
-	BoxColliderComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Box collider"));
-	BoxColliderComponent->SetupAttachment(RootComponent);
+	StaticMeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	StaticMeshComponent->SetSimulatePhysics(true);
+	StaticMeshComponent->SetupAttachment(BoxColliderComponent);
 }
 
 // Called when the game starts or when spawned
