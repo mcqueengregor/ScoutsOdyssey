@@ -4,22 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "InteractComponentBase.h"
-#include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
-#include "TreeInteractComponent.generated.h"
+#include "TrunkInteractComponent.generated.h"
 
 /**
  * 
  */
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SCOUTSODYSSEY_API UTreeInteractComponent : public UInteractComponentBase
+class SCOUTSODYSSEY_API UTrunkInteractComponent : public UInteractComponentBase
 {
 	GENERATED_BODY()
 
-	UTreeInteractComponent();
+	UTrunkInteractComponent();
 
 protected:
 	virtual void BeginPlay() override;
-	
+
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -27,14 +26,17 @@ public:
 	virtual ECurrentInteraction OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef) override;
 
 	virtual void DoTask() override;
+
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	class AAcornProp* AcornPropActor;
 	
 private:
 	UPROPERTY(EditInstanceOnly)
-	class AItemSpawner* AcornSpawnerRef;	// Item spawner which creates acorn object for the player to pick up.
+	TArray<class AAISquirrelActor*> SquirrelActors;
 
-	UPROPERTY(EditInstanceOnly)
-	AActor* AcornPropRef;		// Actor which only holds a plane showing the acorn sprite, destroyed when tree is
-								// interacted with.
-	
-	ACustomSkeletalMeshActor* OwnerActor;
+	FGameplayTag HoneyBootItemTag;
+
+	bool bAreSquirrelsPresent;
+
 };
