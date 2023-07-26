@@ -22,7 +22,7 @@ protected:
 	
 public:	
 	UFUNCTION(BlueprintCallable)
-	void AddItem(UInventoryItemDataAsset* Item);
+	void AddItem(UInventoryItemDataAsset* Item, bool bIsNewCurrentItem = false);
 	
 	UFUNCTION(BlueprintCallable)
 	void RemoveSelectedItem();

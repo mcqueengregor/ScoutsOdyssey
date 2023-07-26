@@ -80,11 +80,6 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 	}
 	else if (HoneyBootItemTag.MatchesTag(ItemType->ItemTag) && !bAreSquirrelsPresent)
 	{
-		// Tell player to remove honey boot from inventory (current item)
-		// Spawn honey boot prop in between trunk sprites (set timer for certain animation frame?)
-		// Force player to walk left for X amount of time so that trunk is out of frame, destroy old bear AI and
-		// spawn bear actor which is stuck inside trunk
-				
 		if (UInventoryComponent* InventoryComponent =
 			Cast<UInventoryComponent>(PlayerRef->GetComponentByClass(UInventoryComponent::StaticClass())))
 		{

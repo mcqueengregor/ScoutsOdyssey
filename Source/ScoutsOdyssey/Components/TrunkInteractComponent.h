@@ -6,8 +6,8 @@
 #include "InteractComponentBase.h"
 #include "TrunkInteractComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FShowHoneyBootDelegate);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FShowHoneyBootDelegate);	// Used to set visibility of honey boot plane on
+															// owning trunk actor.
 /**
  * 
  */
