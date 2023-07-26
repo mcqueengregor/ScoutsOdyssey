@@ -54,6 +54,8 @@ protected:
 	UMaterialInstanceDynamic* DynamicMaterial;
 	USpriteAnimationDataAsset* CurrentAnimDetails;
 
+	AAIController* AIController;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -63,9 +65,7 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	float AnimDuration;
 	float AnimRunningTime;
-
-	AAIController* AIController;
-
+	
 	void UpdateDynamicMaterialParameters();
 	void ResetAnimationTimes();
 };
