@@ -6,10 +6,12 @@
 #include "InteractComponentBase.h"
 #include "TrunkInteractComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FShowHoneyBootDelegate);
+
 /**
  * 
  */
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable )
 class SCOUTSODYSSEY_API UTrunkInteractComponent : public UInteractComponentBase
 {
 	GENERATED_BODY()
@@ -33,13 +35,16 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	UClass* AcornPropSpawnClass;
+
+	UPROPERTY(BlueprintAssignable)
+	FShowHoneyBootDelegate ShowHoneyBoot;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bAreSquirrelsPresent;
 	
 private:
 	UPROPERTY(EditInstanceOnly)
 	TArray<class AAISquirrelActor*> SquirrelActors;
 
 	FGameplayTag HoneyBootItemTag;
-
-	bool bAreSquirrelsPresent;
-
 };

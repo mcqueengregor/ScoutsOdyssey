@@ -85,7 +85,7 @@ public:
 	void ChangeAnimation(EPlayerAnimation NewAnimation);
 
 	UFUNCTION(BlueprintCallable)
-	void ChangeItem(ECurrentItem NewItem);
+	void ChangeItem(ECurrentItem NewItem, bool bShouldPlayAnimation = true);
 
 	UFUNCTION(BlueprintCallable)
 	void StartTeleportationTimer(FVector LocationToTeleportTo, float TeleportWaitTime);

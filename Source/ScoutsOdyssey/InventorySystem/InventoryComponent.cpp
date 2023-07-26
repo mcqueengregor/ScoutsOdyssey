@@ -38,7 +38,14 @@ void UInventoryComponent::AddItem(UInventoryItemDataAsset* Item)
 
 void UInventoryComponent::RemoveSelectedItem()
 {
-	Items.RemoveAt(SelectedItem_Index);
+	// If player has another item in their inventory, remove
+	// the currently, held one and switch to another item:
+	if (Items.Num() > 1)
+	{
+		Items.RemoveAt(SelectedItem_Index);
+		SelectedItem_Index = SelectedItem_Index = 0 ? Items.Num() - 1 : SelectedItem_Index - 1;
+		RefreshCurrentItem();
+	}
 }
 
 void UInventoryComponent::SwitchItem(float Mouse_AxisValue)
@@ -62,9 +69,15 @@ void UInventoryComponent::SwitchItem(float Mouse_AxisValue)
 		if (TagToEnumMap.Contains(Items[SelectedItem_Index]->ItemTag) && PlayerPawnRef)
 		{
 			PlayerPawnRef->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)));
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald,
-				FString("Switched to ") + Items[SelectedItem_Index]->ItemTag.ToString());
 		}
+	}
+}
+
+void UInventoryComponent::RefreshCurrentItem()
+{
+	if (TagToEnumMap.Contains(Items[SelectedItem_Index]->ItemTag) && PlayerPawnRef)
+	{
+		PlayerPawnRef->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)), false);
 	}
 }
 
