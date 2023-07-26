@@ -67,7 +67,7 @@ void AAIAnimationActor::ResetAnimationTimes()
 	
 	AnimDuration = static_cast<float>(NumSprites) / CurrentAnimDetails->PlaybackFramerate;
 
-	LOG_FLOAT("anim duration", AnimDuration);
+	//LOG_FLOAT("anim duration", AnimDuration);
 	
 	AnimRunningTime = 0;
 }
@@ -93,8 +93,6 @@ void AAIAnimationActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	AnimRunningTime += DeltaTime;
-
-	LOG_FLOAT("alpha multiplier", AlphaMultiplier);
 	
 	if(DynamicMaterial)
 	{
@@ -102,7 +100,7 @@ void AAIAnimationActor::Tick(float DeltaTime)
 		if(LoopCurAnim)
 		{
 			Alpha = FGenericPlatformMath::Fmod(Alpha, 1);
-			if(Alpha > AlphaMultiplier) AnimRunningTime = 0;
+			if(Alpha > AlphaMultiplier - 0.01f) AnimRunningTime = 0;
 		}
 		else
 		{
