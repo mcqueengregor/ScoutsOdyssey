@@ -65,6 +65,8 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	float AnimDuration;
 	float AnimRunningTime;
+	float Alpha;
+	float AlphaMultiplier;
 	
 	void UpdateDynamicMaterialParameters();
 	void ResetAnimationTimes();

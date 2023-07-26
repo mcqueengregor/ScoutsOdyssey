@@ -60,6 +60,8 @@ void AAIAnimationActor::ResetAnimationTimes()
 	const int32 NumCells = CurrentAnimDetails->NumSpritesheetColumns * CurrentAnimDetails->NumSpritesheetRows;
 	const int32 NumSprites = NumCells - CurrentAnimDetails->NumEmptyFrames;
 
+	AlphaMultiplier = static_cast<float>(NumSprites)/NumCells;
+	
 	// LOG_INT("num cells", NumCells);
 	// LOG_INT("num sprites", NumSprites);
 	
@@ -92,16 +94,19 @@ void AAIAnimationActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	AnimRunningTime += DeltaTime;
 
+	LOG_FLOAT("alpha multiplier", AlphaMultiplier);
+	
 	if(DynamicMaterial)
 	{
-		float Alpha = AnimRunningTime/AnimDuration;
+		Alpha = AnimRunningTime/AnimDuration;
 		if(LoopCurAnim)
 		{
 			Alpha = FGenericPlatformMath::Fmod(Alpha, 1);
+			if(Alpha > AlphaMultiplier) AnimRunningTime = 0;
 		}
 		else
 		{
-			Alpha = FMath::Clamp(Alpha, 0.f, 1.f);
+			Alpha = FMath::Clamp(Alpha, 0.f, AlphaMultiplier - 0.01f);
 		}
 		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",
 				Alpha);			
