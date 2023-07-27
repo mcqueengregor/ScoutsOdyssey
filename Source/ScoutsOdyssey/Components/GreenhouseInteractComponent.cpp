@@ -85,6 +85,8 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 		
 		GetOwner()->GetWorldTimerManager().SetTimer(SwitchToOldHandle, this,
 			&UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite,	1.0f, false, StartDelay);
+
+		// TODO: BeeActors->MoveToGreenhouse();
 	}
 	
 	return ECurrentInteraction::NO_INTERACTION;

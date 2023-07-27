@@ -4,7 +4,6 @@
 #include "InventoryComponent.h"
 
 #include "Kismet/GameplayStatics.h"
-#include "Net/RepLayout.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -31,14 +30,29 @@ void UInventoryComponent::BeginPlay()
 	if (OwnerPawn) PlayerPawnRef = OwnerPawn;
 }
 
-void UInventoryComponent::AddItem(UInventoryItemDataAsset* Item)
+void UInventoryComponent::AddItem(UInventoryItemDataAsset* Item, bool bIsNewCurrentItem)
 {
-	Items.AddUnique(Item);
+	int32 NewItemIndex = Items.AddUnique(Item);
+
+	if (bIsNewCurrentItem && TagToEnumMap.Contains(Items[NewItemIndex]->ItemTag) && PlayerPawnRef)
+	{
+		SelectedItem_Index = NewItemIndex;
+		PlayerPawnRef->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)), false);
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald,
+	FString("Switched to ") + Items[SelectedItem_Index]->ItemTag.ToString() + FString(" (AddItem)"));
+	}
 }
 
 void UInventoryComponent::RemoveSelectedItem()
 {
-	Items.RemoveAt(SelectedItem_Index);
+	// If player has another item in their inventory, remove
+	// the currently, held one and switch to another item:
+	if (Items.Num() > 1)
+	{
+		Items.RemoveAt(SelectedItem_Index);
+		SelectedItem_Index = SelectedItem_Index = 0 ? Items.Num() - 1 : SelectedItem_Index - 1;
+		RefreshCurrentItem();
+	}
 }
 
 void UInventoryComponent::SwitchItem(float Mouse_AxisValue)
@@ -63,8 +77,18 @@ void UInventoryComponent::SwitchItem(float Mouse_AxisValue)
 		{
 			PlayerPawnRef->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)));
 			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald,
-				FString("Switched to ") + Items[SelectedItem_Index]->ItemTag.ToString());
+	FString("Switched to ") + Items[SelectedItem_Index]->ItemTag.ToString() + FString(" (SwitchItem)"));
 		}
+	}
+}
+
+void UInventoryComponent::RefreshCurrentItem()
+{
+	if (TagToEnumMap.Contains(Items[SelectedItem_Index]->ItemTag) && PlayerPawnRef)
+	{
+		PlayerPawnRef->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)), false);
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald,
+	FString("Switched to ") + Items[SelectedItem_Index]->ItemTag.ToString() + FString(" (RefreshCurrentItem)"));
 	}
 }
 

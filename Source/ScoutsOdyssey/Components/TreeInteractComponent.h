@@ -29,10 +29,10 @@ public:
 	virtual void DoTask() override;
 	
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditInstanceOnly)
 	class AItemSpawner* AcornSpawnerRef;	// Item spawner which creates acorn object for the player to pick up.
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditInstanceOnly)
 	AActor* AcornPropRef;		// Actor which only holds a plane showing the acorn sprite, destroyed when tree is
 								// interacted with.
 	

@@ -182,12 +182,12 @@ void APlayerPawn::ChangeAnimation(EPlayerAnimation NewAnimation)
 	}
 }
 
-void APlayerPawn::ChangeItem(ECurrentItem NewItem)
+void APlayerPawn::ChangeItem(ECurrentItem NewItem, bool bShouldPlayAnimation)
 {
 	PreviouslyHeldItemType = CurrentHeldItemType;
 	CurrentHeldItemType = NewItem;
 	
-	bIsChangingItem = true;
+	bIsChangingItem = bShouldPlayAnimation;
 	ChangeItemLocalTime = -1.0f;
 }
 
