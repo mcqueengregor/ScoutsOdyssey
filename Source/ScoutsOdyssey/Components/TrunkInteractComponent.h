@@ -31,6 +31,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AAISquirrelActor* SquirrelActor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* SquirrelBarrier;
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
