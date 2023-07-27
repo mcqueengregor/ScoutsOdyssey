@@ -69,6 +69,8 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 {
 	if (ItemType->ItemTag.MatchesTag(ValidItemTag) && CurrentState == EGreenhouseState::LOCKED)
 	{
+		OnGreenHouseUnLocked.Broadcast();
+		
 		CurrentState = EGreenhouseState::OPEN;
 		UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
 		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
