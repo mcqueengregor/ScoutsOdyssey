@@ -6,9 +6,12 @@ UCLASS()
 class SCOUTSODYSSEY_API AAIBearActor : public AAIAnimationActor
 {
 	GENERATED_BODY()
+	AAIBearActor();
 	
 public:
 	virtual void ChangeAnimation(int Index) override;
+
+	UAudioComponent* SFXAudioComponent;
 
 	
 protected:
