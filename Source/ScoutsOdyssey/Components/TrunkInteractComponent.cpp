@@ -2,13 +2,13 @@
 
 
 #include "TrunkInteractComponent.h"
-
 #include "Components/BoxComponent.h"
 #include "ScoutsOdyssey/AI/AISquirrelActor.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 #include "ScoutsOdyssey/InventorySystem/InventoryComponent.h"
 #include "ScoutsOdyssey/ItemProps/AcornProp.h"
 
+UTrunkInteractComponent::FOnHoneyBootPlaced UTrunkInteractComponent::OnHoneyBootPlaced;
 
 UTrunkInteractComponent::UTrunkInteractComponent()
 {
@@ -85,9 +85,8 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 		}
 		ShowHoneyBoot.Broadcast();
 
-		// TODO: PlayerRef->StartWalkingLeft();
-		// TODO: GuardingBear->Destroy();
-		// TODO: StuckBear->Show();
+		// Player Running Left, BearAI transition subscribes to it.
+		OnHoneyBootPlaced.Broadcast();
 		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}

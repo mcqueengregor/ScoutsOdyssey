@@ -13,6 +13,8 @@ public:
 
 	UAudioComponent* SFXAudioComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsHoneyBootPlaced;
 	
 protected:
 	virtual void BeginPlay() override;

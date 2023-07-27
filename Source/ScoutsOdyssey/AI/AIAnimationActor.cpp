@@ -42,10 +42,16 @@ void AAIAnimationActor::UpdateDynamicMaterialParameters()
 {
 	if (DynamicMaterial)
 	{
-		DynamicMaterial->SetTextureParameterValue("AnimationSpritesheet", CurrentAnimDetails->SpritesheetTexture);
-		DynamicMaterial->SetScalarParameterValue("NumSpritesheetRows", CurrentAnimDetails->NumSpritesheetRows);
-		DynamicMaterial->SetScalarParameterValue("NumSpritesheetColumns", CurrentAnimDetails->NumSpritesheetColumns);
-		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",0);			
+		if(CurrentAnimDetails)
+		{
+			DynamicMaterial->SetTextureParameterValue("AnimationSpritesheet", CurrentAnimDetails->SpritesheetTexture);
+			DynamicMaterial->SetScalarParameterValue("NumSpritesheetRows", CurrentAnimDetails->NumSpritesheetRows);
+			DynamicMaterial->SetScalarParameterValue("NumSpritesheetColumns", CurrentAnimDetails->NumSpritesheetColumns);
+			DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",0);		
+		} else
+		{
+			LOG_ERROR("No Animation Data Asset Found!")
+		}
 	}
 	else
 	{

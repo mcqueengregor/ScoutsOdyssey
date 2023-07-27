@@ -34,6 +34,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* SquirrelBarrier;
 
+	DECLARE_MULTICAST_DELEGATE(FOnHoneyBootPlaced);
+	static FOnHoneyBootPlaced OnHoneyBootPlaced;
+
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	class AAcornProp* AcornPropActor;

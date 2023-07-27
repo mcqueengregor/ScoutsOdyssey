@@ -2,7 +2,7 @@
 #include "AIActorHelper.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/AudioComponent.h"
-#include "ScoutsOdyssey/LoggingMacros.h"
+#include "ScoutsOdyssey/Components/TrunkInteractComponent.h"
 
 void AAIBearActor::BeginPlay()
 {
@@ -32,6 +32,11 @@ void AAIBearActor::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("AI Controller was not constructed For Dialogue Tree!"));		
 	}
+
+	UTrunkInteractComponent::OnHoneyBootPlaced.AddLambda([&]()
+	{
+		IsHoneyBootPlaced = true;
+	});
 }
 
 void AAIBearActor::Tick(float DeltaSeconds)
