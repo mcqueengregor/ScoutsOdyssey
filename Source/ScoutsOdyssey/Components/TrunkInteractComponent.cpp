@@ -41,11 +41,10 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 	if (ValidItemTag.MatchesTag(ItemType->ItemTag) && bAreSquirrelsPresent)
 	{
 		bAreSquirrelsPresent = false;
-		for (const AAISquirrelActor* Squirrel : SquirrelActors)
-		{
-			// TODO: Squirrel->RunAway();
-			// TODO: SquirrelBarrier->Destroy();
-		}
+
+		SquirrelActor->IsAcornThrown = true;
+
+		// TODO: SquirrelBarrier->Destroy();
 
 		FActorSpawnParameters Parameters = {};
 		Parameters.Name = FName("Thrown Acorn Prop");

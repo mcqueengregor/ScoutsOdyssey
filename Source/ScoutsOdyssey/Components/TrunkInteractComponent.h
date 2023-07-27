@@ -29,6 +29,9 @@ public:
 
 	virtual void DoTask() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class AAISquirrelActor* SquirrelActor;
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	class AAcornProp* AcornPropActor;
@@ -43,8 +46,6 @@ protected:
 	bool bAreSquirrelsPresent;
 	
 private:
-	UPROPERTY(EditInstanceOnly)
-	TArray<class AAISquirrelActor*> SquirrelActors;
 
 	FGameplayTag HoneyBootItemTag;
 };

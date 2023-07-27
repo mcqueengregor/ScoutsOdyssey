@@ -1,5 +1,6 @@
 ﻿#include "AISquirrelActor.h"
 #include "AIActorHelper.h"
+#include "AIAnimationEnums.h"
 
 
 void AAISquirrelActor::BeginPlay()
