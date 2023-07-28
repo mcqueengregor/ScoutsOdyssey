@@ -38,6 +38,8 @@ public:
 	void ConfirmCreatedFadeToBlackMat() { bHasCreatedDynamicFadeToBlackMat = true; }
 	UFUNCTION(BlueprintCallable)
 	bool HasCreatedFadeToBlackMat() const { return bHasCreatedDynamicFadeToBlackMat; }
+
+	void SetOwnsMaterial(bool val);
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -53,7 +55,7 @@ protected:
 	float TeleportDuration;			// How much time passes between the player entering the volume and being
 									// teleported, in seconds.
 	
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UMaterialInstanceDynamic* FadeToBlackMaterialDynamic;
 	
 	UFUNCTION(BlueprintNativeEvent)
@@ -67,4 +69,6 @@ private:
 
 	float FadeToBlackLerpT;
 	bool bIsFadingToBlack;			// Flag which toggles fading from SceneColor to black or from black to SceneColour.
+
+	bool bOwnsMaterial;
 };
