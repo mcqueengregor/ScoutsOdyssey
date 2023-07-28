@@ -15,6 +15,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsHoneyBootPlaced;
+
+	UPROPERTY(EditAnywhere)
+	AActor* WallRef;
 	
 protected:
 	virtual void BeginPlay() override;

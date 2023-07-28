@@ -37,6 +37,11 @@ void AAIBearActor::BeginPlay()
 	{
 		IsHoneyBootPlaced = true;
 	});
+	UTrunkInteractComponent::OnHoneyBootPlaced.AddLambda([&]()
+	{
+		if(WallRef)
+			WallRef->Destroy();
+	});
 }
 
 void AAIBearActor::Tick(float DeltaSeconds)
