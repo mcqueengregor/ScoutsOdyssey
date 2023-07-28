@@ -287,6 +287,7 @@ void UDialogueComponent::Choice(TArray<FText>& Choices)
 	if (BubbleOne)
 	{
 		UListView* ListView = Cast<UListView>(BubbleOne->GetWidgetFromName(TEXT("ListView_Choice")));
+		ListView->ClearListItems();
 
 		for (int i = 0; i < Choices.Num(); i++)
 		{
