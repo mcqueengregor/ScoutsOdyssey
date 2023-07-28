@@ -88,7 +88,8 @@ public:
 	void ChangeItem(ECurrentItem NewItem, bool bShouldPlayAnimation = true);
 
 	UFUNCTION(BlueprintCallable)
-	void StartTeleportationTimer(FVector LocationToTeleportTo, float TeleportWaitTime);
+	void StartTeleportationTimer(FVector LocationToTeleportTo, float TeleportWaitTime,
+		AStageTeleportTriggerVolume* EnteredTeleportVolume);
 
 	UFUNCTION(BlueprintCallable)
 	void CancelTeleportTimer();
@@ -107,7 +108,7 @@ protected:
 	void CalculateInteractLocalAnimTime(float DeltaTime);
 
 	// Teleportation methods:
-	void Teleport(FVector TeleportLocation);
+	void Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume* EnteredTeleportVolume);
 
 	// Audio control methods:
 	UFUNCTION()

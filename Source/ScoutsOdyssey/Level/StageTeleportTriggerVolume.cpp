@@ -24,6 +24,7 @@ AStageTeleportTriggerVolume::AStageTeleportTriggerVolume()
 	bIsFadingToBlack = false;
 	TeleportDuration = 1.0f;
 	FadeToBlackLerpT = 0.0f;
+	bOwnsMaterial = false;
 }
 
 // Called when the game starts or when spawned
@@ -42,10 +43,10 @@ void AStageTeleportTriggerVolume::OnOverlapBegin(AActor* OverlappedActor, AActor
 	if (PawnRef && TeleportLocationActor)
 	{
 		PawnRef->SetLastTeleportVolumeEntered(this);
-		PawnRef->StartTeleportationTimer(TeleportLocationActor->GetActorLocation(), TeleportDuration);
+		PawnRef->StartTeleportationTimer(TeleportLocationActor->GetActorLocation(), TeleportDuration, this);
 		ToggleFadeToBlack();
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald,
-			FString("Overlap begin!"));
+		
+		SetOwnsMaterial(true);
 	}
 
 	// If this teleport trigger volume doesn't know where to teleport the player, print a debug message:
@@ -65,9 +66,6 @@ void AStageTeleportTriggerVolume::OnOverlapEnd(AActor* OverlappedActor, AActor* 
 	{
 		PawnRef->CancelTeleportTimer();
 		ToggleFadeToBlack();
-
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald, 
-		FString("Overlap end!"));
 	}
 }
 
@@ -76,15 +74,24 @@ void AStageTeleportTriggerVolume::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (FadeToBlackMaterialDynamic)
+	if (FadeToBlackMaterialDynamic && bOwnsMaterial)
 	{
 		// Get scalar for increasing/decreasing T value for lerp (either -1 or 1):
 		float LerpTScalar = static_cast<float>(bIsFadingToBlack) * 2.0f - 1.0f;
 		FadeToBlackLerpT += (DeltaTime / TeleportDuration * 2.0f) * LerpTScalar;
+
+		if (FadeToBlackLerpT <= 0.0f)
+			SetOwnsMaterial(false);
+		
 		FadeToBlackLerpT = FMath::Clamp(FadeToBlackLerpT, 0.0f, 1.0f);
 
 		FadeToBlackMaterialDynamic->SetScalarParameterValue("LerpT", FadeToBlackLerpT);
 	}
+}
+
+void AStageTeleportTriggerVolume::SetOwnsMaterial(bool val)
+{
+	bOwnsMaterial = val;
 }
 
 void AStageTeleportTriggerVolume::GetFadeToBlackMatRef_Implementation()
