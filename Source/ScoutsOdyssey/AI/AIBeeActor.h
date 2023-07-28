@@ -16,6 +16,9 @@ class SCOUTSODYSSEY_API AAIBeeActor : public AAIAnimationActor
 
 public:
 	virtual void ChangeAnimation(int Index) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsGreenHouseOpen;
 	
 protected:
 	virtual void BeginPlay() override;

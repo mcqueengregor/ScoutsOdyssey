@@ -34,6 +34,7 @@ public:
 
 	virtual void DoTask() override;
 
+	//Enable bees to move to greenhouse
 	UPROPERTY(BlueprintAssignable)
 	FOnGreenHouseUnLocked OnGreenHouseUnLocked;
 

@@ -4,6 +4,7 @@
 #include "GreenhouseInteractComponent.h"
 
 #include "Kismet/KismetSystemLibrary.h"
+#include "ScoutsOdyssey/DialogueSystem/DialogueComponent.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 
 UGreenhouseInteractComponent::UGreenhouseInteractComponent()
@@ -69,26 +70,18 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 {
 	if (ItemType->ItemTag.MatchesTag(ValidItemTag) && CurrentState == EGreenhouseState::LOCKED)
 	{
-		OnGreenHouseUnLocked.Broadcast();
-		
 		CurrentState = EGreenhouseState::OPEN;
 		UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
 		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
 		
+		OnGreenHouseUnLocked.Broadcast();
+		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}
-	else if (!bIsPlayingSmokeAnim && SmokeAnimDataAsset)
+	else if (CurrentState == EGreenhouseState::LOCKED && SmokeAnimDataAsset)
 	{
-		// TODO: Start "was the greenhouse old?" dialogue
-		bIsPlayingSmokeAnim = true;
-		SmokePropPlaneMesh->SetVisibility(true);
-		const int32 SpriteSwitchFrameIndex = 6;	// Switch to old version of greenhouse on 6th frame of smoke anim.
-		float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SpriteSwitchFrameIndex;
-		
-		GetOwner()->GetWorldTimerManager().SetTimer(SwitchToOldHandle, this,
-			&UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite,	1.0f, false, StartDelay);
-
-		// TODO: BeeActors->MoveToGreenhouse();
+		UDialogueComponent* DialogueComponent = Cast<UDialogueComponent>(GetOwner()->GetComponentByClass(UDialogueComponent::StaticClass()));
+		DialogueComponent->StartDialogue();
 	}
 	
 	return ECurrentInteraction::NO_INTERACTION;
@@ -98,9 +91,15 @@ void UGreenhouseInteractComponent::DoTask()
 {
 	if (CurrentState == EGreenhouseState::LOCKED)
 	{
-		CurrentState = EGreenhouseState::OLD;
-		UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
-		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
+		bIsPlayingSmokeAnim = true;
+		SmokePropPlaneMesh->SetVisibility(true);
+		const int32 SpriteSwitchFrameIndex = 6;	// Switch to old version of greenhouse on 6th frame of smoke anim.
+		float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SpriteSwitchFrameIndex;
+		
+		GetOwner()->GetWorldTimerManager().SetTimer(SwitchToOldHandle, this,
+			&UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite,	1.0f, false, StartDelay);
+
+		OnGreenHouseUnLocked.Broadcast();
 	}
 }
 
