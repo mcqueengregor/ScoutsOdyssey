@@ -36,9 +36,6 @@ void AAIBearActor::BeginPlay()
 	UTrunkInteractComponent::OnHoneyBootPlaced.AddLambda([&]()
 	{
 		IsHoneyBootPlaced = true;
-	});
-	UTrunkInteractComponent::OnHoneyBootPlaced.AddLambda([&]()
-	{
 		if(WallRef)
 			WallRef->Destroy();
 	});

@@ -19,7 +19,7 @@ UTrunkInteractComponent::UTrunkInteractComponent()
 void UTrunkInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
 
 	if (OwnerActor)
@@ -28,8 +28,15 @@ void UTrunkInteractComponent::BeginPlay()
 	}
 }
 
+void UTrunkInteractComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	// needs to clear its invocation list due to static delegate
+	OnHoneyBootPlaced.Clear();
+}
+
 void UTrunkInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+                                            FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
@@ -98,3 +105,5 @@ void UTrunkInteractComponent::DoTask()
 {
 	
 }
+
+
