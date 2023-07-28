@@ -10,6 +10,9 @@ class SCOUTSODYSSEY_API AAISquirrelActor : public AAIAnimationActor
 	
 public:
 	virtual void ChangeAnimation(int Index) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsAcornThrown;
 	
 protected:
 	virtual void BeginPlay() override;

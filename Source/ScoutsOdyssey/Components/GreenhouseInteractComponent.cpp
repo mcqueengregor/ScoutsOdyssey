@@ -69,6 +69,8 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 {
 	if (ItemType->ItemTag.MatchesTag(ValidItemTag) && CurrentState == EGreenhouseState::LOCKED)
 	{
+		OnGreenHouseUnLocked.Broadcast();
+		
 		CurrentState = EGreenhouseState::OPEN;
 		UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
 		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
@@ -85,6 +87,8 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 		
 		GetOwner()->GetWorldTimerManager().SetTimer(SwitchToOldHandle, this,
 			&UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite,	1.0f, false, StartDelay);
+
+		// TODO: BeeActors->MoveToGreenhouse();
 	}
 	
 	return ECurrentInteraction::NO_INTERACTION;

@@ -6,6 +6,8 @@
 #include "InteractComponentBase.h"
 #include "GreenhouseInteractComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGreenHouseUnLocked);
+
 UENUM()
 enum class EGreenhouseState : uint8
 {
@@ -31,6 +33,9 @@ public:
 	virtual ECurrentInteraction OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef) override;
 
 	virtual void DoTask() override;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGreenHouseUnLocked OnGreenHouseUnLocked;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

@@ -6,10 +6,15 @@ UCLASS()
 class SCOUTSODYSSEY_API AAIBearActor : public AAIAnimationActor
 {
 	GENERATED_BODY()
+	AAIBearActor();
 	
 public:
 	virtual void ChangeAnimation(int Index) override;
 
+	UAudioComponent* SFXAudioComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsHoneyBootPlaced;
 	
 protected:
 	virtual void BeginPlay() override;
