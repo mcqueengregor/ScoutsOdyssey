@@ -15,7 +15,6 @@
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 #include "ScoutsOdyssey/InventorySystem/InventoryComponent.h"
 #include "ScoutsOdyssey/InventorySystem/Pickup.h"
-#include "UnrealAudio/Private/UnrealAudioDeviceFormat.h"
 #include "Sound/SoundCue.h"
 
 // Sets default values
