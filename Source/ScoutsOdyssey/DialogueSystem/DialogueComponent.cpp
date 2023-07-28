@@ -43,6 +43,13 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 
 void UDialogueComponent::StartDialogue()
 {
+	if(HasTriggered && OnlyTriggerOnce)
+	{
+		LOG_ERROR("condition passed? for some reason?");
+		return;
+	}
+
+	HasTriggered = true;
 	Click_Implementation(nullptr, EKeys::A);
 
 	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());

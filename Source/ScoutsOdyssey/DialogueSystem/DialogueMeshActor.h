@@ -37,7 +37,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	
 	// Behavior Tree
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category=Dialogue)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Dialogue)
 	UBehaviorTree* DialogueTree;
 	
 	class AMyPlayerController* MyPlayerController;

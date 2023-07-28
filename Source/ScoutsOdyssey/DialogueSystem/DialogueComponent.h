@@ -66,6 +66,10 @@ public:
 	FOnChoiceFinish OnChoiceFinish;
 	FOnDialogueEnd OnDialogueEnd;
 
+	// Only Trigger Once || Trigger repeatedly
+	bool HasTriggered = false;
+	bool OnlyTriggerOnce = false;
+	
 	void SpeakFinish();
 	UFUNCTION()
 	void ChoiceFinish(const int ReplyIndex);

@@ -142,7 +142,11 @@ void ADialogueMeshActor::Clickable_SetUp()
 		MyStaticMeshComponent->OnClicked.AddDynamic(DialogueComponent, &UDialogueComponent::Click_Implementation);
 		MyStaticMeshComponent->OnClicked.AddDynamic(this, &ADialogueMeshActor::BehaviorTree_Start);
 		if(OnlyTriggerOnce)
+		{
 			DialogueComponent->OnDialogueEnd.AddUObject(this, &ADialogueMeshActor::Clickable_CleanUp);
+			DialogueComponent->OnlyTriggerOnce = true;
+			DialogueComponent->HasTriggered = false;
+		}
 	}
 	else
 	{
