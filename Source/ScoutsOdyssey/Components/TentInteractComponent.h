@@ -61,7 +61,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFailToInteract OnFailToInteract;
-
+	
 private:
 	FVector OriginalLocation;
 	float OriginalScaleMultiplier;

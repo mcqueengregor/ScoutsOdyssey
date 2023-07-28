@@ -62,5 +62,6 @@ void UTreeInteractComponent::DoTask()
 		
 		OwnerActor->ToggleAnimationPlayback();
 		OwnerActor->DisableInteractions();
+		OnTreeDisappear.Broadcast();
 	}
 }
