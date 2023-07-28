@@ -106,11 +106,11 @@ void AAIAnimationActor::Tick(float DeltaTime)
 		if(LoopCurAnim)
 		{
 			Alpha = FGenericPlatformMath::Fmod(Alpha, 1);
-			if(Alpha > AlphaMultiplier - 0.01f) AnimRunningTime = 0;
+			if(Alpha > AlphaMultiplier - 0.05f) AnimRunningTime = 0;
 		}
 		else
 		{
-			Alpha = FMath::Clamp(Alpha, 0.f, AlphaMultiplier - 0.01f);
+			Alpha = FMath::Clamp(Alpha, 0.f, AlphaMultiplier - 0.05f);
 		}
 		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",
 				Alpha);			
