@@ -360,9 +360,11 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 	}
 }
 
-void APlayerPawn::StartTeleportationTimer(FVector TeleportLocation, float TeleportWaitTime)
+void APlayerPawn::StartTeleportationTimer(FVector TeleportLocation, float TeleportWaitTime,
+	AStageTeleportTriggerVolume* EnteredTeleportVolume)
 {
-	FTimerDelegate TeleportDelegate = FTimerDelegate::CreateUObject(this, &APlayerPawn::Teleport, TeleportLocation);
+	FTimerDelegate TeleportDelegate = FTimerDelegate::CreateUObject(this, &APlayerPawn::Teleport, TeleportLocation,
+		EnteredTeleportVolume);
 	
 	GetWorldTimerManager().SetTimer(TeleportTimerHandle, TeleportDelegate,
 		1.0f, false, TeleportWaitTime);
@@ -373,16 +375,19 @@ void APlayerPawn::CancelTeleportTimer()
 {
 	// TODO: This bool check is probably unnecessary since this function should only be called if (!bHasTeleported)
 	if (!bHasTeleported)
-		GetWorldTimerManager().ClearTimer(TeleportTimerHandle);			
+	{
+		GetWorldTimerManager().ClearTimer(TeleportTimerHandle);
+	}
 }
 
-void APlayerPawn::Teleport(FVector TeleportLocation)
+void APlayerPawn::Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume* EnteredTeleportVolume)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Teleported!"));
 	bHasTeleported = true;
 	bHasCameraAngleChangedAlready = false;
 	SetActorLocation(TeleportLocation);
-
+	EnteredTeleportVolume->SetOwnsMaterial(true);
+	
 	if (LastTriggerVolumeEntered)
 		LastTriggerVolumeEntered->ForceFadeToSceneColour();
 }
