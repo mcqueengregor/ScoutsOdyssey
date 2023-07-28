@@ -7,6 +7,8 @@
 #include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
 #include "TreeInteractComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTreeDisappear);
+
 /**
  * 
  */
@@ -27,6 +29,9 @@ public:
 	virtual ECurrentInteraction OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef) override;
 
 	virtual void DoTask() override;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTreeDisappear OnTreeDisappear;
 	
 private:
 	UPROPERTY(EditInstanceOnly)
