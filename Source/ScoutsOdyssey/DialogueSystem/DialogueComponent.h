@@ -74,6 +74,9 @@ public:
 	UFUNCTION()
 	void ChoiceFinish(const int ReplyIndex);
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsCharacter;
+	
 protected:
 	virtual void BeginPlay() override;
 

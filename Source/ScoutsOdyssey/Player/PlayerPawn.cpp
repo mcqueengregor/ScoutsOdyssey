@@ -11,8 +11,10 @@
 #include "ScoutsOdyssey/LoggingMacros.h"
 #include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
 #include "ScoutsOdyssey/Components/InteractComponentBase.h"
+#include "ScoutsOdyssey/DialogueSystem/DialogueComponent.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 #include "ScoutsOdyssey/InventorySystem/InventoryComponent.h"
+#include "ScoutsOdyssey/InventorySystem/Pickup.h"
 #include "UnrealAudio/Private/UnrealAudioDeviceFormat.h"
 #include "Sound/SoundCue.h"
 
@@ -203,14 +205,42 @@ void APlayerPawn::MoveForward(float Value)
 
 void APlayerPawn::InteractWhileHoldingItem()
 {
+	// Early-out if there are items to pick up nearby (use logic in BP_Pickup):
+	TArray<AActor*> OverlappingPickupableItems;
+	GetOverlappingActors(OverlappingPickupableItems, APickup::StaticClass());
+	if (OverlappingPickupableItems.Num() > 0)
+	{
+		return;
+	}
+	
 	TArray<AActor*> Overlapping2DSceneProps;
 	TArray<AActor*> Overlapping3DSceneProps;
 	GetOverlappingActors(Overlapping2DSceneProps, ADialogueMeshActor::StaticClass());
 	GetOverlappingActors(Overlapping3DSceneProps, ACustomSkeletalMeshActor::StaticClass());
 	
-	// If standing next to enough scene props, check for interaction component and call OnInteractWithItem on it:
+	// If standing next to enough scene props, check for dialogue component and start dialogue if one exists.
+	// Otherwise, interaction component and call OnInteractWithItem on it:
 	if (Overlapping2DSceneProps.Num() >= 1 || Overlapping3DSceneProps.Num() >= 1)
 	{
+		if (Overlapping2DSceneProps.Num() > 0)
+		{
+			UDialogueComponent* DialogueComponent = Cast<UDialogueComponent>(
+				Overlapping2DSceneProps[0]->GetComponentByClass(UDialogueComponent::StaticClass()));
+		
+			if (DialogueComponent && DialogueComponent->bIsCharacter)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
+					FString("Working!"));
+				DialogueComponent->StartDialogue();
+				return;
+			}
+			else if (!DialogueComponent->bIsCharacter)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
+					FString("Not a character!"));
+			}
+		}
+		
 		AActor* ActorToInteractWith =
 			Overlapping2DSceneProps.Num() > Overlapping3DSceneProps.Num() ?
 			Overlapping2DSceneProps[0] :

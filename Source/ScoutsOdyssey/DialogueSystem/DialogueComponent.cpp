@@ -21,6 +21,8 @@
 UDialogueComponent::UDialogueComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+	bIsCharacter = false;
 }
 
 void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
