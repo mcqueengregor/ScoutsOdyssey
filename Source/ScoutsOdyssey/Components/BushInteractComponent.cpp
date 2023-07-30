@@ -3,6 +3,7 @@
 #include "BushInteractComponent.h"
 #include "../Player/PlayerPawn.h"
 #include "../DialogueSystem/DialogueMeshActor.h"
+#include "ScoutsOdyssey/DialogueSystem/DialogueComponent.h"
 
 UBushInteractComponent::UBushInteractComponent()
 {
@@ -43,7 +44,19 @@ void UBushInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 ECurrentInteraction UBushInteractComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
-    // Do nothing:
+    ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
+
+    if (OwnerActor)
+    {
+        UDialogueComponent* DialogueComponent = Cast<UDialogueComponent>(
+            OwnerActor->GetComponentByClass(UDialogueComponent::StaticClass()));
+
+        if (DialogueComponent->bIsCharacter)
+        {
+            DialogueComponent->StartDialogue();
+        }
+    }
+
     return ECurrentInteraction::NO_INTERACTION;
 }
 

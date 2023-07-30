@@ -31,7 +31,7 @@ public:
 	virtual void Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed) override;
 
 	UFUNCTION(BlueprintCallable)
-	void StartDialogue();
+	bool StartDialogue();
 	
 	// Widgets
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
@@ -67,6 +67,7 @@ public:
 	FOnDialogueEnd OnDialogueEnd;
 
 	// Only Trigger Once || Trigger repeatedly
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool HasTriggered = false;
 	bool OnlyTriggerOnce = false;
 	

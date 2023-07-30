@@ -218,25 +218,21 @@ void APlayerPawn::InteractWhileHoldingItem()
 	GetOverlappingActors(Overlapping3DSceneProps, ACustomSkeletalMeshActor::StaticClass());
 	
 	// If standing next to enough scene props, check for dialogue component and start dialogue if one exists.
-	// Otherwise, interaction component and call OnInteractWithItem on it:
+	// Otherwise, get interaction component and call OnInteractWithItem on it:
 	if (Overlapping2DSceneProps.Num() >= 1 || Overlapping3DSceneProps.Num() >= 1)
 	{
-		if (Overlapping2DSceneProps.Num() > 0)
+		for (const auto& Prop : Overlapping2DSceneProps)
 		{
 			UDialogueComponent* DialogueComponent = Cast<UDialogueComponent>(
-				Overlapping2DSceneProps[0]->GetComponentByClass(UDialogueComponent::StaticClass()));
+			Prop->GetComponentByClass(UDialogueComponent::StaticClass()));
 		
-			if (DialogueComponent && DialogueComponent->bIsCharacter)
+			if (DialogueComponent)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-					FString("Working!"));
-				DialogueComponent->StartDialogue();
-				return;
-			}
-			else if (!DialogueComponent->bIsCharacter)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-					FString("Not a character!"));
+				if (DialogueComponent->bIsCharacter)
+				{
+					DialogueComponent->StartDialogue();
+					return;
+				}
 			}
 		}
 		

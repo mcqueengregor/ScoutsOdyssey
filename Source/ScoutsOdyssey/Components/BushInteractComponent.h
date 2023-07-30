@@ -33,11 +33,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	float ShrunkLocationOffsetZ;
 
+protected:
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsShrinking;
+	
 private:
 	FVector OriginalScale;
 	FVector OriginalLocation;
 	float OriginalLocationZ;
 	float ShrinkDuration;
 	float LerpT;
-	bool bIsShrinking;
 };

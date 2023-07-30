@@ -23,6 +23,7 @@ UDialogueComponent::UDialogueComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 
 	bIsCharacter = false;
+	HasTriggered = false;
 }
 
 void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
@@ -43,12 +44,12 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 	SpeakClickCount = -1;
 }
 
-void UDialogueComponent::StartDialogue()
+bool UDialogueComponent::StartDialogue()
 {
 	if(HasTriggered && OnlyTriggerOnce)
 	{
 		LOG_ERROR("condition passed? for some reason?");
-		return;
+		return false;
 	}
 
 	HasTriggered = true;
@@ -56,14 +57,21 @@ void UDialogueComponent::StartDialogue()
 
 	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
 	if (DialogueMeshActor)
+	{
 		DialogueMeshActor->BehaviorTree_Start(nullptr, EKeys::A);
+		return true;
+	}
 	else
 		LOG_ERROR("Couldn't start behavior tree.");
+
+	return false;
 }
 
 void UDialogueComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	HasTriggered = false;
 }
 
 void UDialogueComponent::Widget_SetUp()
