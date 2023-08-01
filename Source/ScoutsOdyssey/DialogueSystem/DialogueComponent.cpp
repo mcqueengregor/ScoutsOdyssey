@@ -159,10 +159,13 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 			{
 				BubblePosition.X = 0; //+ 0.05 * ViewPortSize.X;
 				BubbleWidget.SetPositionInViewport(BubblePosition);
-			} else if (BubblePosition.X + 0.1 * ViewPortSize.X > ViewPortSize.X)
+			} else if (BubblePosition.X + 0.2 * ViewPortSize.X > ViewPortSize.X)
 			{
 				UImage* Image = Cast<UImage>(BubbleWidget.GetWidgetFromName(TEXT("Image_Tail")));
 				Image->SetRenderScale(FVector2D(-1, 1));
+				UImage* Image1 = Cast<UImage>(BubbleWidget.GetWidgetFromName(TEXT("Image_Tail1")));
+				if(Image1)	
+					Image1->SetRenderScale(FVector2D(-1, 1));
 				BubblePosition.X = 0.8 * ViewPortSize.X;
 				BubbleWidget.SetPositionInViewport(BubblePosition);
 			} else
@@ -174,7 +177,8 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 		switch (Bubble)
 		{
 		case EBubble::One:
-			BubbleOne->SetPositionInViewport(Owner->MyPlayerController->GetPlayerScreenCoordinate(BubbleOneOffSet));
+			ClampBubbleWithinScreen(*BubbleOne, *UGameplayStatics::GetPlayerPawn(this, 0), BubbleOneOffSet);
+			//BubbleOne->SetPositionInViewport(Owner->MyPlayerController->GetPlayerScreenCoordinate(BubbleOneOffSet));
 			BubbleOne->SetVisibility(ESlateVisibility::Visible);
 			BubbleTwo->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
