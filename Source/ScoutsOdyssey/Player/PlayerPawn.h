@@ -58,7 +58,7 @@ enum class ECurrentInteraction : uint8
 	THROW_ACORN = 4			UMETA(DisplayName = "Throw acorn"),
 	PLACE_BOOT = 5			UMETA(DisplayName = "Placing honey boot at log"),
 
-	SUCCESS_NO_ANIM = 0xFF,	// Used when the interaction is successful, but has no animation associated with it.
+	SUCCESS_NO_ANIM = 0xFF	UMETA(Hidden),	// Used when the interaction is successful, but plays no animation.
 };
 
 UCLASS()

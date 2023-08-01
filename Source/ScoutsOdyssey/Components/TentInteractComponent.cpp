@@ -7,6 +7,7 @@
 
 #include "../DialogueSystem/DialogueMeshActor.h"
 #include "Chaos/ChaosPerfTest.h"
+#include "Components/AudioComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
 
@@ -97,6 +98,13 @@ ECurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDat
             	} 
             }
 
+			UAudioComponent* HammerHitPegAudio = Cast<UAudioComponent>(
+				GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
+        	if (HammerHitPegAudio)
+        	{
+        		HammerHitPegAudio->Play();
+        	}
+        	
             return ECurrentInteraction::SUCCESS_NO_ANIM;
         }
     }

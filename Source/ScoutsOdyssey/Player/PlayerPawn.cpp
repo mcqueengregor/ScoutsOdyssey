@@ -230,8 +230,8 @@ void APlayerPawn::InteractWhileHoldingItem()
 			{
 				if (DialogueComponent->bIsCharacter)
 				{
-					DialogueComponent->StartDialogue();
-					return;
+					if (DialogueComponent->StartDialogue())
+						return;
 				}
 			}
 		}
@@ -246,24 +246,25 @@ void APlayerPawn::InteractWhileHoldingItem()
 
 		if (InventoryComponent && InventoryComponent->GetCurrentItem())
 		{
-			UInteractComponentBase* ScenePropInteractComp =
-				Cast<UInteractComponentBase>(ActorToInteractWith->GetComponentByClass(UInteractComponentBase::StaticClass()));
+			UInteractComponentBase* ScenePropInteractComp =Cast<UInteractComponentBase>(
+				ActorToInteractWith->GetComponentByClass(UInteractComponentBase::StaticClass()));
 
 			// If a nearby item has an interaction component associated with it, perform the interaction and update
 			// player animation accordingly:
 			if (ScenePropInteractComp)
 			{
-				ECurrentInteraction interactType =
+				ECurrentInteraction InteractType =
 					ScenePropInteractComp->OnInteractWithItem(InventoryComponent->GetCurrentItem(), this);
 
 				// If interaction was successful but there isn't an animation associated with it, do nothing:
-				if (interactType == ECurrentInteraction::SUCCESS_NO_ANIM) return;
+				if (InteractType == ECurrentInteraction::SUCCESS_NO_ANIM)
+					return;
 
 				// Change current sprite animation to the appropriate interaction anim:
 				bIsInteracting = true;
 				InteractLocalTime = 0.0f;
 				
-				CurrentAnimation = InteractAnimationsList.Find(interactType);
+				CurrentAnimation = InteractAnimationsList.Find(InteractType);
 				UpdateDynamicMaterialParameters();
 			}
 		}

@@ -3,6 +3,7 @@
 
 #include "GreenhouseInteractComponent.h"
 
+#include "Components/AudioComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueComponent.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
@@ -75,6 +76,14 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
 		
 		OnGreenHouseUnLocked.Broadcast();
+
+		UAudioComponent* GlassSmashAudio = Cast<UAudioComponent>(
+			GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
+
+		if (GlassSmashAudio)
+		{
+			GlassSmashAudio->Play();
+		}
 		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}
