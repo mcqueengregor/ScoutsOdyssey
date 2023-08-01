@@ -48,7 +48,6 @@ bool UDialogueComponent::StartDialogue()
 {
 	if(HasTriggered && OnlyTriggerOnce)
 	{
-		LOG_ERROR("condition passed? for some reason?");
 		return false;
 	}
 

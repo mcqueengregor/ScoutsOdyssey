@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "InteractComponentBase.h"
+#include "TentInteractComponent.h"
 #include "TrunkInteractComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FShowHoneyBootDelegate);	// Used to set visibility of honey boot plane on
 															// owning trunk actor.
+
 /**
  * 
  */
@@ -39,6 +41,8 @@ public:
 	DECLARE_MULTICAST_DELEGATE(FOnHoneyBootPlaced);
 	static FOnHoneyBootPlaced OnHoneyBootPlaced;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnFailToInteract OnFailToInteract;
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
