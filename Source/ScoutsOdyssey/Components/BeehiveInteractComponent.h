@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "InteractComponentBase.h"
+#include "TentInteractComponent.h"
 #include "BeehiveInteractComponent.generated.h"
 
 /**
@@ -27,6 +28,9 @@ public:
 
 	virtual void DoTask() override;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnFailToInteract OnFailToInteract;
+	
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	bool bAreBeesPresent;

@@ -53,6 +53,8 @@ ECurrentInteraction UBeehiveInteractComponent::OnInteractWithItem(UInventoryItem
 		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}
+
+	OnFailToInteract.Broadcast();
 	
 	return ECurrentInteraction::NO_INTERACTION;
 }
