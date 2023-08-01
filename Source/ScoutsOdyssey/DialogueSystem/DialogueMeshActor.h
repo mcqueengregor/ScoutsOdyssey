@@ -64,6 +64,6 @@ protected:
 private:
 	UPROPERTY(EditInstanceOnly)
 	bool OnlyTriggerOnce = true;
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditAnywhere)
 	bool DestroyOnDialogueEnd = false;
 };

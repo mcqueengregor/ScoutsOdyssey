@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FShowHoneyBootDelegate);	// Used to set visibility of honey boot plane on
 															// owning trunk actor.
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAcornThrown);	
 
 /**
  * 
@@ -43,6 +44,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFailToInteract OnFailToInteract;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnAcornThrown OnAcornThrown;
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
