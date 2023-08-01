@@ -41,6 +41,8 @@ public:
 	UBehaviorTree* DialogueTree;
 	
 	class AMyPlayerController* MyPlayerController;
+
+	UPROPERTY(BlueprintReadWrite)
 	class AAIController* AIController;
 
 	UMaterialInstanceDynamic* CreateAndAssignDynamicMaterial();

@@ -230,8 +230,8 @@ void APlayerPawn::InteractWhileHoldingItem()
 			{
 				if (DialogueComponent->bIsCharacter)
 				{
-					DialogueComponent->StartDialogue();
-					return;
+					if(DialogueComponent->StartDialogue())
+						return;
 				}
 			}
 		}
