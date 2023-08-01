@@ -157,13 +157,13 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 			FVector2D BubblePosition = Owner->MyPlayerController->GetActorScreenCoordinate(Actor, OffSet);
 			if(BubblePosition.X - 0.1 * ViewPortSize.X < 0)
 			{
-				BubblePosition.X += 0.15 * ViewPortSize.X;
+				BubblePosition.X = 0; //+ 0.05 * ViewPortSize.X;
 				BubbleWidget.SetPositionInViewport(BubblePosition);
 			} else if (BubblePosition.X + 0.1 * ViewPortSize.X > ViewPortSize.X)
 			{
 				UImage* Image = Cast<UImage>(BubbleWidget.GetWidgetFromName(TEXT("Image_Tail")));
 				Image->SetRenderScale(FVector2D(-1, 1));
-				BubblePosition.X -= 0.15 * ViewPortSize.X;
+				BubblePosition.X = 0.8 * ViewPortSize.X;
 				BubbleWidget.SetPositionInViewport(BubblePosition);
 			} else
 			{
