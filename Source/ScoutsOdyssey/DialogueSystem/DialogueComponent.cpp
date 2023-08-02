@@ -113,6 +113,7 @@ void UDialogueComponent::Delegate_SetUp()
 // Issue: given input is bound immediately, this is also invoked every time left mouse is clicked, regardless whether you have started speaking or not. 
 void UDialogueComponent::SpeakFinish()
 {
+	
 	if (SpeakClickCount == -1)
 	{
 		return;
@@ -248,6 +249,13 @@ void UDialogueComponent::SwitchBubbleOneState(const EBubbleState BubbleState) co
 void UDialogueComponent::SetTextBlockText(const FString& String, UTextBlock& TextWidget) const
 {
 	TextWidget.SetText(FText::FromString(String));
+}
+
+void UDialogueComponent::HideAllBubbles()
+{
+	BubbleOne->SetVisibility(ESlateVisibility::Collapsed);
+	BubbleTwo->SetVisibility(ESlateVisibility::Collapsed);
+	BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 // Was const, now no longer const given TypeNextLetter isn't const

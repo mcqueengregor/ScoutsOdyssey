@@ -57,13 +57,14 @@ public:
 	FOnLeftMouseClick OnLeftMouseClick;
 	UMaterialInstanceDynamic* DynamicMaterial;
 
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	bool OnlyTriggerOnce = true;
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	class UBoxComponent* PropCollider;
 
 private:
-	UPROPERTY(EditInstanceOnly)
-	bool OnlyTriggerOnce = true;
 	UPROPERTY(EditAnywhere)
 	bool DestroyOnDialogueEnd = false;
 };
