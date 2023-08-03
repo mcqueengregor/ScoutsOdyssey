@@ -2,8 +2,11 @@
 
 
 #include "TreeInteractComponent.h"
+
+#include "Components/AudioComponent.h"
 #include "ScoutsOdyssey/InventorySystem/ItemSpawner.h"
 #include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
+#include "UnrealAudio/Private/UnrealAudioBuffer.h"
 
 UTreeInteractComponent::UTreeInteractComponent()
 {
@@ -43,6 +46,16 @@ ECurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDat
 		if (AcornSpawnerRef)
 		{
 			AcornSpawnerRef->Spawn();
+		}
+
+		UAudioComponent* HammerHitTreeAudio = Cast<UAudioComponent>(
+			GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
+
+		if (HammerHitTreeAudio)
+		{
+			HammerHitTreeAudio->Play();
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow,
+				FString("Sound played!"));
 		}
 		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;

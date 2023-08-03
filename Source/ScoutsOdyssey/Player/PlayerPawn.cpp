@@ -57,11 +57,11 @@ APlayerPawn::APlayerPawn()
 	static ConstructorHelpers::FObjectFinder<USoundCue>
 		FootstepSC(TEXT("SoundCue'/Game/Audio/SFX/Footstep/SC_GrassFootstep.SC_GrassFootstep'"));
 	
-	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio component"));
-	AudioComponent->SetAutoActivate(false);
+	FootstepAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio component"));
+	FootstepAudioComponent->SetAutoActivate(false);
 	if (FootstepSC.Object)
-		AudioComponent->SetSound(FootstepSC.Object);
-	AudioComponent->SetupAttachment(RootComponent);
+		FootstepAudioComponent->SetSound(FootstepSC.Object);
+	FootstepAudioComponent->SetupAttachment(RootComponent);
 	
 	MoveSpeed = 200.0f;
 
@@ -230,8 +230,8 @@ void APlayerPawn::InteractWhileHoldingItem()
 			{
 				if (DialogueComponent->bIsCharacter)
 				{
-					DialogueComponent->StartDialogue();
-					return;
+					if (DialogueComponent->StartDialogue())
+						return;
 				}
 			}
 		}
@@ -246,24 +246,25 @@ void APlayerPawn::InteractWhileHoldingItem()
 
 		if (InventoryComponent && InventoryComponent->GetCurrentItem())
 		{
-			UInteractComponentBase* ScenePropInteractComp =
-				Cast<UInteractComponentBase>(ActorToInteractWith->GetComponentByClass(UInteractComponentBase::StaticClass()));
+			UInteractComponentBase* ScenePropInteractComp =Cast<UInteractComponentBase>(
+				ActorToInteractWith->GetComponentByClass(UInteractComponentBase::StaticClass()));
 
 			// If a nearby item has an interaction component associated with it, perform the interaction and update
 			// player animation accordingly:
 			if (ScenePropInteractComp)
 			{
-				ECurrentInteraction interactType =
+				ECurrentInteraction InteractType =
 					ScenePropInteractComp->OnInteractWithItem(InventoryComponent->GetCurrentItem(), this);
 
 				// If interaction was successful but there isn't an animation associated with it, do nothing:
-				if (interactType == ECurrentInteraction::SUCCESS_NO_ANIM) return;
+				if (InteractType == ECurrentInteraction::SUCCESS_NO_ANIM)
+					return;
 
 				// Change current sprite animation to the appropriate interaction anim:
 				bIsInteracting = true;
 				InteractLocalTime = 0.0f;
 				
-				CurrentAnimation = InteractAnimationsList.Find(interactType);
+				CurrentAnimation = InteractAnimationsList.Find(InteractType);
 				UpdateDynamicMaterialParameters();
 			}
 		}
@@ -419,10 +420,10 @@ void APlayerPawn::Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume
 
 void APlayerPawn::OnAudioFinishPlaying()
 {
-	if (AudioComponent->Sound && IsCurrentAnimOfType(EPlayerAnimation::WALK))
+	if (FootstepAudioComponent->Sound && IsCurrentAnimOfType(EPlayerAnimation::WALK))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald, FString("Finished playing!"));
-		AudioComponent->Play();
+		FootstepAudioComponent->Play();
 	}
 }
 
@@ -443,9 +444,9 @@ void APlayerPawn::StopFootstepSoundCycle()
 
 void APlayerPawn::PlayFootstepSoundCue()
 {
-	if (AudioComponent->Sound)
+	if (FootstepAudioComponent->Sound)
 	{
-		AudioComponent->Play();
+		FootstepAudioComponent->Play();
 	}
 }
 
