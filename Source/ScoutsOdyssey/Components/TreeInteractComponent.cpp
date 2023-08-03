@@ -40,25 +40,33 @@ ECurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDat
 	{
 		OwnerActor->DisableInteractions();
 
-		if (AcornPropRef)
-			AcornPropRef->Destroy();
+		FTimerDelegate TreeHitFunction = FTimerDelegate::CreateLambda([=]()
+		{			
+			if (AcornPropRef)
+				AcornPropRef->Destroy();
 
-		if (AcornSpawnerRef)
-		{
-			AcornSpawnerRef->Spawn();
-		}
+			if (AcornSpawnerRef)
+			{
+				AcornSpawnerRef->Spawn();
+			}
 
-		UAudioComponent* HammerHitTreeAudio = Cast<UAudioComponent>(
-			GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
+			UAudioComponent* HammerHitTreeAudio = Cast<UAudioComponent>(
+				GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
 
-		if (HammerHitTreeAudio)
-		{
-			HammerHitTreeAudio->Play();
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow,
-				FString("Sound played!"));
-		}
+			if (HammerHitTreeAudio)
+			{
+				HammerHitTreeAudio->Play();
+			}
+		});
+
+		FTimerHandle TempHandle;
+		const USpriteAnimationDataAsset* HammerDA = PlayerRef->GetInteractSpriteDA(ECurrentInteraction::HIT_TREE);
+		const float TimeToPlay = HammerDA->InteractionStartIndex * (1.0f / HammerDA->PlaybackFramerate);
+
+		GetWorld()->GetTimerManager().SetTimer(TempHandle, TreeHitFunction, 1.0f,
+			false, TimeToPlay);
 		
-		return ECurrentInteraction::SUCCESS_NO_ANIM;
+		return ECurrentInteraction::HIT_TREE;
 	}
 	
 	DoTask();

@@ -71,21 +71,32 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 {
 	if (ItemType->ItemTag.MatchesTag(ValidItemTag) && CurrentState == EGreenhouseState::LOCKED)
 	{
-		CurrentState = EGreenhouseState::OPEN;
-		UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
-		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
-		
-		OnGreenHouseUnLocked.Broadcast();
-
-		UAudioComponent* GlassSmashAudio = Cast<UAudioComponent>(
-			GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
-
-		if (GlassSmashAudio)
+		FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([=]()
 		{
-			GlassSmashAudio->Play();
-		}
+			CurrentState = EGreenhouseState::OPEN;
+			UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
+			DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
 		
-		return ECurrentInteraction::SUCCESS_NO_ANIM;
+			OnGreenHouseUnLocked.Broadcast();
+
+			UAudioComponent* GlassSmashAudio = Cast<UAudioComponent>(
+				GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
+
+			if (GlassSmashAudio)
+			{
+				GlassSmashAudio->Play();
+			}
+		});
+
+		FTimerHandle TempHandle;
+
+		const USpriteAnimationDataAsset* HammerDA = PlayerRef->GetInteractSpriteDA(ECurrentInteraction::SMASH_GREENHOUSE);
+		float TimeToPlay = HammerDA->InteractionStartIndex * (1.0f / HammerDA->PlaybackFramerate);
+
+		GetWorld()->GetTimerManager().SetTimer(TempHandle, TimerDelegate, 1.0f,
+			false, TimeToPlay);
+		
+		return ECurrentInteraction::SMASH_GREENHOUSE;
 	}
 	else if (CurrentState == EGreenhouseState::LOCKED && SmokeAnimDataAsset)
 	{

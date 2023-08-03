@@ -57,6 +57,7 @@ enum class ECurrentInteraction : uint8
 	HIT_TREE = 3			UMETA(DisplayName = "Hit tree with hammer"),
 	THROW_ACORN = 4			UMETA(DisplayName = "Throw acorn"),
 	PLACE_BOOT = 5			UMETA(DisplayName = "Placing honey boot at log"),
+	COLLECT_ACORN = 6		UMETA(DisplayName = "Collect acorn from small tree"),
 
 	SUCCESS_NO_ANIM = 0xFF	UMETA(Hidden),	// Used when the interaction is successful, but plays no animation.
 };
@@ -187,6 +188,11 @@ public:
 	inline bool GetHasTeleported()	{ return bHasTeleported; }
 	
 	inline void SetLastTeleportVolumeEntered(AStageTeleportTriggerVolume* Volume) { LastTriggerVolumeEntered = Volume; }
+
+	inline USpriteAnimationDataAsset* GetInteractSpriteDA(ECurrentInteraction InteractType)
+	{
+		return InteractAnimationsList.Find(InteractType)->SpriteAnimDA;
+	}
 	
 private:
 	FVector MovementDirection;	// Direction the player will move on the current frame, in Unreal units.
