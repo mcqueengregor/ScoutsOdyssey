@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "InteractComponentBase.h"
+#include "TentInteractComponent.h"
 #include "BeehiveInteractComponent.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHoneyBootCollected);
 
 /**
  * 
@@ -27,6 +30,12 @@ public:
 
 	virtual void DoTask() override;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnFailToInteract OnFailToInteract;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHoneyBootCollected OnHoneyBootCollected;
+	
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	bool bAreBeesPresent;
@@ -36,4 +45,6 @@ private:
 	FGameplayTag HoneyBootTag;
 
 	UInventoryItemDataAsset* HoneyBootDA;
+
+	bool HoneyCollected = false;
 };

@@ -36,16 +36,19 @@ public:
 	// Widgets
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> PlayerSpeechBubble_WidgetAsset;
+	UPROPERTY(BlueprintReadWrite)
 	class USpeechBubbleUserWidget* BubbleOne;
 	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NPCSpeechBubble_WidgetAsset;
+	UPROPERTY(BlueprintReadWrite)
 	class USpeechBubbleUserWidget* BubbleTwo;
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	AActor* SpeakerTwo;
 	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NarratorSpeechBubble_WidgetAsset;
+	UPROPERTY(BlueprintReadWrite)
 	class USpeechBubbleUserWidget* BubbleNarrator;
 	UPROPERTY(EditAnywhere, Category=Widgets)
 	FVector2D BubbleOneOffSet_PercentageViewPort;
@@ -56,7 +59,9 @@ public:
 	void SwitchToBubble(EBubble Bubble) const;
 	void SwitchBubbleOneState(EBubbleState BubbleState) const;
 	void SetTextBlockText(const FString& String, class UTextBlock& TextWidget) const;
-
+	UFUNCTION(BlueprintCallable)
+	void HideAllBubbles();
+	
 	// Tasks Setup Methods
 	void Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType,  const int FontSize, const float TalkRate);
 	void Choice(TArray<FText>& Choices);

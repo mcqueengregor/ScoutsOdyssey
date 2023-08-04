@@ -75,6 +75,7 @@ void UMyBTTask_Speak::SpeakTaskFinish()
 	{
 		// Remove Task Finish Delegate
 		DialogueComponent->OnSpeakFinish.Remove(SpeakTaskFinish_DelegateHandle);
+		
 		SpeakTaskFinished = true;
 	}
 	else

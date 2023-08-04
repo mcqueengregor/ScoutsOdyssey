@@ -94,6 +94,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CancelTeleportTimer();
+
+	UFUNCTION(BlueprintCallable)
+	void MoveToTheLeft(float Seconds);
 	
 protected:
 	// Action/axis methods:
@@ -210,7 +213,10 @@ private:
 								// new one (set to 'true' when teleport occurs, then 'false' when player re-enters vol).
 	FTimerHandle TeleportTimerHandle;
 	FTimerHandle FootstepSoundTimerHandle;
-
+	FTimerHandle MoveLeftTimerHandle;
+	
 	AStageTeleportTriggerVolume* LastTriggerVolumeEntered;
+
+	bool isMovingLeft;
 };
 

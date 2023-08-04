@@ -48,10 +48,15 @@ ECurrentInteraction UBeehiveInteractComponent::OnInteractWithItem(UInventoryItem
 		{
 			InventoryComponent->RemoveSelectedItem();
 			InventoryComponent->AddItem(HoneyBootDA, true);
+			HoneyCollected = true;
 		}
 		
+		OnHoneyBootCollected.Broadcast();
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}
+
+	if(!HoneyCollected)
+		OnFailToInteract.Broadcast();
 	
 	return ECurrentInteraction::NO_INTERACTION;
 }

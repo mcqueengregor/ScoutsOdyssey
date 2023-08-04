@@ -48,7 +48,6 @@ bool UDialogueComponent::StartDialogue()
 {
 	if(HasTriggered && OnlyTriggerOnce)
 	{
-		LOG_ERROR("condition passed? for some reason?");
 		return false;
 	}
 
@@ -114,6 +113,7 @@ void UDialogueComponent::Delegate_SetUp()
 // Issue: given input is bound immediately, this is also invoked every time left mouse is clicked, regardless whether you have started speaking or not. 
 void UDialogueComponent::SpeakFinish()
 {
+	
 	if (SpeakClickCount == -1)
 	{
 		return;
@@ -158,13 +158,16 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 			FVector2D BubblePosition = Owner->MyPlayerController->GetActorScreenCoordinate(Actor, OffSet);
 			if(BubblePosition.X - 0.1 * ViewPortSize.X < 0)
 			{
-				BubblePosition.X += 0.15 * ViewPortSize.X;
+				BubblePosition.X = 0; //+ 0.05 * ViewPortSize.X;
 				BubbleWidget.SetPositionInViewport(BubblePosition);
-			} else if (BubblePosition.X + 0.1 * ViewPortSize.X > ViewPortSize.X)
+			} else if (BubblePosition.X + 0.2 * ViewPortSize.X > ViewPortSize.X)
 			{
 				UImage* Image = Cast<UImage>(BubbleWidget.GetWidgetFromName(TEXT("Image_Tail")));
 				Image->SetRenderScale(FVector2D(-1, 1));
-				BubblePosition.X -= 0.15 * ViewPortSize.X;
+				UImage* Image1 = Cast<UImage>(BubbleWidget.GetWidgetFromName(TEXT("Image_Tail1")));
+				if(Image1)	
+					Image1->SetRenderScale(FVector2D(-1, 1));
+				BubblePosition.X = 0.8 * ViewPortSize.X;
 				BubbleWidget.SetPositionInViewport(BubblePosition);
 			} else
 			{
@@ -175,7 +178,8 @@ void UDialogueComponent::SwitchToBubble(const EBubble Bubble) const
 		switch (Bubble)
 		{
 		case EBubble::One:
-			BubbleOne->SetPositionInViewport(Owner->MyPlayerController->GetPlayerScreenCoordinate(BubbleOneOffSet));
+			ClampBubbleWithinScreen(*BubbleOne, *UGameplayStatics::GetPlayerPawn(this, 0), BubbleOneOffSet);
+			//BubbleOne->SetPositionInViewport(Owner->MyPlayerController->GetPlayerScreenCoordinate(BubbleOneOffSet));
 			BubbleOne->SetVisibility(ESlateVisibility::Visible);
 			BubbleTwo->SetVisibility(ESlateVisibility::Collapsed);
 			BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
@@ -247,6 +251,13 @@ void UDialogueComponent::SetTextBlockText(const FString& String, UTextBlock& Tex
 	TextWidget.SetText(FText::FromString(String));
 }
 
+void UDialogueComponent::HideAllBubbles()
+{
+	BubbleOne->SetVisibility(ESlateVisibility::Collapsed);
+	BubbleTwo->SetVisibility(ESlateVisibility::Collapsed);
+	BubbleNarrator->SetVisibility(ESlateVisibility::Collapsed);
+}
+
 // Was const, now no longer const given TypeNextLetter isn't const
 void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType,
                                const int FontSize, const float TalkRate)
@@ -303,7 +314,7 @@ void UDialogueComponent::Choice(TArray<FText>& Choices)
 		{
 			UDialogueChoiceObject* DialogueChoiceObject = NewObject<UDialogueChoiceObject>(
 				this, UDialogueChoiceObject::StaticClass());
-			FText ChoiceText = FText::FromString("[" + Choices[i].ToString() + "]");
+			FText ChoiceText = FText::FromString(Choices[i].ToString());
 			DialogueChoiceObject->SetValues(i, ChoiceText);
 			ListView->AddItem(DialogueChoiceObject);
 

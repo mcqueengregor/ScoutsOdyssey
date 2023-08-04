@@ -80,6 +80,8 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 				InventoryComponent->RemoveSelectedItem();
 			}
 		}
+
+		OnAcornThrown.Broadcast();
 		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}
@@ -97,6 +99,8 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}
+
+	OnFailToInteract.Broadcast();
 	
 	return ECurrentInteraction::NO_INTERACTION;
 }
