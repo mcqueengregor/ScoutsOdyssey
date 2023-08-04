@@ -6,7 +6,6 @@
 #include "Components/AudioComponent.h"
 #include "ScoutsOdyssey/InventorySystem/ItemSpawner.h"
 #include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
-#include "UnrealAudio/Private/UnrealAudioBuffer.h"
 
 UTreeInteractComponent::UTreeInteractComponent()
 {
