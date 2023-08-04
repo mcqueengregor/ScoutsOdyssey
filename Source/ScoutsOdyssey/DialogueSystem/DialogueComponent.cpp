@@ -66,6 +66,15 @@ bool UDialogueComponent::StartDialogue()
 	return false;
 }
 
+void UDialogueComponent::StopDialogue()
+{
+	ADialogueMeshActor* DialogueMeshActor = Cast<ADialogueMeshActor>(GetOwner());
+	if (DialogueMeshActor)
+	{
+		DialogueMeshActor->BehaviourTree_Stop();
+	}
+}
+
 void UDialogueComponent::BeginPlay()
 {
 	Super::BeginPlay();

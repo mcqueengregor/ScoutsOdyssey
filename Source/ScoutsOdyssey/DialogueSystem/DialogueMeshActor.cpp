@@ -129,6 +129,14 @@ void ADialogueMeshActor::BehaviorTree_Start(UPrimitiveComponent* TouchedComponen
 	}
 }
 
+void ADialogueMeshActor::BehaviourTree_Stop()
+{
+	if (AIController)
+	{
+		AIController->BrainComponent->StopLogic(FString("Actor was destroyed"));
+	}
+}
+
 void ADialogueMeshActor::Clickable_SetUp()
 {
 	UDialogueComponent* DialogueComponent =
