@@ -213,6 +213,11 @@ void APlayerPawn::InteractWhileHoldingItem()
 	GetOverlappingActors(OverlappingPickupableItems, APickup::StaticClass());
 	if (OverlappingPickupableItems.Num() > 0)
 	{
+		APickup* PickupableItem = Cast<APickup>(OverlappingPickupableItems[0]);
+		if (PickupableItem->getIsPickupInstant())
+		{
+			PickupableItem->InstantPickup();
+		}
 		return;
 	}
 	
