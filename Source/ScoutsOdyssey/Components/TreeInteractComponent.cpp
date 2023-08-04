@@ -2,8 +2,11 @@
 
 
 #include "TreeInteractComponent.h"
+
+#include "Components/AudioComponent.h"
 #include "ScoutsOdyssey/InventorySystem/ItemSpawner.h"
 #include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
+#include "UnrealAudio/Private/UnrealAudioBuffer.h"
 
 UTreeInteractComponent::UTreeInteractComponent()
 {
@@ -37,15 +40,33 @@ ECurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDat
 	{
 		OwnerActor->DisableInteractions();
 
-		if (AcornPropRef)
-			AcornPropRef->Destroy();
+		FTimerDelegate TreeHitFunction = FTimerDelegate::CreateLambda([=]()
+		{			
+			if (AcornPropRef)
+				AcornPropRef->Destroy();
 
-		if (AcornSpawnerRef)
-		{
-			AcornSpawnerRef->Spawn();
-		}
+			if (AcornSpawnerRef)
+			{
+				AcornSpawnerRef->Spawn();
+			}
+
+			UAudioComponent* HammerHitTreeAudio = Cast<UAudioComponent>(
+				GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
+
+			if (HammerHitTreeAudio)
+			{
+				HammerHitTreeAudio->Play();
+			}
+		});
+
+		FTimerHandle TempHandle;
+		const USpriteAnimationDataAsset* HammerDA = PlayerRef->GetInteractSpriteDA(ECurrentInteraction::HIT_TREE);
+		const float TimeToPlay = HammerDA->InteractionStartIndex * (1.0f / HammerDA->PlaybackFramerate);
+
+		GetWorld()->GetTimerManager().SetTimer(TempHandle, TreeHitFunction, 1.0f,
+			false, TimeToPlay);
 		
-		return ECurrentInteraction::SUCCESS_NO_ANIM;
+		return ECurrentInteraction::HIT_TREE;
 	}
 	
 	DoTask();

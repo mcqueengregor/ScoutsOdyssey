@@ -27,7 +27,6 @@ void UBeehiveInteractComponent::BeginPlay()
 	if (OwnerActor)
 	{
 		OwnerActor->CreateAndAssignDynamicMaterial();
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Working!"));
 	}
 }
 

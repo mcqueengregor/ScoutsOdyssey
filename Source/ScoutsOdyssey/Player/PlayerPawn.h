@@ -57,8 +57,9 @@ enum class ECurrentInteraction : uint8
 	HIT_TREE = 3			UMETA(DisplayName = "Hit tree with hammer"),
 	THROW_ACORN = 4			UMETA(DisplayName = "Throw acorn"),
 	PLACE_BOOT = 5			UMETA(DisplayName = "Placing honey boot at log"),
+	COLLECT_ACORN = 6		UMETA(DisplayName = "Collect acorn from small tree"),
 
-	SUCCESS_NO_ANIM = 0xFF,	// Used when the interaction is successful, but has no animation associated with it.
+	SUCCESS_NO_ANIM = 0xFF	UMETA(Hidden),	// Used when the interaction is successful, but plays no animation.
 };
 
 UCLASS()
@@ -157,12 +158,11 @@ public:
 		class USpringArmComponent* SpringArmComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-		class UAudioComponent* AudioComponent;
+		class UAudioComponent* FootstepAudioComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+		class UAudioComponent* HammerAudioComponent;
 	
-	// AUDIO CLIPS:
-	// TODO: Abstract audio playback functionality into AudioManager, instead of bloating actor classes with this logic?
-	UPROPERTY(EditAnywhere, Category = "Audio")
-	class USoundCue* FootstepSoundCue;
 	
 	// ATTRIBUTES:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
@@ -176,11 +176,10 @@ public:
 										// Set to 'false' on first frame of gameplay which triggers instant location
 										// change, then set to 'true' which uses EaseInOut transitions.
 	
-	class TDoubleLinkedList<class AStageSectionVolume*> OverlappedStageSections;	// List of currently-overlapping stage
-																			// sections, used to accurately determine
-																			// the current camera angle to use.
-
-
+	class TDoubleLinkedList<class AStageSectionVolume*> OverlappedStageSections;	// List of currently-overlapping
+																					// stage sections, used to
+																					// accurately determine the current
+																					// camera angle to use.
 	UPROPERTY(BlueprintReadOnly, Category = "Misc.")
 		class AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
 	
@@ -189,6 +188,11 @@ public:
 	inline bool GetHasTeleported()	{ return bHasTeleported; }
 	
 	inline void SetLastTeleportVolumeEntered(AStageTeleportTriggerVolume* Volume) { LastTriggerVolumeEntered = Volume; }
+
+	inline USpriteAnimationDataAsset* GetInteractSpriteDA(ECurrentInteraction InteractType)
+	{
+		return InteractAnimationsList.Find(InteractType)->SpriteAnimDA;
+	}
 	
 private:
 	FVector MovementDirection;	// Direction the player will move on the current frame, in Unreal units.
