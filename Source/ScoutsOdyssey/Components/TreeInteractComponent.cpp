@@ -67,8 +67,6 @@ ECurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDat
 		
 		return ECurrentInteraction::HIT_TREE;
 	}
-	
-	DoTask();
 
 	OnFailToInteract.Broadcast();
 	
