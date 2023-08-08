@@ -49,6 +49,9 @@ public:
 
 	UFUNCTION()
 	void BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
+	UFUNCTION()
+	void BehaviourTree_Stop();
+	
 	void Clickable_SetUp();
 	void Clickable_CleanUp();
 

@@ -48,7 +48,7 @@ enum class ECurrentItem : uint8
 	HONEY_BOOT = 4	UMETA(DisplayName = "Holding boot filled with honey"),
 };
 
-UENUM()
+UENUM(BlueprintType)
 enum class ECurrentInteraction : uint8
 {
 	NO_INTERACTION = 0		UMETA(DisplayName = "Shrugging (invalid interaction)"),
@@ -59,7 +59,7 @@ enum class ECurrentInteraction : uint8
 	PLACE_BOOT = 5			UMETA(DisplayName = "Placing honey boot at log"),
 	COLLECT_ACORN = 6		UMETA(DisplayName = "Collect acorn from small tree"),
 
-	SUCCESS_NO_ANIM = 0xFF	UMETA(Hidden),	// Used when the interaction is successful, but plays no animation.
+	SUCCESS_NO_ANIM = 0xFF	// Used when the interaction is successful, but plays no animation.
 };
 
 UCLASS()
@@ -112,7 +112,11 @@ protected:
 	void CalculateLocalAnimTime();
 	void CalculateChangeItemLocalAnimTime(float DeltaTime);
 	void CalculateInteractLocalAnimTime(float DeltaTime);
+	void ForceChangeAnimation(FSpriteAnimDetails* Animation);
 
+	UFUNCTION(BlueprintCallable)
+	float GetPickupDelayDuration(ECurrentInteraction InteractionType = ECurrentInteraction::SUCCESS_NO_ANIM);
+	
 	// Teleportation methods:
 	void Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume* EnteredTeleportVolume);
 
@@ -142,6 +146,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<ECurrentInteraction, FSpriteAnimDetails> InteractAnimationsList;	// As above, but for animations used when
 																			// performing interactions.
+
+	UPROPERTY(EditDefaultsOnly)
+	FSpriteAnimDetails PickItemFromGroundAnim;
 	
 	UMaterialInstanceDynamic* DynamicMaterial;
 	FSpriteAnimDetails* CurrentAnimation;
@@ -199,7 +206,7 @@ public:
 		return InteractAnimationsList.Find(InteractType)->SpriteAnimDA;
 	}
 	
-private:
+private:	
 	FVector MovementDirection;	// Direction the player will move on the current frame, in Unreal units.
 	FVector OriginalMeshScale;	// The scale of 'MeshComponent' when BeginPlay is triggered.
 	

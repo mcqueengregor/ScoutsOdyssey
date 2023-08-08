@@ -32,6 +32,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool StartDialogue();
+
+	UFUNCTION(BlueprintCallable)
+	void StopDialogue();
 	
 	// Widgets
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)

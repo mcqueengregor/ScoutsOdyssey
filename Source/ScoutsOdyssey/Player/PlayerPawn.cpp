@@ -210,11 +210,16 @@ void APlayerPawn::MoveForward(float Value)
 
 void APlayerPawn::InteractWhileHoldingItem()
 {
-	// Early-out if there are items to pick up nearby (use logic in BP_Pickup):
+	// Early-out if there are items to pick up nearby (attempt to instantly pick up, if possible):
 	TArray<AActor*> OverlappingPickupableItems;
 	GetOverlappingActors(OverlappingPickupableItems, APickup::StaticClass());
 	if (OverlappingPickupableItems.Num() > 0)
 	{
+		APickup* PickupableItem = Cast<APickup>(OverlappingPickupableItems[0]);
+		if (PickupableItem->getIsPickupInstant())
+		{
+			PickupableItem->InstantPickup();
+		}
 		return;
 	}
 	
@@ -377,7 +382,7 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 	
 	const float AnimAdvanceAmount = DeltaTime / AnimDuration;
 	InteractLocalTime += AnimAdvanceAmount;
-
+	
 	if (InteractLocalTime >= 1.0f)
 	{
 		ChangeAnimation(EPlayerAnimation::IDLE);
@@ -392,8 +397,53 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 	}
 }
 
+float APlayerPawn::GetPickupDelayDuration(ECurrentInteraction InteractionType)
+{
+	FTimerHandle TempHandle;
+	FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([=]()
+	{
+		ChangeAnimation(EPlayerAnimation::IDLE);
+		bIsInteracting = false;
+	});
+
+	float DelayTime = 0.0f;
+	FSpriteAnimDetails* Animation;
+
+	// Default to "empty hand" pickup animation, otherwise use specific interaction animation (e.g. getting acorn from tree):
+	// TODO: Create new map of animations for picking up specific items from the ground?
+	if (InteractionType == ECurrentInteraction::SUCCESS_NO_ANIM)
+	{
+		Animation = &PickItemFromGroundAnim;
+	}
+	else
+	{
+		Animation = InteractAnimationsList.Find(InteractionType);
+	}
+	DelayTime = (1.0f / Animation->SpriteAnimDA->PlaybackFramerate) * Animation->SpriteAnimDA->InteractionStartIndex;
+	
+	// Return to IDLE animation after animation has completed:
+	const float AnimDuration = ((Animation->SpriteAnimDA->NumSpritesheetRows * Animation->SpriteAnimDA->NumSpritesheetColumns) -
+		Animation->SpriteAnimDA->NumEmptyFrames) / static_cast<float>(Animation->SpriteAnimDA->PlaybackFramerate);
+	
+	ForceChangeAnimation(Animation);
+	bIsInteracting = true;
+	InteractLocalTime = 0.0f;
+	
+	GetWorld()->GetTimerManager().SetTimer(TempHandle, TimerDelegate, 1.0, false, AnimDuration);
+	return DelayTime;
+}
+
+void APlayerPawn::ForceChangeAnimation(FSpriteAnimDetails* Animation)
+{
+	CurrentAnimation = Animation;
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
+		UKismetSystemLibrary::GetDisplayName(Animation->SpriteAnimDA));
+	
+	UpdateDynamicMaterialParameters();
+}
+
 void APlayerPawn::StartTeleportationTimer(FVector TeleportLocation, float TeleportWaitTime,
-	AStageTeleportTriggerVolume* EnteredTeleportVolume)
+                                          AStageTeleportTriggerVolume* EnteredTeleportVolume)
 {
 	FTimerDelegate TeleportDelegate = FTimerDelegate::CreateUObject(this, &APlayerPawn::Teleport, TeleportLocation,
 		EnteredTeleportVolume);
@@ -503,3 +553,4 @@ bool APlayerPawn::IsCurrentAnimOfType(EPlayerAnimation BaseAnimType)
 		return false;
 	}
 }
+

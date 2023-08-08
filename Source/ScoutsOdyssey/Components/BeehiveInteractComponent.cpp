@@ -52,7 +52,7 @@ ECurrentInteraction UBeehiveInteractComponent::OnInteractWithItem(UInventoryItem
 		}
 		
 		OnHoneyBootCollected.Broadcast();
-		return ECurrentInteraction::SUCCESS_NO_ANIM;
+		return ECurrentInteraction::COLLECT_HONEY;
 	}
 
 	if(!HoneyCollected)
