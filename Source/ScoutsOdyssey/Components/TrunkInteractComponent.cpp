@@ -96,6 +96,8 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 
 		// Player Running Left, BearAI transition subscribes to it.
 		OnHoneyBootPlaced.Broadcast();
+
+		Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
 		
 		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}

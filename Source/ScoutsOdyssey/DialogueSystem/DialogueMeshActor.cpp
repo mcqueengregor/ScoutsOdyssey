@@ -70,8 +70,8 @@ void ADialogueMeshActor::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherAc
 	APlayerPawn* PawnRef = Cast<APlayerPawn>(OtherActor);
 	
 	// If player overlapped this object, turn on pulsing glow effect:
-	if (PawnRef && DynamicMaterial)
-		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", bHasInteractionsRemaining ? 1.0f : 0.0);
+	if (PawnRef)
+		UpdateDynamicMaterial(bHasInteractionsRemaining ? 1.0 : 0.0);
 }
 
 void ADialogueMeshActor::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
@@ -79,8 +79,14 @@ void ADialogueMeshActor::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActo
 	APlayerPawn* PawnRef = Cast<APlayerPawn>(OtherActor);
 
 	// If player stopped overlapping this object, turn off pulsing glow effect:
-	if (PawnRef && DynamicMaterial)
-		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", 0.0f);
+	if (PawnRef)
+		UpdateDynamicMaterial(0.0f);
+}
+
+void ADialogueMeshActor::UpdateDynamicMaterial(float EmissionStrength)
+{
+	if (DynamicMaterial)
+		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", EmissionStrength);
 }
 
 UMaterialInstanceDynamic* ADialogueMeshActor::CreateAndAssignDynamicMaterial()

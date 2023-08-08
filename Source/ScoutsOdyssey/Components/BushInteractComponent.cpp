@@ -64,4 +64,5 @@ void UBushInteractComponent::DoTask()
 {
     // Start shrinking:
     bIsShrinking = true;
+    Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
 }

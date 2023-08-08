@@ -33,6 +33,7 @@ protected:
 	UFUNCTION()
 	void OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
 
+	void UpdateDynamicMaterial(float EmissionStrength);
 public:
 	virtual void Tick(float DeltaSeconds) override;
 	
@@ -55,6 +56,8 @@ public:
 	void Clickable_SetUp();
 	void Clickable_CleanUp();
 
+	inline void DisableInteractions() { bHasInteractionsRemaining = false; UpdateDynamicMaterial(0.0f); }
+	
 	UFUNCTION()
 	void LeftMouseButtonDown();
 	FOnLeftMouseClick OnLeftMouseClick;

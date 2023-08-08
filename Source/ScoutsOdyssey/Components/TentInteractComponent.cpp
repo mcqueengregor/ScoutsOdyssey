@@ -93,6 +93,8 @@ ECurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDat
 				if (CurrentState == ETentState::END)
 				{
 					NumberOfTents++;
+	    			Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
+					
 					if(NumberOfTents == RequiredNumberOfTents)
 					{
 						OnAllTentBuilt.Broadcast();
@@ -107,6 +109,7 @@ ECurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDat
 				}
 			}
 	    	InteractionTimerHandle.Invalidate();
+
 		});
 
 		if (!InteractionTimerHandle.IsValid())
@@ -121,7 +124,7 @@ ECurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDat
     		false, TimeToPlay);
     		
     	return ECurrentInteraction::HIT_TREE;
-    }	
+    }
 	
 	// if interaction fails
 	OnFailToInteract.Broadcast();
