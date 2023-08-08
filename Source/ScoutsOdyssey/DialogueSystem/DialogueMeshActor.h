@@ -67,6 +67,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	class UBoxComponent* PropCollider;
 
+	bool bHasInteractionsRemaining;
+	
 private:
 	UPROPERTY(EditAnywhere)
 	bool DestroyOnDialogueEnd = false;

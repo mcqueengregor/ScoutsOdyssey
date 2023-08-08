@@ -89,15 +89,14 @@ ECurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDat
 
 				// TODO: Make this proportional to differences in resolution between tent sprites:
 				OwnerActor->SetActorLocation(OriginalLocation + (FVector(0.0f, 0.0f, 30.0f) * OriginalScaleMultiplier));
-
-				// NOTE FOR HAO: Add logic for keeping track of the number of tents fully put up here!
+				
 				if (CurrentState == ETentState::END)
 				{
 					NumberOfTents++;
 					if(NumberOfTents == RequiredNumberOfTents)
 					{
 						OnAllTentBuilt.Broadcast();
-					} 
+					}
 				}
 
 				UAudioComponent* HammerHitPegAudio = Cast<UAudioComponent>(
@@ -107,13 +106,18 @@ ECurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDat
 					HammerHitPegAudio->Play();
 				}
 			}
+	    	InteractionTimerHandle.Invalidate();
 		});
 
-    	FTimerHandle TempHandle;
+		if (!InteractionTimerHandle.IsValid())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(InteractionTimerHandle);
+		}
+    	
 		const USpriteAnimationDataAsset* HammerDA = PlayerRef->GetInteractSpriteDA(ECurrentInteraction::HIT_TREE);
     	float TimeToPlay = HammerDA->InteractionStartIndex * (1.0f / HammerDA->PlaybackFramerate);
     	
-    	GetWorld()->GetTimerManager().SetTimer(TempHandle, TimerDelegate, 1.0f,
+    	GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, TimerDelegate, 1.0f,
     		false, TimeToPlay);
     		
     	return ECurrentInteraction::HIT_TREE;
