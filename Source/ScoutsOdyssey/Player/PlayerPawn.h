@@ -97,6 +97,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void MoveToTheLeft(float Seconds);
+	UFUNCTION(BlueprintCallable)
+	void MoveToTheRight(float Seconds);
 	
 protected:
 	// Action/axis methods:
@@ -218,5 +220,6 @@ private:
 	AStageTeleportTriggerVolume* LastTriggerVolumeEntered;
 
 	bool isMovingLeft;
+	bool isMovingRight;
 };
 

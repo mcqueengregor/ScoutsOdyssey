@@ -134,6 +134,8 @@ void APlayerPawn::Tick(float DeltaTime)
 	// Is Moving Left 
 	if(isMovingLeft)
 		MovementDirection.Y = -1.f;
+	if(isMovingRight)
+		MovementDirection.Y = 1.f;
 }
 		
 // Called to bind functionality to input
@@ -422,6 +424,22 @@ void APlayerPawn::MoveToTheLeft(float Seconds)
 		if(TimerManager.GetTimerElapsed(MoveLeftTimerHandle) >= Seconds)
 		{
 			isMovingLeft = false;
+			TimerManager.ClearTimer(MoveLeftTimerHandle);
+		}
+	}), Seconds, true);
+}
+
+void APlayerPawn::MoveToTheRight(float Seconds)
+{
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+	isMovingRight = true;
+	
+	TimerManager.SetTimer(MoveLeftTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		if(TimerManager.GetTimerElapsed(MoveLeftTimerHandle) >= Seconds)
+		{
+			isMovingRight = false;
 			TimerManager.ClearTimer(MoveLeftTimerHandle);
 		}
 	}), Seconds, true);
