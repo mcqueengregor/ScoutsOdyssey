@@ -63,7 +63,7 @@ public:
 	void HideAllBubbles();
 	
 	// Tasks Setup Methods
-	void Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType,  const int FontSize, const float TalkRate);
+	void Speak(const FString& String, const EBubble Bubble, const int FontSize, const float TalkRate);
 	void Choice(TArray<FText>& Choices);
 	
 	// Delegates
@@ -102,11 +102,7 @@ private:
 	FTimerHandle SpeakTimerHandle;
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true), Category=TypeWriterEffect)
 	float LetterTypeRate = 0.1f;
-	UPROPERTY(EditDefaultsOnly, Category=TypeWriterEffect)
-	TArray<USoundCue*> LowVoices;
-	UPROPERTY(EditDefaultsOnly, Category=TypeWriterEffect)
-	TArray<USoundCue*> HighVoices;
-	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String, const EVoiceType VoiceType);
+	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String);
 	void PlayRandomVoice(EVoiceType VoiceType) const;
 	void PlayVoiceAtIndex(EVoiceType VoiceType, int Index) const;
 	// Check number of clicks. First click would complete typewriting immediately, while second click would go to next string.
