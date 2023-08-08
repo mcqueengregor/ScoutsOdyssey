@@ -259,7 +259,7 @@ void UDialogueComponent::HideAllBubbles()
 }
 
 // Was const, now no longer const given TypeNextLetter isn't const
-void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType,
+void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, 
                                const int FontSize, const float TalkRate)
 {
 	if (BubbleOne && BubbleTwo && BubbleNarrator)
@@ -275,7 +275,7 @@ void UDialogueComponent::Speak(const FString& String, const EBubble Bubble, cons
 
 			GetWorld()->GetTimerManager().SetTimer(SpeakTimerHandle, FTimerDelegate::CreateLambda([=]()
 			{
-				TypeNextLetter(CurTextBlock, String, VoiceType);
+				TypeNextLetter(CurTextBlock, String);
 			}), TalkRate, true);
 		};
 
@@ -363,7 +363,7 @@ void UDialogueComponent::DialogueEnd_CleanUp() const
 	}
 }
 
-void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& String, const EVoiceType VoiceType)
+void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& String)
 {
 	if (TextBlock)
 	{
@@ -374,21 +374,6 @@ void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& St
 		}
 		else
 		{
-			// Play Sound
-			if (String[CurChar_Index] != TCHAR('.') && String[CurChar_Index] != TCHAR(' '))
-			{
-				//50% chance
-				if (CurChar_Index == 0)
-					PlayVoiceAtIndex(VoiceType, 0);
-				else if (CurChar_Index == String.Len() - 1)
-					PlayVoiceAtIndex(VoiceType, LowVoices.Num() - 1);
-				else
-				{
-					if (FMath::RandBool())
-						PlayRandomVoice(VoiceType);
-				}
-			}
-
 			// Set Text
 			CurSpeakString += String[CurChar_Index];
 			CurChar_Index++;
@@ -405,44 +390,7 @@ void UDialogueComponent::TypeNextLetter(UTextBlock* TextBlock, const FString& St
 	}
 }
 
-void UDialogueComponent::PlayRandomVoice(EVoiceType VoiceType) const
-{
-	auto PlayRandomVoiceInArray = [=](TArray<USoundCue*> Voices)
-	{
-		if (Voices.Num() > 0)
-			UGameplayStatics::PlaySound2D(this, Voices[FMath::RandRange(0, Voices.Num() - 1)]);
-		else
-			LOG_ERROR("No voice inside the voices array!");
-	};
 
-	switch (VoiceType)
-	{
-	case EVoiceType::High:
-		PlayRandomVoiceInArray(HighVoices);
-		break;
-	case EVoiceType::Low:
-		PlayRandomVoiceInArray(LowVoices);
-		break;
-	default:
-		LOG_ERROR("Non-existent VoiceType.");
-	}
-}
-
-void UDialogueComponent::PlayVoiceAtIndex(EVoiceType VoiceType, int Index) const
-{
-	auto PlayVoiceAtIndex = [&](TArray<USoundCue*> Voices)
-	{
-		UGameplayStatics::PlaySound2D(this, Voices[Index]);
-	};
-
-	switch (VoiceType)
-	{
-	case EVoiceType::High:
-		PlayVoiceAtIndex(HighVoices);
-	case EVoiceType::Low:
-		PlayVoiceAtIndex(LowVoices);
-	}
-}
 
 
 void UDialogueComponent::TickComponent(float DeltaTime, ELevelTick TickType,

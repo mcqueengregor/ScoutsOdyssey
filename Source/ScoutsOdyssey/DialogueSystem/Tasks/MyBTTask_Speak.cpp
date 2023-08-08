@@ -5,8 +5,9 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueComponent.h"
-
+#include "Sound/SoundCue.h"
 
 UMyBTTask_Speak::UMyBTTask_Speak()
 {
@@ -36,8 +37,11 @@ EBTNodeResult::Type UMyBTTask_Speak::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 		// Assign task finish delegate
 		Delegate_SetUp();
 
+		if(SoundCue)
+			UGameplayStatics::PlaySound2D(this, SoundCue);
+		
 		// Speak
-		DialogueComponent->Speak(String, BubbleChoice, VoiceType, Fontsize, TalkRate);
+		DialogueComponent->Speak(String, BubbleChoice, Fontsize, TalkRate);
 	}
 	else
 	{
