@@ -33,6 +33,7 @@ protected:
 	UFUNCTION()
 	void OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
 
+	void UpdateDynamicMaterial(float EmissionStrength);
 public:
 	virtual void Tick(float DeltaSeconds) override;
 	
@@ -49,9 +50,14 @@ public:
 
 	UFUNCTION()
 	void BehaviorTree_Start(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
+	UFUNCTION()
+	void BehaviourTree_Stop();
+	
 	void Clickable_SetUp();
 	void Clickable_CleanUp();
 
+	inline void DisableInteractions() { bHasInteractionsRemaining = false; UpdateDynamicMaterial(0.0f); }
+	
 	UFUNCTION()
 	void LeftMouseButtonDown();
 	FOnLeftMouseClick OnLeftMouseClick;
@@ -60,10 +66,11 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool OnlyTriggerOnce = true;
 
-protected:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UBoxComponent* PropCollider;
 
+	bool bHasInteractionsRemaining;
+	
 private:
 	UPROPERTY(EditAnywhere)
 	bool DestroyOnDialogueEnd = false;

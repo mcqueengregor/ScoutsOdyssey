@@ -23,4 +23,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	inline bool getIsPickupInstant() { return bIsPickupInstant; }
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void InstantPickup();
+protected:
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsPickupInstant;
 };

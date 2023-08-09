@@ -52,7 +52,8 @@ ECurrentInteraction UBeehiveInteractComponent::OnInteractWithItem(UInventoryItem
 		}
 		
 		OnHoneyBootCollected.Broadcast();
-		return ECurrentInteraction::SUCCESS_NO_ANIM;
+		Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
+		return ECurrentInteraction::COLLECT_HONEY;
 	}
 
 	if(!HoneyCollected)

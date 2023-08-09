@@ -63,6 +63,8 @@ public:
 	FOnFailToInteract OnFailToInteract;
 	
 private:
+	FTimerHandle InteractionTimerHandle;
+	
 	FVector OriginalLocation;
 	float OriginalScaleMultiplier;
 };

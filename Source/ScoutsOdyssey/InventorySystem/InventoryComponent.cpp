@@ -38,6 +38,7 @@ void UInventoryComponent::AddItem(UInventoryItemDataAsset* Item, bool bIsNewCurr
 	{
 		SelectedItem_Index = NewItemIndex;
 		PlayerPawnRef->ChangeItem(*(TagToEnumMap.Find(Items[SelectedItem_Index]->ItemTag)), false);
+		
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald,
 	FString("Switched to ") + Items[SelectedItem_Index]->ItemTag.ToString() + FString(" (AddItem)"));
 	}
