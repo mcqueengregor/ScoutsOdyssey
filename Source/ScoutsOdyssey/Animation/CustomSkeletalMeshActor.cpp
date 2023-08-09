@@ -58,7 +58,7 @@ void ACustomSkeletalMeshActor::OnOverlapBegin(AActor* OverlappedActor, AActor* O
 
 	// If player overlapped this object, turn on pulsing glow effect:
 	if (PawnRef && DynamicMaterial)
-		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", bHasBeenInteractedWith ? 1.0f : 0.0f);
+		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", bHasBeenInteractedWith ? 0.0f : 1.0f);
 }
 
 void ACustomSkeletalMeshActor::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
