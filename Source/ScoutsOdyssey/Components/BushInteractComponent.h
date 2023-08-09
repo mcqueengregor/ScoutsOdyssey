@@ -35,7 +35,18 @@ public:
 
 protected:
 	UPROPERTY(BlueprintReadOnly)
-	bool bIsShrinking;
+	bool bIsDisappearing;
+
+	UPROPERTY(EditAnywhere)
+	AActor* SmokePropActorRef;
+
+	UStaticMeshComponent* SmokePropPlaneMesh;
+
+	UPROPERTY(BlueprintReadWrite)
+	UMaterialInstanceDynamic* SmokeAnimDynamicMaterial;
+
+	UPROPERTY(EditDefaultsOnly)
+	USpriteAnimationDataAsset* SmokeAnimDataAsset;
 	
 private:
 	FVector OriginalScale;
@@ -43,4 +54,6 @@ private:
 	float OriginalLocationZ;
 	float ShrinkDuration;
 	float LerpT;
+
+	float SmokeLocalAnimTime;
 };
