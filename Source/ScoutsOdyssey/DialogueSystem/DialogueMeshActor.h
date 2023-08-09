@@ -63,8 +63,7 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool OnlyTriggerOnce = true;
 
-protected:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UBoxComponent* PropCollider;
 
 private:
