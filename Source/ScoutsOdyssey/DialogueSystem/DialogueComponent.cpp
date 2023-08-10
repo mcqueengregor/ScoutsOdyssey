@@ -45,9 +45,7 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 }
 
 bool UDialogueComponent::StartDialogue()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Emerald, UKismetSystemLibrary::GetDisplayName(GetOwner()));
-	
+{	
 	if(HasTriggered && OnlyTriggerOnce)
 	{
 		return false;

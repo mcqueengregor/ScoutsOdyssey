@@ -47,43 +47,71 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 {
 	if (ValidItemTag.MatchesTag(ItemType->ItemTag) && bAreSquirrelsPresent)
 	{
-		bAreSquirrelsPresent = false;
-		
-		SquirrelActor->IsAcornThrown = true;
-		SquirrelBarrier->DestroyComponent();
-
-		FActorSpawnParameters Parameters = {};
-		Parameters.Name = FName("Thrown Acorn Prop");
-		Parameters.Owner = PlayerRef;
-		Parameters.Instigator = PlayerRef;
-		Parameters.bNoFail = true;
-		Parameters.bDeferConstruction = true;
-
-		FVector SpawnLocation = PlayerRef->GetActorLocation();
-		FRotator SpawnRotator = FRotator(0.0f, 90.0f, 90.0f);
-
-		// TODO: Set timer to spawn acorn w/ impulse on certain frame of "throw acorn" animation!
-		AAcornProp* NewAcornProp = Cast<AAcornProp>(GetWorld()->SpawnActor(AcornPropSpawnClass,
-			&SpawnLocation, &SpawnRotator, Parameters));
-
-		if (NewAcornProp)
+		FTimerDelegate ThrowAcornDelegate = FTimerDelegate::CreateLambda([=]()
 		{
-			NewAcornProp->StartDestroyTimer(3.0f);	
-			FVector ImpulseDirection = FVector(0.0f, -0.5f, 0.5f);
-			const float ImpulseStrength = 1000.0f;
-			
-			NewAcornProp->BoxColliderComponent->AddImpulse(ImpulseDirection * ImpulseStrength, NAME_None, true);
+			bAreSquirrelsPresent = false;
+		
+			SquirrelActor->IsAcornThrown = true;
+			SquirrelBarrier->DestroyComponent();
 
-			if (UInventoryComponent* InventoryComponent =
-			Cast<UInventoryComponent>(PlayerRef->GetComponentByClass(UInventoryComponent::StaticClass())))
+			FActorSpawnParameters Parameters = {};
+			Parameters.Name = FName("Thrown Acorn Prop");
+			Parameters.Owner = PlayerRef;
+			Parameters.Instigator = PlayerRef;
+			Parameters.bNoFail = true;
+			Parameters.bDeferConstruction = true;
+
+			FVector SpawnLocation = PlayerRef->GetActorLocation();
+			FRotator SpawnRotator = FRotator(0.0f, 90.0f, 90.0f);
+
+			// TODO: Set timer to spawn acorn w/ impulse on certain frame of "throw acorn" animation!
+			AAcornProp* NewAcornProp = Cast<AAcornProp>(GetWorld()->SpawnActor(AcornPropSpawnClass,
+				&SpawnLocation, &SpawnRotator, Parameters));
+
+			if (NewAcornProp)
 			{
-				InventoryComponent->RemoveSelectedItem();
+				NewAcornProp->StartDestroyTimer(3.0f);	
+				FVector ImpulseDirection = FVector(0.0f, -0.5f, 0.5f);
+				const float ImpulseStrength = 1000.0f;
+			
+				NewAcornProp->BoxColliderComponent->AddImpulse(ImpulseDirection * ImpulseStrength, NAME_None, true);
+
+				if (UInventoryComponent* InventoryComponent =
+				Cast<UInventoryComponent>(PlayerRef->GetComponentByClass(UInventoryComponent::StaticClass())))
+				{
+					InventoryComponent->RemoveSelectedItem();
+				}
 			}
+
+			OnAcornThrown.Broadcast();
+
+			ThrowAcornHandle.Invalidate();
+		});
+
+		if (ThrowAcornHandle.IsValid())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(ThrowAcornHandle);
+			GetWorld()->GetTimerManager().ClearTimer(FaceLeftHandle);
 		}
 
-		OnAcornThrown.Broadcast();
+		const USpriteAnimationDataAsset* ThrowAcornDA = PlayerRef->GetInteractSpriteDA(ECurrentInteraction::THROW_ACORN);
 		
-		return ECurrentInteraction::SUCCESS_NO_ANIM;
+		float StartDelay = (1.0f / ThrowAcornDA->PlaybackFramerate) * ThrowAcornDA->InteractionStartIndex;  
+		
+		GetWorld()->GetTimerManager().SetTimer(ThrowAcornHandle, ThrowAcornDelegate,
+			1.0f, false, StartDelay);
+
+		// Start timer for forcing the player to look left after animation is complete:
+		FTimerDelegate FaceLeftDelegate = FTimerDelegate::CreateLambda([=]()
+		{
+			PlayerRef->FaceLeft();
+		});
+
+		GetWorld()->GetTimerManager().SetTimer(FaceLeftHandle, FaceLeftDelegate, 1.0f, false,
+			(1.0f / ThrowAcornDA->PlaybackFramerate) *
+			((ThrowAcornDA->NumSpritesheetColumns * ThrowAcornDA->NumSpritesheetRows) - ThrowAcornDA->NumEmptyFrames));
+		
+		return ECurrentInteraction::THROW_ACORN;
 	}
 	else if (HoneyBootItemTag.MatchesTag(ItemType->ItemTag) && !bAreSquirrelsPresent)
 	{

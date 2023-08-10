@@ -99,6 +99,11 @@ public:
 	void MoveToTheLeft(float Seconds);
 	UFUNCTION(BlueprintCallable)
 	void MoveToTheRight(float Seconds);
+
+	inline void FaceLeft()
+	{
+		MeshComponent->SetRelativeScale3D(FVector(-OriginalMeshScale.X, OriginalMeshScale.Y, OriginalMeshScale.Z));
+	}
 	
 protected:
 	// Action/axis methods:
