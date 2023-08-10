@@ -86,6 +86,8 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 			{
 				GlassSmashAudio->Play();
 			}
+
+			Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
 		});
 
 		FTimerHandle TempHandle;
@@ -119,6 +121,7 @@ void UGreenhouseInteractComponent::DoTask()
 			&UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite,	1.0f, false, StartDelay);
 
 		OnGreenHouseUnLocked.Broadcast();
+		Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
 	}
 }
 
