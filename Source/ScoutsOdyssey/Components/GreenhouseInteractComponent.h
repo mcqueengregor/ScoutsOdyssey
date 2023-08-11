@@ -41,7 +41,7 @@ public:
 
 protected:
 	UPROPERTY(BlueprintAssignable)
-	FPlayGreenhouseChangeAudio PlayGreenhouseAudioDelegate;
+	FPlayGreenhouseChangeAudio PlayGreenhouseAudio;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EGreenhouseState CurrentState;

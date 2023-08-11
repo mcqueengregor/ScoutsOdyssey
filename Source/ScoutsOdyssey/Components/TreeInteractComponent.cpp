@@ -83,9 +83,6 @@ void UTreeInteractComponent::DoTask()
 		OwnerActor->ToggleAnimationPlayback();
 		OwnerActor->DisableInteractions();
 		OnTreeDisappear.Broadcast();
+		PlayTreeChangeAudio.Broadcast();
 	}
-}
-
-void UTreeInteractComponent::PlayTreeChangeAudio_Implementation()
-{
 }

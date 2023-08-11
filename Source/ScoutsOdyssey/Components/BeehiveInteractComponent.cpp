@@ -49,6 +49,7 @@ ECurrentInteraction UBeehiveInteractComponent::OnInteractWithItem(UInventoryItem
 			InventoryComponent->RemoveSelectedItem();
 			InventoryComponent->AddItem(HoneyBootDA, true);
 			HoneyCollected = true;
+			PlayCollectedHoneyAudio.Broadcast();
 		}
 		
 		OnHoneyBootCollected.Broadcast();
@@ -64,8 +65,4 @@ ECurrentInteraction UBeehiveInteractComponent::OnInteractWithItem(UInventoryItem
 void UBeehiveInteractComponent::DoTask()
 {
 	
-}
-
-void UBeehiveInteractComponent::PlayCollectHoneyAudio_Implementation()
-{
 }
