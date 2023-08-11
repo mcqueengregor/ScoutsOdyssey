@@ -62,6 +62,8 @@ protected:
 	bool bAreSquirrelsPresent;
 	
 private:
-
+	FTimerHandle ThrowAcornHandle;
+	FTimerHandle FaceLeftHandle;
+	
 	FGameplayTag HoneyBootItemTag;
 };

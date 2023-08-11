@@ -115,8 +115,7 @@ void UGreenhouseInteractComponent::DoTask()
 	{
 		bIsPlayingSmokeAnim = true;
 		SmokePropPlaneMesh->SetVisibility(true);
-		const int32 SpriteSwitchFrameIndex = 6;	// Switch to old version of greenhouse on 6th frame of smoke anim.
-		float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SpriteSwitchFrameIndex;
+		float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SmokeAnimDataAsset->InteractionStartIndex;
 		
 		GetOwner()->GetWorldTimerManager().SetTimer(SwitchToOldHandle, this,
 			&UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite,	1.0f, false, StartDelay);
