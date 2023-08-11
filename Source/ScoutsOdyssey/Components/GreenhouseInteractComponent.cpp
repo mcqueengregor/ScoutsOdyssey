@@ -113,6 +113,8 @@ void UGreenhouseInteractComponent::DoTask()
 {
 	if (CurrentState == EGreenhouseState::LOCKED)
 	{
+		PlayGreenhouseAudioDelegate.Broadcast();
+		
 		bIsPlayingSmokeAnim = true;
 		SmokePropPlaneMesh->SetVisibility(true);
 		float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SmokeAnimDataAsset->InteractionStartIndex;

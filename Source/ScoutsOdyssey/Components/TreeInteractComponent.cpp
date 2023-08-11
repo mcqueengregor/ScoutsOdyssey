@@ -85,3 +85,7 @@ void UTreeInteractComponent::DoTask()
 		OnTreeDisappear.Broadcast();
 	}
 }
+
+void UTreeInteractComponent::PlayTreeChangeAudio_Implementation()
+{
+}

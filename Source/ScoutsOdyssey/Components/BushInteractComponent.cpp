@@ -101,3 +101,7 @@ void UBushInteractComponent::DoTask()
     float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SmokeAnimDataAsset->InteractionStartIndex;
     GetWorld()->GetTimerManager().SetTimer(TempHandle, TimerDelegate, 1.0f, false, StartDelay);
 }
+
+void UBushInteractComponent::PlayBushChangeAudio_Implementation()
+{
+}

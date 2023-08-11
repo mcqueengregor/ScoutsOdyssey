@@ -37,6 +37,9 @@ public:
 	FOnHoneyBootCollected OnHoneyBootCollected;
 	
 protected:
+	UFUNCTION(BlueprintNativeEvent)
+	void PlayCollectHoneyAudio();
+	
 	UPROPERTY(BlueprintReadWrite)
 	bool bAreBeesPresent;
 	
