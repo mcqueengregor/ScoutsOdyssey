@@ -120,6 +120,7 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 		{
 			SpawnAndThrowProp(MarshmallowPropSpawnClass, ImpulseDirection, PlayerRef);
 			ThrowItemHandle.Invalidate();
+			OnMarshmallowThrown.Broadcast();
 		});
 
 		if (ThrowItemHandle.IsValid())
