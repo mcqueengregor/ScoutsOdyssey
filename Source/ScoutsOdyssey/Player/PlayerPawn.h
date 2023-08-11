@@ -26,6 +26,9 @@ enum class EPlayerAnimation : uint8
 
 	IDLE_WITH_HONEY_BOOT = 8	UMETA(DisplayName = "Idle with honey boot animation"),
 	WALK_WITH_HONEY_BOOT = 9	UMETA(DisplayName = "Walk with honey boot animation"),
+
+	IDLE_WITH_MARSHMALLOW = 10	UMETA(DisplayName = "Idle with marshmallow animation"),
+	WALK_WITH_MARSHMALLOW = 11	UMETA(DisplayName = "Walk with marshmallow animation"),
 };
 
 USTRUCT(BlueprintType)
@@ -46,6 +49,7 @@ enum class ECurrentItem : uint8
 	ACORN = 2		UMETA(DisplayName = "Holding acorn"),
 	BOOT = 3		UMETA(DisplayName = "Holding lonely boot"),
 	HONEY_BOOT = 4	UMETA(DisplayName = "Holding boot filled with honey"),
+	MARSHMALLOW = 5	UMETA(DisplayName = "Holding marshmallow"),
 };
 
 UENUM(BlueprintType)
@@ -58,7 +62,8 @@ enum class ECurrentInteraction : uint8
 	THROW_ACORN = 4			UMETA(DisplayName = "Throw acorn"),
 	PLACE_BOOT = 5			UMETA(DisplayName = "Placing honey boot at log"),
 	COLLECT_ACORN = 6		UMETA(DisplayName = "Collect acorn from small tree"),
-
+	COLLECT_MARSHMALLOW = 7	UMETA(DisplayName = "Collect marshmallow from food cooler"),
+	
 	SUCCESS_NO_ANIM = 0xFF	// Used when the interaction is successful, but plays no animation.
 };
 
