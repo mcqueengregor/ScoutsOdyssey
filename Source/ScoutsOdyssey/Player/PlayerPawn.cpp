@@ -495,9 +495,18 @@ void APlayerPawn::MoveToTheRight(float Seconds)
 	}), Seconds, true);
 }
 
+void APlayerPawn::FaceLeft()
+{
+	MeshComponent->SetRelativeScale3D(FVector(-OriginalMeshScale.X, OriginalMeshScale.Y, OriginalMeshScale.Z));
+}
+
+void APlayerPawn::FaceRight()
+{
+	MeshComponent->SetRelativeScale3D(FVector(OriginalMeshScale.X, OriginalMeshScale.Y, OriginalMeshScale.Z));
+}
+
 void APlayerPawn::Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume* EnteredTeleportVolume)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Teleported!"));
 	bHasTeleported = true;
 	bHasCameraAngleChangedAlready = false;
 	SetActorLocation(TeleportLocation);
@@ -505,15 +514,6 @@ void APlayerPawn::Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume
 	
 	if (LastTriggerVolumeEntered)
 		LastTriggerVolumeEntered->ForceFadeToSceneColour();
-}
-
-void APlayerPawn::OnAudioFinishPlaying()
-{
-	if (FootstepAudioComponent->Sound && IsCurrentAnimOfType(EPlayerAnimation::WALK))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald, FString("Finished playing!"));
-		FootstepAudioComponent->Play();
-	}
 }
 
 void APlayerPawn::StartFootstepSoundCycle()

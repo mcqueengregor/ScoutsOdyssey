@@ -99,6 +99,9 @@ public:
 	void MoveToTheLeft(float Seconds);
 	UFUNCTION(BlueprintCallable)
 	void MoveToTheRight(float Seconds);
+
+	void FaceLeft();
+	void FaceRight();
 	
 protected:
 	// Action/axis methods:
@@ -121,9 +124,6 @@ protected:
 	void Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume* EnteredTeleportVolume);
 
 	// Audio control methods:
-	UFUNCTION()
-	void OnAudioFinishPlaying();
-	
 	void StartFootstepSoundCycle();
 	void StopFootstepSoundCycle();
 	void PlayFootstepSoundCue();

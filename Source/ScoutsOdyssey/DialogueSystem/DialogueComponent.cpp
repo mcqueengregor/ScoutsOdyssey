@@ -45,7 +45,7 @@ void UDialogueComponent::Click_Implementation(UPrimitiveComponent* TouchedCompon
 }
 
 bool UDialogueComponent::StartDialogue()
-{
+{	
 	if(HasTriggered && OnlyTriggerOnce)
 	{
 		return false;
