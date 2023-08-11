@@ -82,6 +82,15 @@ ECurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDat
 			UTexture* CurrentTexture = TentStateTextures.Find(CurrentState)->TentStateTexture;
 			DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
 
+			if (CurrentState == ETentState::MIDDLE)
+			{
+				PlayStartToMiddleAudio.Broadcast();
+			}
+			else
+			{
+				PlayMiddleToEndAudio.Broadcast();
+			}
+	    	
 			if (ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner()))
 			{
 				OwnerActor->GetStaticMeshComponent()->SetRelativeScale3D(

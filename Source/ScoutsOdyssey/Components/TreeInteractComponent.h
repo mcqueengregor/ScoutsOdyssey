@@ -10,6 +10,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTreeDisappear);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayTreeChangeAudio);
+
 /**
  * 
  */
@@ -38,8 +40,8 @@ public:
 	FOnFailToInteract OnFailToInteract;
 
 protected:
-	UFUNCTION(BlueprintNativeEvent)
-	void PlayTreeChangeAudio();
+	UPROPERTY(BlueprintAssignable)
+	FPlayTreeChangeAudio PlayTreeChangeAudio;
 	
 private:
 	UPROPERTY(EditInstanceOnly)

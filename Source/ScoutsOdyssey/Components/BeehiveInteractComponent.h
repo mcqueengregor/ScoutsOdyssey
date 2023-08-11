@@ -9,6 +9,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHoneyBootCollected);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayCollectedHoneyAudio);
+
 /**
  * 
  */
@@ -37,8 +39,8 @@ public:
 	FOnHoneyBootCollected OnHoneyBootCollected;
 	
 protected:
-	UFUNCTION(BlueprintNativeEvent)
-	void PlayCollectHoneyAudio();
+	UPROPERTY(BlueprintAssignable)
+	FPlayCollectedHoneyAudio PlayCollectedHoneyAudio;
 	
 	UPROPERTY(BlueprintReadWrite)
 	bool bAreBeesPresent;

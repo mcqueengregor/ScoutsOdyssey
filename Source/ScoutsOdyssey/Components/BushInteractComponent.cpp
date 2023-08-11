@@ -87,6 +87,7 @@ void UBushInteractComponent::DoTask()
     // Start smoke transition:
     bIsDisappearing = true;
     SmokePropPlaneMesh->SetVisibility(true);
+    PlayBushChangeAudio.Broadcast();
     
     ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
     
@@ -100,8 +101,4 @@ void UBushInteractComponent::DoTask()
 
     float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SmokeAnimDataAsset->InteractionStartIndex;
     GetWorld()->GetTimerManager().SetTimer(TempHandle, TimerDelegate, 1.0f, false, StartDelay);
-}
-
-void UBushInteractComponent::PlayBushChangeAudio_Implementation()
-{
 }

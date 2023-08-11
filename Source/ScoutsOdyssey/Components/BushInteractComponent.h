@@ -6,6 +6,8 @@
 #include "InteractComponentBase.h"
 #include "BushInteractComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayBushChangeAudio);
+
 /**
  * 
  */
@@ -34,8 +36,8 @@ public:
 	float ShrunkLocationOffsetZ;
 
 protected:
-	UFUNCTION(BlueprintNativeEvent)
-	void PlayBushChangeAudio();
+	UPROPERTY(BlueprintAssignable)
+	FPlayBushChangeAudio PlayBushChangeAudio;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsDisappearing;
