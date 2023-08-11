@@ -28,6 +28,11 @@ public:
 	virtual void DoTask() override;
 
 protected:
+	void RemoveMarshmallowsFromCooler();
+	
 	UPROPERTY(EditDefaultsOnly)
 	UInventoryItemDataAsset* MarshmallowDA;
+
+	UPROPERTY(EditDefaultsOnly)
+	UTexture2D* CoolerNoMarshmallowsTex;
 };

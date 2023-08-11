@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AcornProp.h"
+#include "ThrownItemProp.h"
 #include "Components/BoxComponent.h"
 
 // Sets default values
-AAcornProp::AAcornProp()
+AThrownItemProp::AThrownItemProp()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>
@@ -28,20 +28,20 @@ AAcornProp::AAcornProp()
 }
 
 // Called when the game starts or when spawned
-void AAcornProp::BeginPlay()
+void AThrownItemProp::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void AAcornProp::Tick(float DeltaTime)
+void AThrownItemProp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-void AAcornProp::StartDestroyTimer(float DestroyTime)
+void AThrownItemProp::StartDestroyTimer(float DestroyTime)
 {
 	FTimerHandle DestroyHandle;
 	FTimerDelegate DestroyDelegate;
@@ -52,4 +52,3 @@ void AAcornProp::StartDestroyTimer(float DestroyTime)
 	
 	GetWorldTimerManager().SetTimer(DestroyHandle, DestroyDelegate, 1.0f, false, DestroyTime);
 }
-

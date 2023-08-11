@@ -31,7 +31,6 @@ void UFoodCoolerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 ECurrentInteraction UFoodCoolerComponent::OnInteractWithItem(UInventoryItemDataAsset* ItemType, APlayerPawn* PlayerRef)
 {
-	// If player interacts with food cooler and 
 	ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner());
 	if (OwnerActor && OwnerActor->bHasInteractionsRemaining)
 	{
@@ -44,16 +43,7 @@ ECurrentInteraction UFoodCoolerComponent::OnInteractWithItem(UInventoryItemDataA
 		{
 			InventoryComponent->AddItem(MarshmallowDA, true);
 		}
-		else if (MarshmallowDA)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red,
-				FString("No reference to marshmallow DA!"));
-		}
-		else if (!InventoryComponent)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red,
-				FString("No reference to inventory component!"));
-		}
+
 		return ECurrentInteraction::COLLECT_MARSHMALLOW;
 	}
 
@@ -63,4 +53,12 @@ ECurrentInteraction UFoodCoolerComponent::OnInteractWithItem(UInventoryItemDataA
 void UFoodCoolerComponent::DoTask()
 {
 	
+}
+
+void UFoodCoolerComponent::RemoveMarshmallowsFromCooler()
+{
+	if (DynamicMaterial && CoolerNoMarshmallowsTex)
+	{
+		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CoolerNoMarshmallowsTex);
+	}
 }

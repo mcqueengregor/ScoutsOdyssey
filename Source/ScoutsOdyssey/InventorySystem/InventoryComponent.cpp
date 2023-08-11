@@ -4,6 +4,7 @@
 #include "InventoryComponent.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
 
 UInventoryComponent::UInventoryComponent()
 {
