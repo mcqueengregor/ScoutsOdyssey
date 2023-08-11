@@ -49,12 +49,14 @@ public:
 	FOnAcornThrown OnAcornThrown;
 
 protected:
-	UPROPERTY(EditDefaultsOnly)
-	class AAcornProp* AcornPropActor;
+	void SpawnAndThrowProp(UClass* PropClass, FVector ThrowDirection, APawn* OwningPawnRef);
 
 	UPROPERTY(EditDefaultsOnly)
 	UClass* AcornPropSpawnClass;
 
+	UPROPERTY(EditDefaultsOnly)
+	UClass* MarshmallowPropSpawnClass;
+	
 	UPROPERTY(BlueprintAssignable)
 	FShowHoneyBootDelegate ShowHoneyBoot;
 
@@ -62,8 +64,11 @@ protected:
 	bool bAreSquirrelsPresent;
 	
 private:
-	FTimerHandle ThrowAcornHandle;
+	FTimerHandle ThrowItemHandle;
 	FTimerHandle FaceLeftHandle;
 	
 	FGameplayTag HoneyBootItemTag;
+	FGameplayTag MarshmallowItemTag;
+
+	int32 NumItemsThrown;
 };

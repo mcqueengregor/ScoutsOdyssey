@@ -4,6 +4,7 @@
 #include "InventoryComponent.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -33,7 +34,7 @@ void UInventoryComponent::BeginPlay()
 void UInventoryComponent::AddItem(UInventoryItemDataAsset* Item, bool bIsNewCurrentItem)
 {
 	int32 NewItemIndex = Items.AddUnique(Item);
-
+	
 	if (bIsNewCurrentItem && TagToEnumMap.Contains(Items[NewItemIndex]->ItemTag) && PlayerPawnRef)
 	{
 		SelectedItem_Index = NewItemIndex;
