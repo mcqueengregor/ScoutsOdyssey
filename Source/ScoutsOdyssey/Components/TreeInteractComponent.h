@@ -36,6 +36,10 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFailToInteract OnFailToInteract;
+
+protected:
+	UFUNCTION(BlueprintNativeEvent)
+	void PlayTreeChangeAudio();
 	
 private:
 	UPROPERTY(EditInstanceOnly)

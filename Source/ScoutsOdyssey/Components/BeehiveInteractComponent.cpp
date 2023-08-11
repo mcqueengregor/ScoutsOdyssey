@@ -65,3 +65,7 @@ void UBeehiveInteractComponent::DoTask()
 {
 	
 }
+
+void UBeehiveInteractComponent::PlayCollectHoneyAudio_Implementation()
+{
+}

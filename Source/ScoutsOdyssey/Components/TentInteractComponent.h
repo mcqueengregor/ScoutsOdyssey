@@ -61,7 +61,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFailToInteract OnFailToInteract;
-	
+
 private:
 	FTimerHandle InteractionTimerHandle;
 	

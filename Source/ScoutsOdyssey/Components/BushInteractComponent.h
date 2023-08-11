@@ -34,6 +34,9 @@ public:
 	float ShrunkLocationOffsetZ;
 
 protected:
+	UFUNCTION(BlueprintNativeEvent)
+	void PlayBushChangeAudio();
+
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsDisappearing;
 
