@@ -47,6 +47,8 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 {
 	if (ValidItemTag.MatchesTag(ItemType->ItemTag) && bAreSquirrelsPresent)
 	{
+		PlayerRef->FaceRight();
+		
 		FTimerDelegate ThrowAcornDelegate = FTimerDelegate::CreateLambda([=]()
 		{
 			bAreSquirrelsPresent = false;
