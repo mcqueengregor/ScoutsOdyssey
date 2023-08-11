@@ -69,4 +69,6 @@ private:
 	
 	FGameplayTag HoneyBootItemTag;
 	FGameplayTag MarshmallowItemTag;
+
+	int32 NumItemsThrown;
 };

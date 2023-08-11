@@ -2,6 +2,9 @@
 
 
 #include "TrunkInteractComponent.h"
+
+#include <string>
+
 #include "Components/BoxComponent.h"
 #include "ScoutsOdyssey/AI/AISquirrelActor.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
@@ -16,6 +19,7 @@ UTrunkInteractComponent::UTrunkInteractComponent()
 	HoneyBootItemTag = FGameplayTag::RequestGameplayTag(FName("Item.DeliciousBoot"));
 	MarshmallowItemTag = FGameplayTag::RequestGameplayTag(FName("Item.Marshmallow"));
 	bAreSquirrelsPresent = true;
+	NumItemsThrown = 0;
 }
 
 void UTrunkInteractComponent::BeginPlay()
@@ -61,7 +65,6 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 		
 			SquirrelActor->IsAcornThrown = true;
 			SquirrelBarrier->DestroyComponent();
-
 			
 			SpawnAndThrowProp(AcornPropSpawnClass, ImpulseDirection, PlayerRef);
 
@@ -113,12 +116,9 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 	}
 	else if (MarshmallowItemTag.MatchesTag(ItemType->ItemTag) && bAreSquirrelsPresent)
 	{
-		FTimerDelegate ThrowAcornDelegate = FTimerDelegate::CreateLambda([=]()
+		FTimerDelegate ThrowMarshmallowDelegate = FTimerDelegate::CreateLambda([=]()
 		{
-			bAreSquirrelsPresent = false;
-			
 			SpawnAndThrowProp(MarshmallowPropSpawnClass, ImpulseDirection, PlayerRef);
-
 			ThrowItemHandle.Invalidate();
 		});
 
@@ -132,7 +132,7 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 		
 		float StartDelay = (1.0f / ThrowAcornDA->PlaybackFramerate) * ThrowAcornDA->InteractionStartIndex;  
 		
-		GetWorld()->GetTimerManager().SetTimer(ThrowItemHandle, ThrowAcornDelegate,
+		GetWorld()->GetTimerManager().SetTimer(ThrowItemHandle, ThrowMarshmallowDelegate,
 			1.0f, false, StartDelay);
 
 		return ECurrentInteraction::THROW_ACORN;
@@ -150,23 +150,27 @@ void UTrunkInteractComponent::DoTask()
 
 void UTrunkInteractComponent::SpawnAndThrowProp(UClass* PropClass, FVector ThrowDirection, APawn* OwningPawnRef)
 {
+	// Add item index since creating multiple objects of the same name causes a crash:
+	FString Name = FString("Thrown Prop ");
+	Name.AppendInt(NumItemsThrown);
+	
 	FActorSpawnParameters Parameters = {};
-	Parameters.Name = FName("Thrown Prop");
-	Parameters.Owner = OwningPawnRef;
-	Parameters.Instigator = OwningPawnRef;
+	Parameters.Name.AppendString(Name);
+	Parameters.Owner = OwningPawnRef;											
+	Parameters.Instigator = OwningPawnRef;										
 	Parameters.bNoFail = true;
 	Parameters.bDeferConstruction = true;
 
 	FVector SpawnLocation = OwningPawnRef->GetActorLocation();
 	FRotator SpawnRotator = FRotator(0.0f, 90.0f, 90.0f);
 	
-	AThrownItemProp* NewAcornProp = Cast<AThrownItemProp>(GetWorld()->SpawnActor(PropClass,
+	AThrownItemProp* NewProp = Cast<AThrownItemProp>(GetWorld()->SpawnActor(PropClass,
 		&SpawnLocation, &SpawnRotator, Parameters));
 
-	if (NewAcornProp)
+	if (NewProp)
 	{
-		NewAcornProp->StartDestroyTimer(3.0f);			
-		NewAcornProp->BoxColliderComponent->AddImpulse(ThrowDirection, NAME_None, true);
+		NewProp->StartDestroyTimer(3.0f);			
+		NewProp->BoxColliderComponent->AddImpulse(ThrowDirection, NAME_None, true);
 
 		if (UInventoryComponent* InventoryComponent =
 		Cast<UInventoryComponent>(OwningPawnRef->GetComponentByClass(UInventoryComponent::StaticClass())))
@@ -174,6 +178,5 @@ void UTrunkInteractComponent::SpawnAndThrowProp(UClass* PropClass, FVector Throw
 			InventoryComponent->RemoveSelectedItem();
 		}
 	}
+	++NumItemsThrown;
 }
-
-
