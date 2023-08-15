@@ -7,7 +7,6 @@
 
 #include "../DialogueSystem/DialogueMeshActor.h"
 #include "Chaos/ChaosPerfTest.h"
-#include "Components/AudioComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
 
@@ -76,65 +75,32 @@ ECurrentInteraction UTentInteractComponent::OnInteractWithItem(UInventoryItemDat
 {
     if (ItemType->ItemTag.MatchesTag(ValidItemTag) && CurrentState != ETentState::END)
     {
-	    FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([=]()
-		{
-			CurrentState = CurrentState == ETentState::START ? ETentState::MIDDLE : ETentState::END;
-			UTexture* CurrentTexture = TentStateTextures.Find(CurrentState)->TentStateTexture;
-			DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
+        CurrentState = CurrentState == ETentState::START ? ETentState::MIDDLE : ETentState::END;
+        UTexture* CurrentTexture = TentStateTextures.Find(CurrentState)->TentStateTexture;
+        DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
 
-			if (CurrentState == ETentState::MIDDLE)
-			{
-				PlayStartToMiddleAudio.Broadcast();
-			}
-			else
-			{
-				PlayMiddleToEndAudio.Broadcast();
-			}
-	    	
-			if (ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner()))
-			{
-				OwnerActor->GetStaticMeshComponent()->SetRelativeScale3D(
-					TentStateTextures.Find(CurrentState)->TextureScale * OriginalScaleMultiplier);
+        if (ADialogueMeshActor* OwnerActor = Cast<ADialogueMeshActor>(GetOwner()))
+        {
+            OwnerActor->GetStaticMeshComponent()->SetRelativeScale3D(
+                TentStateTextures.Find(CurrentState)->TextureScale * OriginalScaleMultiplier);
 
-				// TODO: Make this proportional to differences in resolution between tent sprites:
-				OwnerActor->SetActorLocation(OriginalLocation + (FVector(0.0f, 0.0f, 30.0f) * OriginalScaleMultiplier));
-				
-				if (CurrentState == ETentState::END)
-				{
-					NumberOfTents++;
-	    			Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
-					
-					if(NumberOfTents == RequiredNumberOfTents)
-					{
-						OnAllTentBuilt.Broadcast();
-					}
-				}
+            // TODO: Make this proportional to differences in resolution between tent sprites:
+            OwnerActor->SetActorLocation(OriginalLocation + (FVector(0.0f, 0.0f, 30.0f) * OriginalScaleMultiplier));
 
-				UAudioComponent* HammerHitPegAudio = Cast<UAudioComponent>(
-					GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
-				if (HammerHitPegAudio)
-				{
-					HammerHitPegAudio->Play();
-				}
-			}
-	    	InteractionTimerHandle.Invalidate();
+            // NOTE FOR HAO: Add logic for keeping track of the number of tents fully put up here!
+            if (CurrentState == ETentState::END)
+            {
+	            NumberOfTents++;
+            	if(NumberOfTents == RequiredNumberOfTents)
+            	{
+            		OnAllTentBuilt.Broadcast();
+            	} 
+            }
 
-		});
-
-		if (!InteractionTimerHandle.IsValid())
-		{
-			GetWorld()->GetTimerManager().ClearTimer(InteractionTimerHandle);
-		}
-    	
-		const USpriteAnimationDataAsset* HammerDA = PlayerRef->GetInteractSpriteDA(ECurrentInteraction::HIT_TREE);
-    	float TimeToPlay = HammerDA->InteractionStartIndex * (1.0f / HammerDA->PlaybackFramerate);
-    	
-    	GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle, TimerDelegate, 1.0f,
-    		false, TimeToPlay);
-    		
-    	return ECurrentInteraction::HIT_TREE;
+            return ECurrentInteraction::SUCCESS_NO_ANIM;
+        }
     }
-	
+
 	// if interaction fails
 	OnFailToInteract.Broadcast();
     return ECurrentInteraction::NO_INTERACTION;

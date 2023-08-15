@@ -27,6 +27,7 @@ void UBeehiveInteractComponent::BeginPlay()
 	if (OwnerActor)
 	{
 		OwnerActor->CreateAndAssignDynamicMaterial();
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Working!"));
 	}
 }
 
@@ -48,17 +49,11 @@ ECurrentInteraction UBeehiveInteractComponent::OnInteractWithItem(UInventoryItem
 		{
 			InventoryComponent->RemoveSelectedItem();
 			InventoryComponent->AddItem(HoneyBootDA, true);
-			HoneyCollected = true;
-			PlayCollectedHoneyAudio.Broadcast();
 		}
 		
-		OnHoneyBootCollected.Broadcast();
-		Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
-		return ECurrentInteraction::COLLECT_HONEY;
-	} else if (bAreBeesPresent)
-	{
-		OnFailToInteract.Broadcast();
+		return ECurrentInteraction::SUCCESS_NO_ANIM;
 	}
+	
 	return ECurrentInteraction::NO_INTERACTION;
 }
 

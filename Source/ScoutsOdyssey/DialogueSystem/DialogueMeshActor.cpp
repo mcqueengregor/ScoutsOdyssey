@@ -19,8 +19,6 @@ ADialogueMeshActor::ADialogueMeshActor()
 	PropCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("PropCollider"));
 	PropCollider->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
 	PropCollider->SetupAttachment(RootComponent);
-
-	bHasInteractionsRemaining = true;
 }
 
 void ADialogueMeshActor::BeginPlay()
@@ -70,8 +68,8 @@ void ADialogueMeshActor::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherAc
 	APlayerPawn* PawnRef = Cast<APlayerPawn>(OtherActor);
 	
 	// If player overlapped this object, turn on pulsing glow effect:
-	if (PawnRef)
-		UpdateDynamicMaterial(bHasInteractionsRemaining ? 1.0 : 0.0);
+	if (PawnRef && DynamicMaterial)
+		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", 1.0f);
 }
 
 void ADialogueMeshActor::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
@@ -79,14 +77,8 @@ void ADialogueMeshActor::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActo
 	APlayerPawn* PawnRef = Cast<APlayerPawn>(OtherActor);
 
 	// If player stopped overlapping this object, turn off pulsing glow effect:
-	if (PawnRef)
-		UpdateDynamicMaterial(0.0f);
-}
-
-void ADialogueMeshActor::UpdateDynamicMaterial(float EmissionStrength)
-{
-	if (DynamicMaterial)
-		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", EmissionStrength);
+	if (PawnRef && DynamicMaterial)
+		DynamicMaterial->SetScalarParameterValue("PulseEmissionStrength", 0.0f);
 }
 
 UMaterialInstanceDynamic* ADialogueMeshActor::CreateAndAssignDynamicMaterial()
@@ -134,14 +126,6 @@ void ADialogueMeshActor::BehaviorTree_Start(UPrimitiveComponent* TouchedComponen
 	} else
 	{
 		UE_LOG(LogTemp, Error, TEXT("AI Controller was not constructed For Dialogue Tree!"));		
-	}
-}
-
-void ADialogueMeshActor::BehaviourTree_Stop()
-{
-	if (AIController)
-	{
-		AIController->BrainComponent->StopLogic(FString("Actor was destroyed"));
 	}
 }
 

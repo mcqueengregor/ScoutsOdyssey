@@ -26,9 +26,6 @@ enum class EPlayerAnimation : uint8
 
 	IDLE_WITH_HONEY_BOOT = 8	UMETA(DisplayName = "Idle with honey boot animation"),
 	WALK_WITH_HONEY_BOOT = 9	UMETA(DisplayName = "Walk with honey boot animation"),
-
-	IDLE_WITH_MARSHMALLOW = 10	UMETA(DisplayName = "Idle with marshmallow animation"),
-	WALK_WITH_MARSHMALLOW = 11	UMETA(DisplayName = "Walk with marshmallow animation"),
 };
 
 USTRUCT(BlueprintType)
@@ -49,10 +46,9 @@ enum class ECurrentItem : uint8
 	ACORN = 2		UMETA(DisplayName = "Holding acorn"),
 	BOOT = 3		UMETA(DisplayName = "Holding lonely boot"),
 	HONEY_BOOT = 4	UMETA(DisplayName = "Holding boot filled with honey"),
-	MARSHMALLOW = 5	UMETA(DisplayName = "Holding marshmallow"),
 };
 
-UENUM(BlueprintType)
+UENUM()
 enum class ECurrentInteraction : uint8
 {
 	NO_INTERACTION = 0		UMETA(DisplayName = "Shrugging (invalid interaction)"),
@@ -61,10 +57,8 @@ enum class ECurrentInteraction : uint8
 	HIT_TREE = 3			UMETA(DisplayName = "Hit tree with hammer"),
 	THROW_ACORN = 4			UMETA(DisplayName = "Throw acorn"),
 	PLACE_BOOT = 5			UMETA(DisplayName = "Placing honey boot at log"),
-	COLLECT_ACORN = 6		UMETA(DisplayName = "Collect acorn from small tree"),
-	COLLECT_MARSHMALLOW = 7	UMETA(DisplayName = "Collect marshmallow from food cooler"),
-	
-	SUCCESS_NO_ANIM = 0xFF	// Used when the interaction is successful, but plays no animation.
+
+	SUCCESS_NO_ANIM = 0xFF,	// Used when the interaction is successful, but has no animation associated with it.
 };
 
 UCLASS()
@@ -99,14 +93,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CancelTeleportTimer();
-
-	UFUNCTION(BlueprintCallable)
-	void MoveToTheLeft(float Seconds);
-	UFUNCTION(BlueprintCallable)
-	void MoveToTheRight(float Seconds);
-
-	void FaceLeft();
-	void FaceRight();
 	
 protected:
 	// Action/axis methods:
@@ -120,15 +106,14 @@ protected:
 	void CalculateLocalAnimTime();
 	void CalculateChangeItemLocalAnimTime(float DeltaTime);
 	void CalculateInteractLocalAnimTime(float DeltaTime);
-	void ForceChangeAnimation(FSpriteAnimDetails* Animation);
 
-	UFUNCTION(BlueprintCallable)
-	float GetPickupDelayDuration(ECurrentInteraction InteractionType = ECurrentInteraction::SUCCESS_NO_ANIM);
-	
 	// Teleportation methods:
 	void Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume* EnteredTeleportVolume);
 
 	// Audio control methods:
+	UFUNCTION()
+	void OnAudioFinishPlaying();
+	
 	void StartFootstepSoundCycle();
 	void StopFootstepSoundCycle();
 	void PlayFootstepSoundCue();
@@ -151,9 +136,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<ECurrentInteraction, FSpriteAnimDetails> InteractAnimationsList;	// As above, but for animations used when
 																			// performing interactions.
-
-	UPROPERTY(EditDefaultsOnly)
-	FSpriteAnimDetails PickItemFromGroundAnim;
 	
 	UMaterialInstanceDynamic* DynamicMaterial;
 	FSpriteAnimDetails* CurrentAnimation;
@@ -175,11 +157,12 @@ public:
 		class USpringArmComponent* SpringArmComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-		class UAudioComponent* FootstepAudioComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-		class UAudioComponent* HammerAudioComponent;
+		class UAudioComponent* AudioComponent;
 	
+	// AUDIO CLIPS:
+	// TODO: Abstract audio playback functionality into AudioManager, instead of bloating actor classes with this logic?
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	class USoundCue* FootstepSoundCue;
 	
 	// ATTRIBUTES:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
@@ -193,10 +176,11 @@ public:
 										// Set to 'false' on first frame of gameplay which triggers instant location
 										// change, then set to 'true' which uses EaseInOut transitions.
 	
-	class TDoubleLinkedList<class AStageSectionVolume*> OverlappedStageSections;	// List of currently-overlapping
-																					// stage sections, used to
-																					// accurately determine the current
-																					// camera angle to use.
+	class TDoubleLinkedList<class AStageSectionVolume*> OverlappedStageSections;	// List of currently-overlapping stage
+																			// sections, used to accurately determine
+																			// the current camera angle to use.
+
+
 	UPROPERTY(BlueprintReadOnly, Category = "Misc.")
 		class AStageSectionVolume* LastEnteredSection;	// Pointer to stage section that was most-recently entered.
 	
@@ -205,13 +189,8 @@ public:
 	inline bool GetHasTeleported()	{ return bHasTeleported; }
 	
 	inline void SetLastTeleportVolumeEntered(AStageTeleportTriggerVolume* Volume) { LastTriggerVolumeEntered = Volume; }
-
-	inline USpriteAnimationDataAsset* GetInteractSpriteDA(ECurrentInteraction InteractType)
-	{
-		return InteractAnimationsList.Find(InteractType)->SpriteAnimDA;
-	}
 	
-private:	
+private:
 	FVector MovementDirection;	// Direction the player will move on the current frame, in Unreal units.
 	FVector OriginalMeshScale;	// The scale of 'MeshComponent' when BeginPlay is triggered.
 	
@@ -227,11 +206,7 @@ private:
 								// new one (set to 'true' when teleport occurs, then 'false' when player re-enters vol).
 	FTimerHandle TeleportTimerHandle;
 	FTimerHandle FootstepSoundTimerHandle;
-	FTimerHandle MoveLeftTimerHandle;
-	
-	AStageTeleportTriggerVolume* LastTriggerVolumeEntered;
 
-	bool isMovingLeft;
-	bool isMovingRight;
+	AStageTeleportTriggerVolume* LastTriggerVolumeEntered;
 };
 

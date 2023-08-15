@@ -7,7 +7,6 @@
 #include "GreenhouseInteractComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGreenHouseUnLocked);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayGreenhouseChangeAudio);
 
 UENUM()
 enum class EGreenhouseState : uint8
@@ -40,9 +39,6 @@ public:
 	FOnGreenHouseUnLocked OnGreenHouseUnLocked;
 
 protected:
-	UPROPERTY(BlueprintAssignable)
-	FPlayGreenhouseChangeAudio PlayGreenhouseAudio;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EGreenhouseState CurrentState;
 

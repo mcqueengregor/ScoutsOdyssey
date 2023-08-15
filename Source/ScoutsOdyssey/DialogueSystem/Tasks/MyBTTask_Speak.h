@@ -43,9 +43,10 @@ private:
 	UPROPERTY(EditAnywhere, Category=Speak, meta = (AllowPrivateAccess = true))
 	EBubble BubbleChoice;
 	UPROPERTY(EditAnywhere, Category=Speak, meta = (AllowPrivateAccess = true))
+	EVoiceType VoiceType = EVoiceType::High;
+	UPROPERTY(EditAnywhere, Category=Speak, meta = (AllowPrivateAccess = true))
 	int Fontsize = 24;
 	UPROPERTY(EditAnywhere, Category=Speak)
 	float TalkRate = 0.07f;
-	UPROPERTY(EditAnywhere, Category=Speak)
-	class USoundCue* SoundCue;
+	
 };
