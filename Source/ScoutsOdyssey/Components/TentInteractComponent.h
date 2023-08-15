@@ -9,6 +9,9 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllTentBuilt);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFailToInteract);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayStartToMiddleAudio);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayMiddleToEndAudio);
+
 UENUM()
 enum class ETentState : uint8
 {
@@ -61,8 +64,17 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFailToInteract OnFailToInteract;
+
+protected:
+	UPROPERTY(BlueprintAssignable)
+	FPlayStartToMiddleAudio PlayStartToMiddleAudio;
+
+	UPROPERTY(BlueprintAssignable)
+	FPlayMiddleToEndAudio PlayMiddleToEndAudio;
 	
 private:
+	FTimerHandle InteractionTimerHandle;
+	
 	FVector OriginalLocation;
 	float OriginalScaleMultiplier;
 };

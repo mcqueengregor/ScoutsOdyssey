@@ -3,6 +3,7 @@
 
 #include "GreenhouseInteractComponent.h"
 
+#include "Components/AudioComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueComponent.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
@@ -70,13 +71,34 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 {
 	if (ItemType->ItemTag.MatchesTag(ValidItemTag) && CurrentState == EGreenhouseState::LOCKED)
 	{
-		CurrentState = EGreenhouseState::OPEN;
-		UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
-		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
+		FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([=]()
+		{
+			CurrentState = EGreenhouseState::OPEN;
+			UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
+			DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
 		
-		OnGreenHouseUnLocked.Broadcast();
+			OnGreenHouseUnLocked.Broadcast();
+
+			UAudioComponent* GlassSmashAudio = Cast<UAudioComponent>(
+				GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
+
+			if (GlassSmashAudio)
+			{
+				GlassSmashAudio->Play();
+			}
+
+			Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
+		});
+
+		FTimerHandle TempHandle;
+
+		const USpriteAnimationDataAsset* HammerDA = PlayerRef->GetInteractSpriteDA(ECurrentInteraction::SMASH_GREENHOUSE);
+		float TimeToPlay = HammerDA->InteractionStartIndex * (1.0f / HammerDA->PlaybackFramerate);
+
+		GetWorld()->GetTimerManager().SetTimer(TempHandle, TimerDelegate, 1.0f,
+			false, TimeToPlay);
 		
-		return ECurrentInteraction::SUCCESS_NO_ANIM;
+		return ECurrentInteraction::SMASH_GREENHOUSE;
 	}
 	else if (CurrentState == EGreenhouseState::LOCKED && SmokeAnimDataAsset)
 	{
@@ -91,15 +113,17 @@ void UGreenhouseInteractComponent::DoTask()
 {
 	if (CurrentState == EGreenhouseState::LOCKED)
 	{
+		PlayGreenhouseAudio.Broadcast();
+		
 		bIsPlayingSmokeAnim = true;
 		SmokePropPlaneMesh->SetVisibility(true);
-		const int32 SpriteSwitchFrameIndex = 6;	// Switch to old version of greenhouse on 6th frame of smoke anim.
-		float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SpriteSwitchFrameIndex;
+		float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SmokeAnimDataAsset->InteractionStartIndex;
 		
 		GetOwner()->GetWorldTimerManager().SetTimer(SwitchToOldHandle, this,
 			&UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite,	1.0f, false, StartDelay);
 
 		OnGreenHouseUnLocked.Broadcast();
+		Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
 	}
 }
 

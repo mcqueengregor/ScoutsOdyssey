@@ -6,6 +6,8 @@
 #include "InteractComponentBase.h"
 #include "BushInteractComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayBushChangeAudio);
+
 /**
  * 
  */
@@ -34,8 +36,22 @@ public:
 	float ShrunkLocationOffsetZ;
 
 protected:
+	UPROPERTY(BlueprintAssignable)
+	FPlayBushChangeAudio PlayBushChangeAudio;
+
 	UPROPERTY(BlueprintReadOnly)
-	bool bIsShrinking;
+	bool bIsDisappearing;
+
+	UPROPERTY(EditAnywhere)
+	AActor* SmokePropActorRef;
+
+	UStaticMeshComponent* SmokePropPlaneMesh;
+
+	UPROPERTY(BlueprintReadWrite)
+	UMaterialInstanceDynamic* SmokeAnimDynamicMaterial;
+
+	UPROPERTY(EditDefaultsOnly)
+	USpriteAnimationDataAsset* SmokeAnimDataAsset;
 	
 private:
 	FVector OriginalScale;
@@ -43,4 +59,6 @@ private:
 	float OriginalLocationZ;
 	float ShrinkDuration;
 	float LerpT;
+
+	float SmokeLocalAnimTime;
 };

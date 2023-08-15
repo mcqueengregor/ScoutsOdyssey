@@ -47,6 +47,9 @@ protected:
 
 	void BehaviorTree_SetUp();
 
+	UFUNCTION(BlueprintCallable)
+	void BehaviorTree_Stop();
+	
 	UPROPERTY(EditDefaultsOnly)
 	USceneComponent* SceneComponent;
 	UPROPERTY(EditDefaultsOnly)
