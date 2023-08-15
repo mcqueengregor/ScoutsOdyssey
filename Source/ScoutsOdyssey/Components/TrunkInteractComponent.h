@@ -4,10 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "InteractComponentBase.h"
+#include "TentInteractComponent.h"
 #include "TrunkInteractComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FShowHoneyBootDelegate);	// Used to set visibility of honey boot plane on
 															// owning trunk actor.
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAcornThrown);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMarshmallowThrown);	
+
 /**
  * 
  */
@@ -39,14 +43,24 @@ public:
 	DECLARE_MULTICAST_DELEGATE(FOnHoneyBootPlaced);
 	static FOnHoneyBootPlaced OnHoneyBootPlaced;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnFailToInteract OnFailToInteract;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnAcornThrown OnAcornThrown;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMarshmallowThrown OnMarshmallowThrown;
 
 protected:
-	UPROPERTY(EditDefaultsOnly)
-	class AAcornProp* AcornPropActor;
+	void SpawnAndThrowProp(UClass* PropClass, FVector ThrowDirection, APawn* OwningPawnRef);
 
 	UPROPERTY(EditDefaultsOnly)
 	UClass* AcornPropSpawnClass;
 
+	UPROPERTY(EditDefaultsOnly)
+	UClass* MarshmallowPropSpawnClass;
+	
 	UPROPERTY(BlueprintAssignable)
 	FShowHoneyBootDelegate ShowHoneyBoot;
 
@@ -54,6 +68,11 @@ protected:
 	bool bAreSquirrelsPresent;
 	
 private:
-
+	FTimerHandle ThrowItemHandle;
+	FTimerHandle FaceLeftHandle;
+	
 	FGameplayTag HoneyBootItemTag;
+	FGameplayTag MarshmallowItemTag;
+
+	int32 NumItemsThrown;
 };

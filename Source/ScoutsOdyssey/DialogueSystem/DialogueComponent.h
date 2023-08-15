@@ -32,20 +32,26 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool StartDialogue();
+
+	UFUNCTION(BlueprintCallable)
+	void StopDialogue();
 	
 	// Widgets
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> PlayerSpeechBubble_WidgetAsset;
+	UPROPERTY(BlueprintReadWrite)
 	class USpeechBubbleUserWidget* BubbleOne;
 	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NPCSpeechBubble_WidgetAsset;
+	UPROPERTY(BlueprintReadWrite)
 	class USpeechBubbleUserWidget* BubbleTwo;
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	AActor* SpeakerTwo;
 	
 	UPROPERTY(EditDefaultsOnly, Category=Widgets)
 	TSubclassOf<UUserWidget> NarratorSpeechBubble_WidgetAsset;
+	UPROPERTY(BlueprintReadWrite)
 	class USpeechBubbleUserWidget* BubbleNarrator;
 	UPROPERTY(EditAnywhere, Category=Widgets)
 	FVector2D BubbleOneOffSet_PercentageViewPort;
@@ -56,9 +62,11 @@ public:
 	void SwitchToBubble(EBubble Bubble) const;
 	void SwitchBubbleOneState(EBubbleState BubbleState) const;
 	void SetTextBlockText(const FString& String, class UTextBlock& TextWidget) const;
-
+	UFUNCTION(BlueprintCallable)
+	void HideAllBubbles();
+	
 	// Tasks Setup Methods
-	void Speak(const FString& String, const EBubble Bubble, const EVoiceType VoiceType,  const int FontSize, const float TalkRate);
+	void Speak(const FString& String, const EBubble Bubble, const int FontSize, const float TalkRate);
 	void Choice(TArray<FText>& Choices);
 	
 	// Delegates
@@ -97,11 +105,7 @@ private:
 	FTimerHandle SpeakTimerHandle;
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true), Category=TypeWriterEffect)
 	float LetterTypeRate = 0.1f;
-	UPROPERTY(EditDefaultsOnly, Category=TypeWriterEffect)
-	TArray<USoundCue*> LowVoices;
-	UPROPERTY(EditDefaultsOnly, Category=TypeWriterEffect)
-	TArray<USoundCue*> HighVoices;
-	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String, const EVoiceType VoiceType);
+	void TypeNextLetter(class UTextBlock* TextBlock,  const FString& String);
 	void PlayRandomVoice(EVoiceType VoiceType) const;
 	void PlayVoiceAtIndex(EVoiceType VoiceType, int Index) const;
 	// Check number of clicks. First click would complete typewriting immediately, while second click would go to next string.

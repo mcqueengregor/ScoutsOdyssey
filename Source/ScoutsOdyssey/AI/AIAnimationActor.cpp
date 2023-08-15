@@ -4,6 +4,7 @@
 #include "AIAnimationActor.h"
 
 #include "AIActorHelper.h"
+#include "BrainComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
@@ -93,6 +94,13 @@ void AAIAnimationActor::BehaviorTree_SetUp()
 	}
 }
 
+void AAIAnimationActor::BehaviorTree_Stop()
+{
+	if (AIController)
+	{
+		AIController->BrainComponent->StopLogic(FString("Actor was destroyed"));
+	}
+}
 
 // Called every frame
 void AAIAnimationActor::Tick(float DeltaTime)

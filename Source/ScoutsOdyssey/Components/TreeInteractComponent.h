@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "InteractComponentBase.h"
+#include "TentInteractComponent.h"
 #include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
 #include "TreeInteractComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTreeDisappear);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayTreeChangeAudio);
 
 /**
  * 
@@ -32,6 +35,13 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnTreeDisappear OnTreeDisappear;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFailToInteract OnFailToInteract;
+
+protected:
+	UPROPERTY(BlueprintAssignable)
+	FPlayTreeChangeAudio PlayTreeChangeAudio;
 	
 private:
 	UPROPERTY(EditInstanceOnly)

@@ -56,7 +56,7 @@ TEXT macros can cause issue due to its L identifier
 
 #define CUR_ACTOR_CLASS_FUNC_LINE ("[" + GetName() + "] => " + CUR_CLASS_FUNC_LINE)
 
-
+#define CUR_OWNER_CLASS_FUNC_LINE ("[" + GetOwner()->GetName() + "] => " + CUR_CLASS_FUNC_LINE)
 
 // 	Gives you the Class name and exact line number where you print a message to yourself!**
 #define PRINT_CLASS_LINE(Text) if(GEngine) (GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *(CUR_CLASS_FUNC_LINE + ": " + Text)), false )
@@ -76,6 +76,8 @@ TEXT macros can cause issue due to its L identifier
 #define LOG2(Text1, Text2) 	UE_LOG(LogTemp, Warning,TEXT("%s: %s %s"), *CUR_CLASS_FUNC_LINE, *FString(Text1),*FString(Text2))
 
 #define LOG_ACTOR(Text) 		  UE_LOG(LogTemp, Warning,TEXT("%s: %s"), *CUR_ACTOR_CLASS_FUNC_LINE, *FString(Text))
+
+#define LOG_OWNER(Text) UE_LOG(LogTemp, Warning,TEXT("%s: %s"), *CUR_OWNER_CLASS_FUNC_LINE, *FString(Text))
 
 #define LOG_ERROR(Text) 		 UE_LOG(LogTemp,Error,TEXT("%s: %s"), *CUR_CLASS_FUNC_LINE, *FString(Text))
 

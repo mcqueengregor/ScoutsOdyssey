@@ -57,11 +57,11 @@ APlayerPawn::APlayerPawn()
 	static ConstructorHelpers::FObjectFinder<USoundCue>
 		FootstepSC(TEXT("SoundCue'/Game/Audio/SFX/Footstep/SC_GrassFootstep.SC_GrassFootstep'"));
 	
-	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio component"));
-	AudioComponent->SetAutoActivate(false);
+	FootstepAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio component"));
+	FootstepAudioComponent->SetAutoActivate(false);
 	if (FootstepSC.Object)
-		AudioComponent->SetSound(FootstepSC.Object);
-	AudioComponent->SetupAttachment(RootComponent);
+		FootstepAudioComponent->SetSound(FootstepSC.Object);
+	FootstepAudioComponent->SetupAttachment(RootComponent);
 	
 	MoveSpeed = 200.0f;
 
@@ -130,6 +130,12 @@ void APlayerPawn::Tick(float DeltaTime)
 
 	// Reset movement speed so that turning off input axis calls doesn't force player to continue moving:
 	MovementDirection = FVector(0.0f);
+
+	// Is Moving Left 
+	if(isMovingLeft)
+		MovementDirection.Y = -1.f;
+	if(isMovingRight)
+		MovementDirection.Y = 1.f;
 }
 		
 // Called to bind functionality to input
@@ -204,11 +210,16 @@ void APlayerPawn::MoveForward(float Value)
 
 void APlayerPawn::InteractWhileHoldingItem()
 {
-	// Early-out if there are items to pick up nearby (use logic in BP_Pickup):
+	// Early-out if there are items to pick up nearby (attempt to instantly pick up, if possible):
 	TArray<AActor*> OverlappingPickupableItems;
 	GetOverlappingActors(OverlappingPickupableItems, APickup::StaticClass());
 	if (OverlappingPickupableItems.Num() > 0)
 	{
+		APickup* PickupableItem = Cast<APickup>(OverlappingPickupableItems[0]);
+		if (PickupableItem->getIsPickupInstant())
+		{
+			PickupableItem->InstantPickup();
+		}
 		return;
 	}
 	
@@ -230,8 +241,8 @@ void APlayerPawn::InteractWhileHoldingItem()
 			{
 				if (DialogueComponent->bIsCharacter)
 				{
-					DialogueComponent->StartDialogue();
-					return;
+					if (DialogueComponent->StartDialogue())
+						return;
 				}
 			}
 		}
@@ -246,24 +257,25 @@ void APlayerPawn::InteractWhileHoldingItem()
 
 		if (InventoryComponent && InventoryComponent->GetCurrentItem())
 		{
-			UInteractComponentBase* ScenePropInteractComp =
-				Cast<UInteractComponentBase>(ActorToInteractWith->GetComponentByClass(UInteractComponentBase::StaticClass()));
+			UInteractComponentBase* ScenePropInteractComp =Cast<UInteractComponentBase>(
+				ActorToInteractWith->GetComponentByClass(UInteractComponentBase::StaticClass()));
 
 			// If a nearby item has an interaction component associated with it, perform the interaction and update
 			// player animation accordingly:
 			if (ScenePropInteractComp)
 			{
-				ECurrentInteraction interactType =
+				ECurrentInteraction InteractType =
 					ScenePropInteractComp->OnInteractWithItem(InventoryComponent->GetCurrentItem(), this);
 
 				// If interaction was successful but there isn't an animation associated with it, do nothing:
-				if (interactType == ECurrentInteraction::SUCCESS_NO_ANIM) return;
+				if (InteractType == ECurrentInteraction::SUCCESS_NO_ANIM)
+					return;
 
 				// Change current sprite animation to the appropriate interaction anim:
 				bIsInteracting = true;
 				InteractLocalTime = 0.0f;
 				
-				CurrentAnimation = InteractAnimationsList.Find(interactType);
+				CurrentAnimation = InteractAnimationsList.Find(InteractType);
 				UpdateDynamicMaterialParameters();
 			}
 		}
@@ -370,7 +382,7 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 	
 	const float AnimAdvanceAmount = DeltaTime / AnimDuration;
 	InteractLocalTime += AnimAdvanceAmount;
-
+	
 	if (InteractLocalTime >= 1.0f)
 	{
 		ChangeAnimation(EPlayerAnimation::IDLE);
@@ -385,8 +397,53 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 	}
 }
 
+float APlayerPawn::GetPickupDelayDuration(ECurrentInteraction InteractionType)
+{
+	FTimerHandle TempHandle;
+	FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([=]()
+	{
+		ChangeAnimation(EPlayerAnimation::IDLE);
+		bIsInteracting = false;
+	});
+
+	float DelayTime = 0.0f;
+	FSpriteAnimDetails* Animation;
+
+	// Default to "empty hand" pickup animation, otherwise use specific interaction animation (e.g. getting acorn from tree):
+	// TODO: Create new map of animations for picking up specific items from the ground?
+	if (InteractionType == ECurrentInteraction::SUCCESS_NO_ANIM)
+	{
+		Animation = &PickItemFromGroundAnim;
+	}
+	else
+	{
+		Animation = InteractAnimationsList.Find(InteractionType);
+	}
+	DelayTime = (1.0f / Animation->SpriteAnimDA->PlaybackFramerate) * Animation->SpriteAnimDA->InteractionStartIndex;
+	
+	// Return to IDLE animation after animation has completed:
+	const float AnimDuration = ((Animation->SpriteAnimDA->NumSpritesheetRows * Animation->SpriteAnimDA->NumSpritesheetColumns) -
+		Animation->SpriteAnimDA->NumEmptyFrames) / static_cast<float>(Animation->SpriteAnimDA->PlaybackFramerate);
+	
+	ForceChangeAnimation(Animation);
+	bIsInteracting = true;
+	InteractLocalTime = 0.0f;
+	
+	GetWorld()->GetTimerManager().SetTimer(TempHandle, TimerDelegate, 1.0, false, AnimDuration);
+	return DelayTime;
+}
+
+void APlayerPawn::ForceChangeAnimation(FSpriteAnimDetails* Animation)
+{
+	CurrentAnimation = Animation;
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
+		UKismetSystemLibrary::GetDisplayName(Animation->SpriteAnimDA));
+	
+	UpdateDynamicMaterialParameters();
+}
+
 void APlayerPawn::StartTeleportationTimer(FVector TeleportLocation, float TeleportWaitTime,
-	AStageTeleportTriggerVolume* EnteredTeleportVolume)
+                                          AStageTeleportTriggerVolume* EnteredTeleportVolume)
 {
 	FTimerDelegate TeleportDelegate = FTimerDelegate::CreateUObject(this, &APlayerPawn::Teleport, TeleportLocation,
 		EnteredTeleportVolume);
@@ -405,9 +462,51 @@ void APlayerPawn::CancelTeleportTimer()
 	}
 }
 
+// Move the player to the left for input seconds. Stop the player after the duration.
+void APlayerPawn::MoveToTheLeft(float Seconds)
+{
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+	isMovingLeft = true;
+	
+	TimerManager.SetTimer(MoveLeftTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		if(TimerManager.GetTimerElapsed(MoveLeftTimerHandle) >= Seconds)
+		{
+			isMovingLeft = false;
+			TimerManager.ClearTimer(MoveLeftTimerHandle);
+		}
+	}), Seconds, true);
+}
+
+void APlayerPawn::MoveToTheRight(float Seconds)
+{
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+	isMovingRight = true;
+	
+	TimerManager.SetTimer(MoveLeftTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		if(TimerManager.GetTimerElapsed(MoveLeftTimerHandle) >= Seconds)
+		{
+			isMovingRight = false;
+			TimerManager.ClearTimer(MoveLeftTimerHandle);
+		}
+	}), Seconds, true);
+}
+
+void APlayerPawn::FaceLeft()
+{
+	MeshComponent->SetRelativeScale3D(FVector(-OriginalMeshScale.X, OriginalMeshScale.Y, OriginalMeshScale.Z));
+}
+
+void APlayerPawn::FaceRight()
+{
+	MeshComponent->SetRelativeScale3D(FVector(OriginalMeshScale.X, OriginalMeshScale.Y, OriginalMeshScale.Z));
+}
+
 void APlayerPawn::Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume* EnteredTeleportVolume)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Teleported!"));
 	bHasTeleported = true;
 	bHasCameraAngleChangedAlready = false;
 	SetActorLocation(TeleportLocation);
@@ -415,15 +514,6 @@ void APlayerPawn::Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume
 	
 	if (LastTriggerVolumeEntered)
 		LastTriggerVolumeEntered->ForceFadeToSceneColour();
-}
-
-void APlayerPawn::OnAudioFinishPlaying()
-{
-	if (AudioComponent->Sound && IsCurrentAnimOfType(EPlayerAnimation::WALK))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald, FString("Finished playing!"));
-		AudioComponent->Play();
-	}
 }
 
 void APlayerPawn::StartFootstepSoundCycle()
@@ -443,9 +533,9 @@ void APlayerPawn::StopFootstepSoundCycle()
 
 void APlayerPawn::PlayFootstepSoundCue()
 {
-	if (AudioComponent->Sound)
+	if (FootstepAudioComponent->Sound)
 	{
-		AudioComponent->Play();
+		FootstepAudioComponent->Play();
 	}
 }
 
@@ -463,3 +553,4 @@ bool APlayerPawn::IsCurrentAnimOfType(EPlayerAnimation BaseAnimType)
 		return false;
 	}
 }
+
