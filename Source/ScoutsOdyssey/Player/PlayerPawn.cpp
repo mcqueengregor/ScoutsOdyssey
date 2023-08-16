@@ -397,7 +397,7 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 	}
 }
 
-float APlayerPawn::GetPickupDelayDuration(ECurrentInteraction InteractionType)
+float APlayerPawn::GetPickupDelayDuration(ECurrentItem ItemType, ECurrentInteraction InteractionType)
 {
 	FTimerHandle TempHandle;
 	FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([=]()
@@ -408,17 +408,16 @@ float APlayerPawn::GetPickupDelayDuration(ECurrentInteraction InteractionType)
 
 	float DelayTime = 0.0f;
 	FSpriteAnimDetails* Animation;
-
-	// Default to "empty hand" pickup animation, otherwise use specific interaction animation (e.g. getting acorn from tree):
-	// TODO: Create new map of animations for picking up specific items from the ground?
-	if (InteractionType == ECurrentInteraction::SUCCESS_NO_ANIM)
-	{
-		Animation = &PickItemFromGroundAnim;
-	}
-	else
+	
+	if (InteractionType != ECurrentInteraction::SUCCESS_NO_ANIM)
 	{
 		Animation = InteractAnimationsList.Find(InteractionType);
 	}
+	else
+	{
+		Animation = PickupAnimationsList.Find(ItemType);
+	}
+
 	DelayTime = (1.0f / Animation->SpriteAnimDA->PlaybackFramerate) * Animation->SpriteAnimDA->InteractionStartIndex;
 	
 	// Return to IDLE animation after animation has completed:

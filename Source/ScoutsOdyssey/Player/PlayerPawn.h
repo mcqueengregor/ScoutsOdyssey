@@ -41,7 +41,7 @@ struct FSpriteAnimDetails
 	EPlayerAnimation AnimationType;
 };
 
-UENUM()
+UENUM(BlueprintType)
 enum class ECurrentItem : uint8
 {
 	EMPTY = 0		UMETA(DisplayName = "Holding no item"),
@@ -123,7 +123,7 @@ protected:
 	void ForceChangeAnimation(FSpriteAnimDetails* Animation);
 
 	UFUNCTION(BlueprintCallable)
-	float GetPickupDelayDuration(ECurrentInteraction InteractionType = ECurrentInteraction::SUCCESS_NO_ANIM);
+	float GetPickupDelayDuration( ECurrentItem ItemType, ECurrentInteraction InteractionType = ECurrentInteraction::SUCCESS_NO_ANIM);
 	
 	// Teleportation methods:
 	void Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume* EnteredTeleportVolume);
@@ -154,6 +154,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	FSpriteAnimDetails PickItemFromGroundAnim;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TMap<ECurrentItem, FSpriteAnimDetails> PickupAnimationsList;	// As above, but for animations used when picking
+																	// up items.
 	
 	UMaterialInstanceDynamic* DynamicMaterial;
 	FSpriteAnimDetails* CurrentAnimation;
