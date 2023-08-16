@@ -7,6 +7,7 @@
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Kismet/GameplayStatics.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
 #include "ScoutsOdyssey/Player/PlayerPawn.h"
 #include "ScoutsOdyssey/Level/StageSectionVolume.h"
 
@@ -59,8 +60,10 @@ void AOutlineSceneCaptureActor::Tick(float DeltaTime)
 		SceneCaptureComponent->FOVAngle = StageSectionCamera->FieldOfView;
 	}
 	else
-		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red,
-			FString("PlayerPawnRef is null!"));
+	{
+		PRINT_CLASS_LINE("PlayerPawnRef is null!");
+		PlayerPawnRef = Cast<APlayerPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	}
 
 	FViewport* Viewport = GEngine->GameViewport->Viewport;
 

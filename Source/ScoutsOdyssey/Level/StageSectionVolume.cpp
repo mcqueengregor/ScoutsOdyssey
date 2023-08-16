@@ -11,6 +11,7 @@
 #include "Kismet/KismetStringLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Camera/PlayerCameraManager.h"
+#include "ScoutsOdyssey/LoggingMacros.h"
 
 // Sets default values
 AStageSectionVolume::AStageSectionVolume()
@@ -67,6 +68,10 @@ void AStageSectionVolume::Tick(float DeltaTime)
 				NewYPositionWS,
 				CurrentCamPos.Z));
 		}
+	} else
+	{
+		PRINT_CLASS_LINE("PlayerPawnRef is null!");
+		PlayerPawnRef = Cast<APlayerPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	}
 }
 
@@ -78,15 +83,22 @@ void AStageSectionVolume::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherA
 	
 	if (Pawn)
 	{
+		LOG("Is Pawn!");
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		
 		// Remember this section as the last section that was entered:
 		Pawn->OverlappedStageSections.AddHead(this);
 		Pawn->LastEnteredSection = this;
-		
-		PlayerController->SetViewTarget(this, GetCameraTransitionParams(Pawn));
 
+		if(PlayerController)
+			PlayerController->SetViewTarget(this, GetCameraTransitionParams(Pawn));
+		else
+			LOG_ERROR("No Player Controller");
+		
 		Pawn->bHasCameraAngleChangedAlready = true;
+	} else
+	{
+		LOG_ERROR("Not Pawn");
 	}
 }
 
@@ -96,6 +108,7 @@ void AStageSectionVolume::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherAct
 
 	if (Pawn && Pawn->LastEnteredSection)
 	{
+		LOG("Is Pawn!");
 		// Determine which stage section the player should "forget"
 		// about, and update camera angle if necessary:
 		const bool bLeftLastEnteredSection = Pawn->LastEnteredSection == this;
@@ -110,10 +123,14 @@ void AStageSectionVolume::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherAct
 		if (bLeftLastEnteredSection)
 		{
 			APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-			PlayerController->SetViewTarget(Pawn->OverlappedStageSections.GetTail()->GetValue(), GetCameraTransitionParams(Pawn));
+			if(PlayerController)
+				PlayerController->SetViewTarget(Pawn->OverlappedStageSections.GetTail()->GetValue(), GetCameraTransitionParams(Pawn));
 			Pawn->LastEnteredSection = Pawn->OverlappedStageSections.GetTail()->GetValue();
 		}
 		Pawn->OverlappedStageSections.RemoveNode(SectionToForget);
+	} else
+	{
+		LOG_ERROR("Not Pawn");
 	}
 }
 
