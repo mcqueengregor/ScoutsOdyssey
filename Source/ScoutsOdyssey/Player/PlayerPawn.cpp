@@ -219,6 +219,7 @@ void APlayerPawn::InteractWhileHoldingItem()
 		if (PickupableItem->getIsPickupInstant())
 		{
 			PickupableItem->InstantPickup();
+			PickupAudioComponent->Play();
 		}
 		return;
 	}
