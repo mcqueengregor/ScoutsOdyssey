@@ -54,14 +54,13 @@ APlayerPawn::APlayerPawn()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera component"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	
-	static ConstructorHelpers::FObjectFinder<USoundCue>
-		FootstepSC(TEXT("SoundCue'/Game/Audio/SFX/Footstep/SC_GrassFootstep.SC_GrassFootstep'"));
-	
-	FootstepAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio component"));
+	FootstepAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Footstep audio component"));
 	FootstepAudioComponent->SetAutoActivate(false);
-	if (FootstepSC.Object)
-		FootstepAudioComponent->SetSound(FootstepSC.Object);
 	FootstepAudioComponent->SetupAttachment(RootComponent);
+
+	PickupAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Pickup audio component"));
+	PickupAudioComponent->SetAutoActivate(false);
+	PickupAudioComponent->SetupAttachment(RootComponent);
 	
 	MoveSpeed = 200.0f;
 

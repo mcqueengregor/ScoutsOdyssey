@@ -182,9 +182,6 @@ public:
 		class UAudioComponent* FootstepAudioComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-		class UAudioComponent* HammerAudioComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		class UAudioComponent* PickupAudioComponent;
 	
 	// ATTRIBUTES:
