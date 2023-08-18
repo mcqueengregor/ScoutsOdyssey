@@ -218,7 +218,6 @@ void APlayerPawn::InteractWhileHoldingItem()
 		if (PickupableItem->getIsPickupInstant())
 		{
 			PickupableItem->InstantPickup();
-			PickupAudioComponent->Play();
 		}
 		return;
 	}
@@ -399,8 +398,8 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 
 float APlayerPawn::GetPickupDelayDuration(ECurrentItem ItemType, ECurrentInteraction InteractionType)
 {
-	FTimerHandle TempHandle;
-	FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([=]()
+	FTimerHandle AnimTempHandle;
+	FTimerDelegate AnimTimerDelegate = FTimerDelegate::CreateLambda([=]()
 	{
 		ChangeAnimation(EPlayerAnimation::IDLE);
 		bIsInteracting = false;
@@ -427,8 +426,19 @@ float APlayerPawn::GetPickupDelayDuration(ECurrentItem ItemType, ECurrentInterac
 	ForceChangeAnimation(Animation);
 	bIsInteracting = true;
 	InteractLocalTime = 0.0f;
+
+	// Start "Switch back to IDLE animation" timer:
+	GetWorld()->GetTimerManager().SetTimer(AnimTempHandle, AnimTimerDelegate, 1.0, false, AnimDuration);
+
+	FTimerHandle AudioTempHandle;
+	FTimerDelegate AudioTimerDelegate = FTimerDelegate::CreateLambda([=]()
+	{
+		PickupAudioComponent->Play();
+	});
 	
-	GetWorld()->GetTimerManager().SetTimer(TempHandle, TimerDelegate, 1.0, false, AnimDuration);
+	// Start "Play pickup sound" timer:
+	GetWorld()->GetTimerManager().SetTimer(AudioTempHandle, AudioTimerDelegate, 1.0f, false, DelayTime);
+	
 	return DelayTime;
 }
 
@@ -536,6 +546,11 @@ void APlayerPawn::PlayFootstepSoundCue()
 	{
 		FootstepAudioComponent->Play();
 	}
+}
+
+void APlayerPawn::PlayPickupSoundCue()
+{
+	PickupAudioComponent->Play();
 }
 
 bool APlayerPawn::IsCurrentAnimOfType(EPlayerAnimation BaseAnimType)

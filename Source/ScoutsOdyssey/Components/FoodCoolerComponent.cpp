@@ -44,6 +44,18 @@ ECurrentInteraction UFoodCoolerComponent::OnInteractWithItem(UInventoryItemDataA
 			InventoryComponent->AddItem(MarshmallowDA, true);
 		}
 
+		FTimerHandle TempHandle;
+		FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([=]()
+		{
+			PlayerRef->PlayPickupSoundCue();
+		});
+		
+		const USpriteAnimationDataAsset* AnimDA = PlayerRef->GetInteractSpriteDA(ECurrentInteraction::COLLECT_MARSHMALLOW);
+
+		float TimeToPlay = (1.0f / AnimDA->PlaybackFramerate) * AnimDA->InteractionStartIndex;
+
+		GetWorld()->GetTimerManager().SetTimer(TempHandle, TimerDelegate, 1.0f, false, TimeToPlay);
+		
 		return ECurrentInteraction::COLLECT_MARSHMALLOW;
 	}
 

@@ -49,13 +49,7 @@ ECurrentInteraction UTreeInteractComponent::OnInteractWithItem(UInventoryItemDat
 				AcornSpawnerRef->Spawn();
 			}
 
-			UAudioComponent* HammerHitTreeAudio = Cast<UAudioComponent>(
-				GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
-
-			if (HammerHitTreeAudio)
-			{
-				HammerHitTreeAudio->Play();
-			}
+			PlayTreeHitAudio.Broadcast();
 		});
 
 		FTimerHandle TempHandle;

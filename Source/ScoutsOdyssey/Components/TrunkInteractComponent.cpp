@@ -69,6 +69,7 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 			SpawnAndThrowProp(AcornPropSpawnClass, ImpulseDirection, PlayerRef);
 
 			OnAcornThrown.Broadcast();
+			PlayThrowItemAudio.Broadcast();
 
 			ThrowItemHandle.Invalidate();
 		});
@@ -116,11 +117,14 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 	}
 	else if (MarshmallowItemTag.MatchesTag(ItemType->ItemTag) && bAreSquirrelsPresent)
 	{
+		PlayerRef->FaceRight();
+		
 		FTimerDelegate ThrowMarshmallowDelegate = FTimerDelegate::CreateLambda([=]()
 		{
 			SpawnAndThrowProp(MarshmallowPropSpawnClass, ImpulseDirection, PlayerRef);
 			ThrowItemHandle.Invalidate();
 			OnMarshmallowThrown.Broadcast();
+			PlayThrowItemAudio.Broadcast();
 		});
 
 		if (ThrowItemHandle.IsValid())
@@ -136,6 +140,16 @@ ECurrentInteraction UTrunkInteractComponent::OnInteractWithItem(UInventoryItemDa
 		GetWorld()->GetTimerManager().SetTimer(ThrowItemHandle, ThrowMarshmallowDelegate,
 			1.0f, false, StartDelay);
 
+		// Start timer for forcing the player to look left after animation is complete:
+		FTimerDelegate FaceLeftDelegate = FTimerDelegate::CreateLambda([=]()
+		{
+			PlayerRef->FaceLeft();
+		});
+
+		GetWorld()->GetTimerManager().SetTimer(FaceLeftHandle, FaceLeftDelegate, 1.0f, false,
+			(1.0f / ThrowAcornDA->PlaybackFramerate) *
+			((ThrowAcornDA->NumSpritesheetColumns * ThrowAcornDA->NumSpritesheetRows) - ThrowAcornDA->NumEmptyFrames));
+		
 		return ECurrentInteraction::THROW_ACORN;
 	}
 

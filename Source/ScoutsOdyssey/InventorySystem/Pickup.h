@@ -27,8 +27,11 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void InstantPickup();
-protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ECurrentItem ItemType;
 	
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsPickupInstant;
 };

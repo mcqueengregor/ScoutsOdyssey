@@ -11,6 +11,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTreeDisappear);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayTreeChangeAudio);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayTreeHitAudio);
 
 /**
  * 
@@ -42,6 +43,9 @@ public:
 protected:
 	UPROPERTY(BlueprintAssignable)
 	FPlayTreeChangeAudio PlayTreeChangeAudio;
+
+	UPROPERTY(BlueprintAssignable)
+	FPlayTreeHitAudio PlayTreeHitAudio;
 	
 private:
 	UPROPERTY(EditInstanceOnly)

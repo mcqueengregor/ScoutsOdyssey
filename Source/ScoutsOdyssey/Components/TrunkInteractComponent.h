@@ -10,7 +10,9 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FShowHoneyBootDelegate);	// Used to set visibility of honey boot plane on
 															// owning trunk actor.
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAcornThrown);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMarshmallowThrown);	
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMarshmallowThrown);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayThrowItemAudio);
 
 /**
  * 
@@ -64,6 +66,9 @@ protected:
 	UPROPERTY(BlueprintAssignable)
 	FShowHoneyBootDelegate ShowHoneyBoot;
 
+	UPROPERTY(BlueprintAssignable)
+	FPlayThrowItemAudio PlayThrowItemAudio;
+	
 	UPROPERTY(BlueprintReadWrite)
 	bool bAreSquirrelsPresent;
 	

@@ -107,6 +107,8 @@ public:
 
 	void FaceLeft();
 	void FaceRight();
+
+	void PlayPickupSoundCue();
 	
 protected:
 	// Action/axis methods:
@@ -123,7 +125,8 @@ protected:
 	void ForceChangeAnimation(FSpriteAnimDetails* Animation);
 
 	UFUNCTION(BlueprintCallable)
-	float GetPickupDelayDuration( ECurrentItem ItemType, ECurrentInteraction InteractionType = ECurrentInteraction::SUCCESS_NO_ANIM);
+	float GetPickupDelayDuration( ECurrentItem ItemType,
+		ECurrentInteraction InteractionType = ECurrentInteraction::SUCCESS_NO_ANIM);
 	
 	// Teleportation methods:
 	void Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume* EnteredTeleportVolume);
