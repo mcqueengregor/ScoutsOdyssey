@@ -11,9 +11,10 @@
 #include "ScoutsOdyssey/LoggingMacros.h"
 #include "ScoutsOdyssey/Animation/CustomSkeletalMeshActor.h"
 #include "ScoutsOdyssey/Components/InteractComponentBase.h"
+#include "ScoutsOdyssey/DialogueSystem/DialogueComponent.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 #include "ScoutsOdyssey/InventorySystem/InventoryComponent.h"
-#include "UnrealAudio/Private/UnrealAudioDeviceFormat.h"
+#include "ScoutsOdyssey/InventorySystem/Pickup.h"
 #include "Sound/SoundCue.h"
 
 // Sets default values
@@ -53,14 +54,13 @@ APlayerPawn::APlayerPawn()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera component"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	
-	static ConstructorHelpers::FObjectFinder<USoundCue>
-		FootstepSC(TEXT("SoundCue'/Game/Audio/SFX/Footstep/SC_GrassFootstep.SC_GrassFootstep'"));
-	
-	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio component"));
-	AudioComponent->SetAutoActivate(false);
-	if (FootstepSC.Object)
-		AudioComponent->SetSound(FootstepSC.Object);
-	AudioComponent->SetupAttachment(RootComponent);
+	FootstepAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Footstep audio component"));
+	FootstepAudioComponent->SetAutoActivate(false);
+	FootstepAudioComponent->SetupAttachment(RootComponent);
+
+	PickupAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Pickup audio component"));
+	PickupAudioComponent->SetAutoActivate(false);
+	PickupAudioComponent->SetupAttachment(RootComponent);
 	
 	MoveSpeed = 200.0f;
 
@@ -129,6 +129,12 @@ void APlayerPawn::Tick(float DeltaTime)
 
 	// Reset movement speed so that turning off input axis calls doesn't force player to continue moving:
 	MovementDirection = FVector(0.0f);
+
+	// Is Moving Left 
+	if(isMovingLeft)
+		MovementDirection.Y = -1.f;
+	if(isMovingRight)
+		MovementDirection.Y = 1.f;
 }
 		
 // Called to bind functionality to input
@@ -182,12 +188,12 @@ void APlayerPawn::ChangeAnimation(EPlayerAnimation NewAnimation)
 	}
 }
 
-void APlayerPawn::ChangeItem(ECurrentItem NewItem)
+void APlayerPawn::ChangeItem(ECurrentItem NewItem, bool bShouldPlayAnimation)
 {
 	PreviouslyHeldItemType = CurrentHeldItemType;
 	CurrentHeldItemType = NewItem;
 	
-	bIsChangingItem = true;
+	bIsChangingItem = bShouldPlayAnimation;
 	ChangeItemLocalTime = -1.0f;
 }
 
@@ -203,14 +209,43 @@ void APlayerPawn::MoveForward(float Value)
 
 void APlayerPawn::InteractWhileHoldingItem()
 {
+	// Early-out if there are items to pick up nearby (attempt to instantly pick up, if possible):
+	TArray<AActor*> OverlappingPickupableItems;
+	GetOverlappingActors(OverlappingPickupableItems, APickup::StaticClass());
+	if (OverlappingPickupableItems.Num() > 0)
+	{
+		APickup* PickupableItem = Cast<APickup>(OverlappingPickupableItems[0]);
+		if (PickupableItem->getIsPickupInstant())
+		{
+			PickupableItem->InstantPickup();
+		}
+		return;
+	}
+	
 	TArray<AActor*> Overlapping2DSceneProps;
 	TArray<AActor*> Overlapping3DSceneProps;
 	GetOverlappingActors(Overlapping2DSceneProps, ADialogueMeshActor::StaticClass());
 	GetOverlappingActors(Overlapping3DSceneProps, ACustomSkeletalMeshActor::StaticClass());
 	
-	// If standing next to enough scene props, check for interaction component and call OnInteractWithItem on it:
+	// If standing next to enough scene props, check for dialogue component and start dialogue if one exists.
+	// Otherwise, get interaction component and call OnInteractWithItem on it:
 	if (Overlapping2DSceneProps.Num() >= 1 || Overlapping3DSceneProps.Num() >= 1)
 	{
+		for (const auto& Prop : Overlapping2DSceneProps)
+		{
+			UDialogueComponent* DialogueComponent = Cast<UDialogueComponent>(
+			Prop->GetComponentByClass(UDialogueComponent::StaticClass()));
+		
+			if (DialogueComponent)
+			{
+				if (DialogueComponent->bIsCharacter)
+				{
+					if (DialogueComponent->StartDialogue())
+						return;
+				}
+			}
+		}
+		
 		AActor* ActorToInteractWith =
 			Overlapping2DSceneProps.Num() > Overlapping3DSceneProps.Num() ?
 			Overlapping2DSceneProps[0] :
@@ -221,24 +256,25 @@ void APlayerPawn::InteractWhileHoldingItem()
 
 		if (InventoryComponent && InventoryComponent->GetCurrentItem())
 		{
-			UInteractComponentBase* ScenePropInteractComp =
-				Cast<UInteractComponentBase>(ActorToInteractWith->GetComponentByClass(UInteractComponentBase::StaticClass()));
+			UInteractComponentBase* ScenePropInteractComp =Cast<UInteractComponentBase>(
+				ActorToInteractWith->GetComponentByClass(UInteractComponentBase::StaticClass()));
 
 			// If a nearby item has an interaction component associated with it, perform the interaction and update
 			// player animation accordingly:
 			if (ScenePropInteractComp)
 			{
-				ECurrentInteraction interactType =
+				ECurrentInteraction InteractType =
 					ScenePropInteractComp->OnInteractWithItem(InventoryComponent->GetCurrentItem(), this);
 
 				// If interaction was successful but there isn't an animation associated with it, do nothing:
-				if (interactType == ECurrentInteraction::SUCCESS_NO_ANIM) return;
+				if (InteractType == ECurrentInteraction::SUCCESS_NO_ANIM)
+					return;
 
 				// Change current sprite animation to the appropriate interaction anim:
 				bIsInteracting = true;
 				InteractLocalTime = 0.0f;
 				
-				CurrentAnimation = InteractAnimationsList.Find(interactType);
+				CurrentAnimation = InteractAnimationsList.Find(InteractType);
 				UpdateDynamicMaterialParameters();
 			}
 		}
@@ -345,7 +381,7 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 	
 	const float AnimAdvanceAmount = DeltaTime / AnimDuration;
 	InteractLocalTime += AnimAdvanceAmount;
-
+	
 	if (InteractLocalTime >= 1.0f)
 	{
 		ChangeAnimation(EPlayerAnimation::IDLE);
@@ -360,9 +396,66 @@ void APlayerPawn::CalculateInteractLocalAnimTime(float DeltaTime)
 	}
 }
 
-void APlayerPawn::StartTeleportationTimer(FVector TeleportLocation, float TeleportWaitTime)
+float APlayerPawn::GetPickupDelayDuration(ECurrentItem ItemType, ECurrentInteraction InteractionType)
 {
-	FTimerDelegate TeleportDelegate = FTimerDelegate::CreateUObject(this, &APlayerPawn::Teleport, TeleportLocation);
+	FTimerHandle AnimTempHandle;
+	FTimerDelegate AnimTimerDelegate = FTimerDelegate::CreateLambda([=]()
+	{
+		ChangeAnimation(EPlayerAnimation::IDLE);
+		bIsInteracting = false;
+	});
+
+	float DelayTime = 0.0f;
+	FSpriteAnimDetails* Animation;
+	
+	if (InteractionType != ECurrentInteraction::SUCCESS_NO_ANIM)
+	{
+		Animation = InteractAnimationsList.Find(InteractionType);
+	}
+	else
+	{
+		Animation = PickupAnimationsList.Find(ItemType);
+	}
+
+	DelayTime = (1.0f / Animation->SpriteAnimDA->PlaybackFramerate) * Animation->SpriteAnimDA->InteractionStartIndex;
+	
+	// Return to IDLE animation after animation has completed:
+	const float AnimDuration = ((Animation->SpriteAnimDA->NumSpritesheetRows * Animation->SpriteAnimDA->NumSpritesheetColumns) -
+		Animation->SpriteAnimDA->NumEmptyFrames) / static_cast<float>(Animation->SpriteAnimDA->PlaybackFramerate);
+	
+	ForceChangeAnimation(Animation);
+	bIsInteracting = true;
+	InteractLocalTime = 0.0f;
+
+	// Start "Switch back to IDLE animation" timer:
+	GetWorld()->GetTimerManager().SetTimer(AnimTempHandle, AnimTimerDelegate, 1.0, false, AnimDuration);
+
+	FTimerHandle AudioTempHandle;
+	FTimerDelegate AudioTimerDelegate = FTimerDelegate::CreateLambda([=]()
+	{
+		PickupAudioComponent->Play();
+	});
+	
+	// Start "Play pickup sound" timer:
+	GetWorld()->GetTimerManager().SetTimer(AudioTempHandle, AudioTimerDelegate, 1.0f, false, DelayTime);
+	
+	return DelayTime;
+}
+
+void APlayerPawn::ForceChangeAnimation(FSpriteAnimDetails* Animation)
+{
+	CurrentAnimation = Animation;
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
+		UKismetSystemLibrary::GetDisplayName(Animation->SpriteAnimDA));
+	
+	UpdateDynamicMaterialParameters();
+}
+
+void APlayerPawn::StartTeleportationTimer(FVector TeleportLocation, float TeleportWaitTime,
+                                          AStageTeleportTriggerVolume* EnteredTeleportVolume)
+{
+	FTimerDelegate TeleportDelegate = FTimerDelegate::CreateUObject(this, &APlayerPawn::Teleport, TeleportLocation,
+		EnteredTeleportVolume);
 	
 	GetWorldTimerManager().SetTimer(TeleportTimerHandle, TeleportDelegate,
 		1.0f, false, TeleportWaitTime);
@@ -373,27 +466,63 @@ void APlayerPawn::CancelTeleportTimer()
 {
 	// TODO: This bool check is probably unnecessary since this function should only be called if (!bHasTeleported)
 	if (!bHasTeleported)
-		GetWorldTimerManager().ClearTimer(TeleportTimerHandle);			
+	{
+		GetWorldTimerManager().ClearTimer(TeleportTimerHandle);
+	}
 }
 
-void APlayerPawn::Teleport(FVector TeleportLocation)
+// Move the player to the left for input seconds. Stop the player after the duration.
+void APlayerPawn::MoveToTheLeft(float Seconds)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Teleported!"));
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+	isMovingLeft = true;
+	
+	TimerManager.SetTimer(MoveLeftTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		if(TimerManager.GetTimerElapsed(MoveLeftTimerHandle) >= Seconds)
+		{
+			isMovingLeft = false;
+			TimerManager.ClearTimer(MoveLeftTimerHandle);
+		}
+	}), Seconds, true);
+}
+
+void APlayerPawn::MoveToTheRight(float Seconds)
+{
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+	isMovingRight = true;
+	
+	TimerManager.SetTimer(MoveLeftTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		if(TimerManager.GetTimerElapsed(MoveLeftTimerHandle) >= Seconds)
+		{
+			isMovingRight = false;
+			TimerManager.ClearTimer(MoveLeftTimerHandle);
+		}
+	}), Seconds, true);
+}
+
+void APlayerPawn::FaceLeft()
+{
+	MeshComponent->SetRelativeScale3D(FVector(-OriginalMeshScale.X, OriginalMeshScale.Y, OriginalMeshScale.Z));
+}
+
+void APlayerPawn::FaceRight()
+{
+	MeshComponent->SetRelativeScale3D(FVector(OriginalMeshScale.X, OriginalMeshScale.Y, OriginalMeshScale.Z));
+}
+
+void APlayerPawn::Teleport(FVector TeleportLocation, AStageTeleportTriggerVolume* EnteredTeleportVolume)
+{
 	bHasTeleported = true;
 	bHasCameraAngleChangedAlready = false;
 	SetActorLocation(TeleportLocation);
-
+	EnteredTeleportVolume->SetOwnsMaterial(true);
+	
 	if (LastTriggerVolumeEntered)
 		LastTriggerVolumeEntered->ForceFadeToSceneColour();
-}
-
-void APlayerPawn::OnAudioFinishPlaying()
-{
-	if (AudioComponent->Sound && IsCurrentAnimOfType(EPlayerAnimation::WALK))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Emerald, FString("Finished playing!"));
-		AudioComponent->Play();
-	}
 }
 
 void APlayerPawn::StartFootstepSoundCycle()
@@ -413,10 +542,15 @@ void APlayerPawn::StopFootstepSoundCycle()
 
 void APlayerPawn::PlayFootstepSoundCue()
 {
-	if (AudioComponent->Sound)
+	if (FootstepAudioComponent->Sound)
 	{
-		AudioComponent->Play();
+		FootstepAudioComponent->Play();
 	}
+}
+
+void APlayerPawn::PlayPickupSoundCue()
+{
+	PickupAudioComponent->Play();
 }
 
 bool APlayerPawn::IsCurrentAnimOfType(EPlayerAnimation BaseAnimType)
@@ -433,3 +567,4 @@ bool APlayerPawn::IsCurrentAnimOfType(EPlayerAnimation BaseAnimType)
 		return false;
 	}
 }
+

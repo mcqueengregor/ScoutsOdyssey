@@ -15,7 +15,8 @@ public:
 
 	USpriteAnimationDataAsset* Find(int Index)
 	{
-		T Key = static_cast<T>(Index); 
+		T Key = static_cast<T>(Index);
+		
 		return *Map.Find(Key);
 	}
 

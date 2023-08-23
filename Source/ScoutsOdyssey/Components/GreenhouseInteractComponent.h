@@ -6,6 +6,9 @@
 #include "InteractComponentBase.h"
 #include "GreenhouseInteractComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGreenHouseUnLocked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayGreenhouseChangeAudio);
+
 UENUM()
 enum class EGreenhouseState : uint8
 {
@@ -32,7 +35,14 @@ public:
 
 	virtual void DoTask() override;
 
+	//Enable bees to move to greenhouse
+	UPROPERTY(BlueprintAssignable)
+	FOnGreenHouseUnLocked OnGreenHouseUnLocked;
+
 protected:
+	UPROPERTY(BlueprintAssignable)
+	FPlayGreenhouseChangeAudio PlayGreenhouseAudio;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EGreenhouseState CurrentState;
 

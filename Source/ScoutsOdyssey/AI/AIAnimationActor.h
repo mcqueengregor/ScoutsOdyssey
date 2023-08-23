@@ -47,6 +47,9 @@ protected:
 
 	void BehaviorTree_SetUp();
 
+	UFUNCTION(BlueprintCallable)
+	void BehaviorTree_Stop();
+	
 	UPROPERTY(EditDefaultsOnly)
 	USceneComponent* SceneComponent;
 	UPROPERTY(EditDefaultsOnly)
@@ -54,6 +57,8 @@ protected:
 	UMaterialInstanceDynamic* DynamicMaterial;
 	USpriteAnimationDataAsset* CurrentAnimDetails;
 
+	AAIController* AIController;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -63,9 +68,9 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	float AnimDuration;
 	float AnimRunningTime;
-
-	AAIController* AIController;
-
+	float Alpha;
+	float AlphaMultiplier;
+	
 	void UpdateDynamicMaterialParameters();
 	void ResetAnimationTimes();
 };

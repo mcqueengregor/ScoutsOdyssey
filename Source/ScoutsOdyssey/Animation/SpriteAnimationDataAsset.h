@@ -9,24 +9,34 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class SCOUTSODYSSEY_API USpriteAnimationDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly)
+	// The texture object containing the animation spritesheet:
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	UTexture* SpritesheetTexture;
-	
-	UPROPERTY(EditDefaultsOnly)
+
+	// The number of columns in the spritesheet:
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	int32 NumSpritesheetColumns;
-	
-	UPROPERTY(EditDefaultsOnly)
+
+	// The number of rows in the spritesheet:
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	int32 NumSpritesheetRows;
-	
-	UPROPERTY(EditDefaultsOnly)
+
+	// The number of empty cells in the spritesheet:
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	int32 NumEmptyFrames;
-	
-	UPROPERTY(EditDefaultsOnly)
+
+	// The intended FPS of the animation:
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	int32 PlaybackFramerate;
+
+	// For animations that show an interaction, the frame index for when that
+	// interaction should take place (e.g. frame 4 of the "hit with hammer" animation):
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	int32 InteractionStartIndex;
 };

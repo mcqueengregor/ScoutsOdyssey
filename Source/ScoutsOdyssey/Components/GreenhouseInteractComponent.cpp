@@ -3,7 +3,9 @@
 
 #include "GreenhouseInteractComponent.h"
 
+#include "Components/AudioComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "ScoutsOdyssey/DialogueSystem/DialogueComponent.h"
 #include "ScoutsOdyssey/DialogueSystem/DialogueMeshActor.h"
 
 UGreenhouseInteractComponent::UGreenhouseInteractComponent()
@@ -54,9 +56,6 @@ void UGreenhouseInteractComponent::TickComponent(float DeltaTime, ELevelTick Tic
 		const float AnimDuration = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * NumFrames;
 		SmokeLocalAnimTime += DeltaTime / AnimDuration;
 		SmokeAnimDynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm", SmokeLocalAnimTime);
-	
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald,
-			FString::Printf(TEXT("%f"), SmokeLocalAnimTime));
 		
 		if (SmokeLocalAnimTime >= 1.0f)
 		{
@@ -72,25 +71,39 @@ ECurrentInteraction UGreenhouseInteractComponent::OnInteractWithItem(UInventoryI
 {
 	if (ItemType->ItemTag.MatchesTag(ValidItemTag) && CurrentState == EGreenhouseState::LOCKED)
 	{
-		CurrentState = EGreenhouseState::OPEN;
-		UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
-		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
+		FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([=]()
+		{
+			CurrentState = EGreenhouseState::OPEN;
+			UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
+			DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
 		
-		return ECurrentInteraction::SUCCESS_NO_ANIM;
-	}
-	else if (!bIsPlayingSmokeAnim && SmokeAnimDataAsset)
-	{
-		// TODO: Start "was the greenhouse old?" dialogue
-		bIsPlayingSmokeAnim = true;
-		SmokePropPlaneMesh->SetVisibility(true);
-		const int32 SpriteSwitchFrameIndex = 6;	// Switch to old version of greenhouse on 6th frame of smoke anim.
-		float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SpriteSwitchFrameIndex;
-		
-		GetOwner()->GetWorldTimerManager().SetTimer(SwitchToOldHandle, this,
-			&UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite,	1.0f, false, StartDelay);
+			OnGreenHouseUnLocked.Broadcast();
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan,
-			FString::Printf(TEXT("%f"), StartDelay));
+			UAudioComponent* GlassSmashAudio = Cast<UAudioComponent>(
+				GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
+
+			if (GlassSmashAudio)
+			{
+				GlassSmashAudio->Play();
+			}
+
+			Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
+		});
+
+		FTimerHandle TempHandle;
+
+		const USpriteAnimationDataAsset* HammerDA = PlayerRef->GetInteractSpriteDA(ECurrentInteraction::SMASH_GREENHOUSE);
+		float TimeToPlay = HammerDA->InteractionStartIndex * (1.0f / HammerDA->PlaybackFramerate);
+
+		GetWorld()->GetTimerManager().SetTimer(TempHandle, TimerDelegate, 1.0f,
+			false, TimeToPlay);
+		
+		return ECurrentInteraction::SMASH_GREENHOUSE;
+	}
+	else if (CurrentState == EGreenhouseState::LOCKED && SmokeAnimDataAsset)
+	{
+		UDialogueComponent* DialogueComponent = Cast<UDialogueComponent>(GetOwner()->GetComponentByClass(UDialogueComponent::StaticClass()));
+		DialogueComponent->StartDialogue();
 	}
 	
 	return ECurrentInteraction::NO_INTERACTION;
@@ -100,9 +113,17 @@ void UGreenhouseInteractComponent::DoTask()
 {
 	if (CurrentState == EGreenhouseState::LOCKED)
 	{
-		CurrentState = EGreenhouseState::OLD;
-		UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
-		DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
+		PlayGreenhouseAudio.Broadcast();
+		
+		bIsPlayingSmokeAnim = true;
+		SmokePropPlaneMesh->SetVisibility(true);
+		float StartDelay = (1.0f / SmokeAnimDataAsset->PlaybackFramerate) * SmokeAnimDataAsset->InteractionStartIndex;
+		
+		GetOwner()->GetWorldTimerManager().SetTimer(SwitchToOldHandle, this,
+			&UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite,	1.0f, false, StartDelay);
+
+		OnGreenHouseUnLocked.Broadcast();
+		Cast<ADialogueMeshActor>(GetOwner())->DisableInteractions();
 	}
 }
 
@@ -111,6 +132,4 @@ void UGreenhouseInteractComponent::SwitchToOldGreenhouseSprite()
 	CurrentState = EGreenhouseState::OLD;
 	UTexture* CurrentTexture = *GreenhouseStateTextures.Find(CurrentState);
 	DynamicMaterial->SetTextureParameterValue("SpriteTexture", CurrentTexture);
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, FString("Working!"));
 }

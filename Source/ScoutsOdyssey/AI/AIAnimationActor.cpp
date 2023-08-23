@@ -4,6 +4,7 @@
 #include "AIAnimationActor.h"
 
 #include "AIActorHelper.h"
+#include "BrainComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "ScoutsOdyssey/LoggingMacros.h"
@@ -42,10 +43,16 @@ void AAIAnimationActor::UpdateDynamicMaterialParameters()
 {
 	if (DynamicMaterial)
 	{
-		DynamicMaterial->SetTextureParameterValue("AnimationSpritesheet", CurrentAnimDetails->SpritesheetTexture);
-		DynamicMaterial->SetScalarParameterValue("NumSpritesheetRows", CurrentAnimDetails->NumSpritesheetRows);
-		DynamicMaterial->SetScalarParameterValue("NumSpritesheetColumns", CurrentAnimDetails->NumSpritesheetColumns);
-		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",0);			
+		if(CurrentAnimDetails)
+		{
+			DynamicMaterial->SetTextureParameterValue("AnimationSpritesheet", CurrentAnimDetails->SpritesheetTexture);
+			DynamicMaterial->SetScalarParameterValue("NumSpritesheetRows", CurrentAnimDetails->NumSpritesheetRows);
+			DynamicMaterial->SetScalarParameterValue("NumSpritesheetColumns", CurrentAnimDetails->NumSpritesheetColumns);
+			DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",0);		
+		} else
+		{
+			LOG_ERROR("No Animation Data Asset Found!")
+		}
 	}
 	else
 	{
@@ -60,12 +67,14 @@ void AAIAnimationActor::ResetAnimationTimes()
 	const int32 NumCells = CurrentAnimDetails->NumSpritesheetColumns * CurrentAnimDetails->NumSpritesheetRows;
 	const int32 NumSprites = NumCells - CurrentAnimDetails->NumEmptyFrames;
 
-	LOG_INT("num cells", NumCells);
-	LOG_INT("num sprites", NumSprites);
+	AlphaMultiplier = static_cast<float>(NumSprites)/NumCells;
+	
+	// LOG_INT("num cells", NumCells);
+	// LOG_INT("num sprites", NumSprites);
 	
 	AnimDuration = static_cast<float>(NumSprites) / CurrentAnimDetails->PlaybackFramerate;
 
-	LOG_FLOAT("anim duration", AnimDuration);
+	//LOG_FLOAT("anim duration", AnimDuration);
 	
 	AnimRunningTime = 0;
 }
@@ -85,23 +94,31 @@ void AAIAnimationActor::BehaviorTree_SetUp()
 	}
 }
 
+void AAIAnimationActor::BehaviorTree_Stop()
+{
+	if (AIController)
+	{
+		AIController->BrainComponent->StopLogic(FString("Actor was destroyed"));
+	}
+}
 
 // Called every frame
 void AAIAnimationActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	AnimRunningTime += DeltaTime;
-
+	
 	if(DynamicMaterial)
 	{
-		float Alpha = AnimRunningTime/AnimDuration;
+		Alpha = AnimRunningTime/AnimDuration;
 		if(LoopCurAnim)
 		{
 			Alpha = FGenericPlatformMath::Fmod(Alpha, 1);
+			if(Alpha > AlphaMultiplier - 0.05f) AnimRunningTime = 0;
 		}
 		else
 		{
-			Alpha = FMath::Clamp(Alpha, 0.f, 1.f);
+			Alpha = FMath::Clamp(Alpha, 0.f, AlphaMultiplier - 0.05f);
 		}
 		DynamicMaterial->SetScalarParameterValue("AnimationLocalTimeNorm",
 				Alpha);			
